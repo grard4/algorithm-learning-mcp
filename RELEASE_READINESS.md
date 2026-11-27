@@ -1,14 +1,14 @@
 # 发布准备情况
 
-更新：2026-11-27，第二轮审计基线main为0afc5b1；修复在独立audit/round2-20261127分支。维护者随后授权先备份、本机升级、验收后合并。9475a6a已部署，并通过重启Codex后的真实课程验收；PR #3按该授权进入合并流程，不创建Release/Tag/PyPI。详见 [本机验收](docs/ROUND2_LOCAL_ACCEPTANCE.md)。PR #1/#2已合并的历史仍保留，v0.1.1不包含后续修复。
+更新：2026-11-27，第三轮基线 main=991ea4030061be8e8740e33629fae2a8114936b0，代码候选 8b805a5，独立分支 audit/round3-20261127。本轮只完成源码与隔离验收，未升级生产、未推送、未合并、未创建 Release/Tag/PyPI。第二轮 PR #3 已合并及此前部署是历史事实，不作为本轮部署证据。
 
 ## 本机单用户
 
-在已披露兼容性变化与预算内，达到本轮单用户本机源码候选验收标准：A01–A04已修复并经专项和全量验证；A05量化后保留完整规则；A06只完成未来迁移设计；新增A07/A08已修复。Windows Python3.12/3.14各154项通过，隔离数据库完整性/外键、10个资源样本、依赖检查通过。跨平台CI以 [第二轮测试矩阵](ROUND2_TEST_MATRIX.md) 的本轮记录为准。
+有条件通过源码候选标准：A09 原单位错误 NOT CONFIRMED，8 MiB 实际限制验证有效；A10 CLI 退出码与 A11 动态错误脱敏 VERIFIED。Windows Python 3.14.7/3.12.15 各 176 passed、0 failed、0 skipped；10 个资源探针、临时数据库完整性/外键、Lint、依赖一致性与漏洞检查通过。A04 保持 PARTIAL，具体状态、命令、边界见 [第三轮完整报告](THIRD_ROUND_REMEDIATION_REPORT.md)。
 
-GitHub草稿PR #3：提交c001e4f的三平台×四Python版本各154项和10资源探针通过，独立依赖作业成功，共13作业；工作流45995062371。未将此结果等同于生产部署验收。
+公开源码候选有条件通过：需披露剩余限制；正式发布准备尚不完整，本轮 GitHub Actions 与生产部署未验证。其他客户端仍为 NOT VERIFIED；第二轮历史 13 个 CI 作业成功不能替代本轮代码检查。
 
-部署前必须备份并在副本验证。旧六个写接口返回LEGACY_WRITE_DISABLED，统一改用update_learning；旧读取保留。规范化消息只接受role/content/timestamp，使用有效带时区时间戳及有界请求；同步超限会停止且保留历史与游标，不能静默截断。详见 [输入预算](docs/INPUT_BUDGETS.md)。私人偏好与固定规则的迁移/回滚仍按 [原规则说明](docs/COURSE_RULES.md)。
+部署前必须备份并在副本验证。六个旧写接口继续返回 LEGACY_WRITE_DISABLED；CLI 现在退出 1。统一使用 update_learning；旧读取保留。预算、兼容变化及错误约定见 [输入预算](docs/INPUT_BUDGETS.md)。本轮未修改个人偏好、固定课程规则或生产 Schema。
 
 ## 公网部署
 

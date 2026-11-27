@@ -25,3 +25,11 @@
 所有输入校验先于归档和数据写入。逻辑冲突也先于发布。文件系统和SQLite没有跨系统原子提交：文件发布后进程崩溃可留下未登记的内容寻址文件，重试验证并复用，不能自动删除未知历史归档。原有消息/游标不会因这个窗口提前提交。新聊天注册与后续同步是两个持久步骤，后续失败可保留已注册空聊天。
 
 六个旧写接口 update_topic_progress、add_knowledge、update_knowledge、record_learning_task、record_learning_result、add_knowledge_relation 已停用。ALGORITHM_LEGACY_TOOLS=1也不会暴露它们；CLI与直接函数返回LEGACY_WRITE_DISABLED。迁移到update_learning时读取topic_version，按changes Schema携带证据及必要来源声明。旧读取仍可用，内部KB.write仅是可信本地代码的存储原语，不是公开绕过入口。
+
+## 窗口单位和 CLI 退出码（第三轮复核）
+
+固定 zstandard==0.25.0 的 C 后端将 max_window_size 原样传给 ZSTD_DCtx_setMaxWindowSize，单位为字节。上游文档的 KiB 描述与实现不一致；不应按该描述除以 1024。实际帧窗口 4/8 MiB 接受，16/128 MiB 拒绝；改传 8192 会拒绝合法 4/8 MiB 帧。CFFI 源码也直接转传，未执行 CFFI 动态测试。升级依赖必须重跑窗口专项；原输出、比率等预算保持不变。证据见 ../THIRD_ROUND_REMEDIATION_REPORT.md 与 evidence/round3-window.json。
+
+CLI call 成功（含没有 ok 字段的历史成功形状）退出 0；ok=False、参数/文件/数据库/意外异常退出 1，stdout 保持可解析 JSON 与稳定错误码。--help 仍为帮助文本并退出 0。成功执行 main 不额外抛 SystemExit，以保留 runpy 包装器兼容。MCP 错误封装语义不变。verify 的结果仍需检查 integrity、foreign_keys、bad_archives；本次 call 修复不将 verify 的诊断字段改造成 ok 契约。
+
+错误响应不回显不存在的 ID、非法输入值或自定义字段名。VALIDATION_ERROR 保留 details 的 path/expected/problem，非 Schema 字段标记为 <field>；同位置未知字段可能合并。内部日志保留 code/type/native_code，不写入用户值、路径或 traceback。

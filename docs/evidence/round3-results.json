@@ -1,0 +1,80 @@
+{
+  "date": "2026-11-27",
+  "code_head": "8b805a52168934474233c939c3a39f448826f4c8",
+  "python314": {
+    "version": "3.14.7",
+    "passed": 176,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 59.28
+  },
+  "python312": {
+    "version": "3.12.15",
+    "passed": 176,
+    "failed": 0,
+    "skipped": 0,
+    "seconds": 48.61
+  },
+  "quality": [
+    {
+      "check": "static",
+      "exit_code": 0
+    },
+    {
+      "check": "regression",
+      "exit_code": 0
+    },
+    {
+      "check": "dependency_consistency",
+      "exit_code": 0
+    },
+    {
+      "check": "vulnerabilities",
+      "exit_code": 0
+    }
+  ],
+  "resource_cases": 10,
+  "remote_ci": "NOT VERIFIED - not run on this branch",
+  "commands": [
+    {
+      "name": "window-sync",
+      "command": [
+        "-m",
+        "pytest",
+        "-q",
+        "tests/security/test_round2_sync_limits.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "cli",
+      "command": [
+        "-m",
+        "pytest",
+        "-q",
+        "tests/security/test_round3_cli.py",
+        "tests/security/test_round2_legacy.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "errors",
+      "command": [
+        "-m",
+        "pytest",
+        "-q",
+        "tests/security/test_round3_errors.py",
+        "tests/security/test_round2_errors.py"
+      ],
+      "exit_code": 0
+    },
+    {
+      "name": "quality",
+      "command": [
+        "scripts/quality_gate.py",
+        "--dependencies"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

@@ -1,5 +1,7 @@
 # 算法学习 MCP 服务器
 
+2026-11-27 第三轮：CLI 失败退出码与动态业务错误脱敏已修复；8 MiB Zstandard 窗口按固定版本实测保留字节传参。Windows 双 Python 各 176 项通过，A04 仍为 PARTIAL；本轮未部署、未合并、未执行远程 CI。详见 [第三轮报告](THIRD_ROUND_REMEDIATION_REPORT.md)。
+
 简体中文（默认） | [English](README.en.md)
 
 > **非商业源码公开：允许非商业学习、研究、修改和分享；禁止未经许可的商业利用及非法倒卖。**
@@ -172,7 +174,7 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 
 2026-11-27：PR #1 审计修复已合并；PR #2 交付内置课程规则版本 `2`，最新功能提交通过本地 88 项测试与 13 个 CI 作业。当前安全边界、兼容性和验证范围见 [测试矩阵](TEST_MATRIX.md)、[规则验收](docs/COURSE_RULES_VERIFICATION.md) 与 [发布准备](RELEASE_READINESS.md)。既有 `v0.1.1` 标签不包含这些后续代码变更；下述 16 项及真实客户端记录属于早期发布验收。
 
-2026-11-27 完整隔离测试 16 项通过；真实 Codex CLI 已通过用户控制的批准、拒绝及五步合成知识读写验收。第三方依赖不捆绑分发。偏好工具、Desktop 全部场景及 OS 隔离不在已验证范围；Windows 管理员沙箱运行时故障按用户决定保留为已知限制。详见 docs/CODEX_INTEGRATION_TEST.md。
+首次发布阶段（2026-11-27）的隔离测试当时为 16 项通过，当前结果见页首第三轮报告；真实 Codex CLI 已通过用户控制的批准、拒绝及五步合成知识读写验收。第三方依赖不捆绑分发。偏好工具、Desktop 全部场景及 OS 隔离不在已验证范围；Windows 管理员沙箱运行时故障按用户决定保留为已知限制。详见 docs/CODEX_INTEGRATION_TEST.md。
 
 - [安装与初始化](docs/INSTALLATION.md)
 - [配置说明](docs/CONFIGURATION.md)

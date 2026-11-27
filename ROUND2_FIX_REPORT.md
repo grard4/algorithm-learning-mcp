@@ -1,5 +1,7 @@
 # 第二轮修复阶段记录
 
+本文保留第二轮历史结果；当前审计状态与本轮测试以 [第三轮报告](THIRD_ROUND_REMEDIATION_REPORT.md) 为准，A04 总体为 PARTIAL。
+
 基线 `0afc5b1cf6d57f40a092ea659508e8f06153de69`。复现及计划在代码修复前提交 `6ebf1e3`。
 
 ## 阶段 1：旧写接口

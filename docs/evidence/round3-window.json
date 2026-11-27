@@ -1,0 +1,147 @@
+{
+  "python": "3.14.7",
+  "zstandard": "0.25.0",
+  "backend": "cext",
+  "zstd": [
+    1,
+    5,
+    7
+  ],
+  "frames": [
+    {
+      "window_bytes": 4096,
+      "compressed_bytes": 58,
+      "limits": {
+        "8192": {
+          "accepted": true,
+          "decoded_bytes": 49
+        },
+        "8388608": {
+          "accepted": true,
+          "decoded_bytes": 49
+        }
+      }
+    },
+    {
+      "window_bytes": 8192,
+      "compressed_bytes": 58,
+      "limits": {
+        "8192": {
+          "accepted": true,
+          "decoded_bytes": 49
+        },
+        "8388608": {
+          "accepted": true,
+          "decoded_bytes": 49
+        }
+      }
+    },
+    {
+      "window_bytes": 16384,
+      "compressed_bytes": 58,
+      "limits": {
+        "8192": {
+          "accepted": false,
+          "error": "zstd decompress error: Frame requires too much memory for decoding"
+        },
+        "8388608": {
+          "accepted": true,
+          "decoded_bytes": 49
+        }
+      }
+    },
+    {
+      "window_bytes": 4194304,
+      "compressed_bytes": 58,
+      "limits": {
+        "8192": {
+          "accepted": false,
+          "error": "zstd decompress error: Frame requires too much memory for decoding"
+        },
+        "8388608": {
+          "accepted": true,
+          "decoded_bytes": 49
+        }
+      }
+    },
+    {
+      "window_bytes": 8388608,
+      "compressed_bytes": 58,
+      "limits": {
+        "8192": {
+          "accepted": false,
+          "error": "zstd decompress error: Frame requires too much memory for decoding"
+        },
+        "8388608": {
+          "accepted": true,
+          "decoded_bytes": 49
+        }
+      }
+    },
+    {
+      "window_bytes": 16777216,
+      "compressed_bytes": 58,
+      "limits": {
+        "8192": {
+          "accepted": false,
+          "error": "zstd decompress error: Frame requires too much memory for decoding"
+        },
+        "8388608": {
+          "accepted": false,
+          "error": "zstd decompress error: Frame requires too much memory for decoding"
+        }
+      }
+    },
+    {
+      "window_bytes": 134217728,
+      "compressed_bytes": 58,
+      "limits": {
+        "8192": {
+          "accepted": false,
+          "error": "zstd decompress error: Frame requires too much memory for decoding"
+        },
+        "8388608": {
+          "accepted": false,
+          "error": "zstd decompress error: Frame requires too much memory for decoding"
+        }
+      }
+    }
+  ],
+  "sources": [
+    {
+      "url": "https://raw.githubusercontent.com/indygreg/python-zstandard/0.25.0/c-ext/decompressor.c",
+      "sha256": "eafb771ea5f532eb2d23d3e4d97d242200b0ecc09b446274a3bd2468281977e7",
+      "snippets": [
+        {
+          "line": 23,
+          "text": "    if (decompressor->maxWindowSize) {\n        zresult = ZSTD_DCtx_setMaxWindowSize(decompressor->dctx,\n                                             decompressor->maxWindowSize);\n        if (ZSTD_isError(zresult)) {"
+        }
+      ]
+    },
+    {
+      "url": "https://raw.githubusercontent.com/indygreg/python-zstandard/0.25.0/zstandard/backend_cffi.py",
+      "sha256": "0b268ae515d511531f1c6e76068123efb8f725b4f62484aa11e887fadc1975ce",
+      "snippets": [
+        {
+          "line": 4456,
+          "text": "        if self._max_window_size:\n            zresult = lib.ZSTD_DCtx_setMaxWindowSize(\n                self._dctx, self._max_window_size\n            )"
+        }
+      ],
+      "documentation_note": {
+        "line": 3693,
+        "unit_claim": "kibibytes",
+        "assessment": "Contradicts the direct native call and the observed cext boundary."
+      }
+    },
+    {
+      "url": "https://raw.githubusercontent.com/facebook/zstd/v1.5.7/lib/zstd.h",
+      "sha256": "9b4bc8245565c98ccfc61c07749928b57e7c0f6fddb0530c4f6aa1971893d88b",
+      "snippets": [
+        {
+          "line": 2481,
+          "text": "/*! ZSTD_DCtx_setMaxWindowSize() :\n *  Refuses allocating internal buffers for frames requiring a window size larger than provided limit.\n *  This protects a decoder context from reserving too much memory for itself (potential attack scenario).\n *  This parameter is only useful in streaming mode, since no internal buffer is allocated in single-pass mode.\n *  By default, a decompression context accepts all window sizes <= (1 << ZSTD_WINDOWLOG_LIMIT_DEFAULT)\n * @return : 0, or an error code (which can be tested using ZSTD_isError()).\n */\nZSTDLIB_STATIC_API size_t ZSTD_DCtx_setMaxWindowSize(ZSTD_DCtx* dctx, size_t maxWindowSize);"
+        }
+      ]
+    }
+  ]
+}

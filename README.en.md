@@ -1,5 +1,7 @@
 # Algorithm Learning MCP
 
+Round three (2026-11-27): fixed CLI failure exit status and reflected business-error data. The pinned Zstandard backend enforces the existing 8 MiB byte limit. Both local Windows Python environments passed 176 tests. A04 remains PARTIAL; this round is not deployed or merged, and remote CI has not run. See [the report](THIRD_ROUND_REMEDIATION_REPORT.md).
+
 [简体中文（默认）](README.md) | English
 
 > **Noncommercial source-available:** Noncommercial learning, research, modification, and sharing are permitted. Unauthorized commercial exploitation and unlawful resale are prohibited. The project uses [PolyForm Noncommercial License 1.0.0](LICENSE), with attribution to `grard4`. The license controls, including its express organizational-use provisions; this summary does not add a learning-only restriction or limit statutory rights. This is not an OSI open-source license.
