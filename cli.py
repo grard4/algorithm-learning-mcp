@@ -16,7 +16,8 @@ def main():
   try:import server
   except SystemExit as exc:
    # Server startup emits only a stable code; preserve JSON for CLI consumers.
-   codes={'PERMISSION_DENIED','SOURCE_UNAVAILABLE','CONSTRAINT','DATABASE','STORAGE_UNAVAILABLE','INVALID_INPUT','INTERNAL_ERROR'}
+   codes={'PERMISSION_DENIED','SOURCE_UNAVAILABLE','CONSTRAINT','DATABASE','STORAGE_UNAVAILABLE','INVALID_INPUT','INTERNAL_ERROR',
+          'UNKNOWN_SCHEMA_VERSION','MIGRATION_CHECKSUM','SCHEMA_DRIFT'}
    code=exc.code if exc.code in codes else 'INTERNAL_ERROR'
    raise KBError(code,'工具服务初始化失败；请依据错误码检查服务日志') from None
   allowed=set(server.TOOLS)

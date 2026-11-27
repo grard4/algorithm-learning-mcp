@@ -10,7 +10,8 @@ ROOT=Path(__file__).resolve().parents[2]
 @pytest.mark.parametrize('case,code',[
     ('success',None),('business','NOT_FOUND'),('unknown','INVALID_INPUT'),
     ('missing','SOURCE_UNAVAILABLE'),('json','INVALID_INPUT'),('arguments','INVALID_INPUT'),
-    ('database','STORAGE_UNAVAILABLE'),('unexpected','INTERNAL_ERROR'),('plain_success',None)])
+    ('database','STORAGE_UNAVAILABLE'),('schema','UNKNOWN_SCHEMA_VERSION'),
+    ('unexpected','INTERNAL_ERROR'),('plain_success',None)])
 def test_cli_status(tmp_path,case,code):
     env=dict(os.environ,ALGORITHM_KB=str(tmp_path/'cli.sqlite3'))
     args=['call','list_all_topics']
@@ -25,6 +26,11 @@ def test_cli_status(tmp_path,case,code):
     if case=='database':
         block=tmp_path/'block';block.write_text('file',encoding='utf-8')
         env['ALGORITHM_KB']=str(block/'db.sqlite3')
+    if case=='schema':
+        import sqlite3
+        import contextlib
+        with contextlib.closing(sqlite3.connect(env['ALGORITHM_KB'])) as db:
+            db.execute('PRAGMA user_version=99')
     command=[sys.executable,str(ROOT/'cli.py'),*args]
     if case in ('unexpected','plain_success'):
         # Real CLI entry point in a subprocess; inject only the tool result/failure.
