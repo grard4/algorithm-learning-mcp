@@ -173,6 +173,7 @@ def search(cx,query='',topic_id=None,limit=None,related_to=None,since_version=No
   # All reads in one SQLite snapshot; archives can change without context_events.
 
   version=[c.execute('SELECT COALESCE(MAX(id),0) FROM change_history').fetchone()[0],c.execute('SELECT COALESCE(MAX(rowid),0) FROM archives').fetchone()[0],c.execute('SELECT COUNT(*) FROM messages').fetchone()[0]]
+  version.append(c.execute('SELECT epoch FROM r3_meta WHERE singleton=1').fetchone()[0])
 
   offsets=[0]*len(queries)
 

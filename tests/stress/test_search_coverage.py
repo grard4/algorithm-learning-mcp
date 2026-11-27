@@ -44,3 +44,12 @@ def test_cursor_stale_and_malicious_query(linked):
         ctx.search(query='searchable',limit=1,cursor=first['next_cursor'])
     assert ctx.search(query="' OR 1=1 --")['items']==[]
     assert kb.rows('SELECT count(*) n FROM knowledge_items')[0]['n']==4
+
+
+def test_restore_epoch_invalidates_search_cursor(linked):
+    kb,ctx,tid=linked
+    kb.write('knowledge_items','extra',{'title':'searchable','content':'searchable'},'extra','test',topic_id=tid)
+    first=ctx.search(query='searchable',limit=1)
+    with kb.connect() as c: c.execute("UPDATE r3_meta SET epoch='restored'")
+    with pytest.raises(KBError):
+        ctx.search(query='searchable',limit=1,cursor=first['next_cursor'])
