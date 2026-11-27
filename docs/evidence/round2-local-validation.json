@@ -1,0 +1,42 @@
+{
+  "baseline": "0afc5b1cf6d57f40a092ea659508e8f06153de69",
+  "code_commit": "9304295",
+  "local": {
+    "python314": {
+      "tests": "154",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "27.422"
+    },
+    "python312": {
+      "tests": "154",
+      "errors": "0",
+      "failures": "0",
+      "skipped": "0",
+      "time": "22.302"
+    }
+  },
+  "dependency_audit": {
+    "packages": 67,
+    "vulnerabilities": 0
+  },
+  "quality_gate": [
+    {
+      "check": "static",
+      "exit_code": 0
+    },
+    {
+      "check": "regression",
+      "exit_code": 0
+    },
+    {
+      "check": "dependency_consistency",
+      "exit_code": 0
+    },
+    {
+      "check": "vulnerabilities",
+      "exit_code": 0
+    }
+  ]
+}

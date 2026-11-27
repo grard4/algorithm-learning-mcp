@@ -23,4 +23,5 @@ reports/
 .coverage.*
 coverage.xml
 test-results.xml
+resource-probe.json
 .ruff_cache/

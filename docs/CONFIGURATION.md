@@ -7,10 +7,12 @@
 | ALGORITHM_MCP_TRANSPORT | stdio（默认）或 streamable-http |
 | ALGORITHM_MCP_HOST | HTTP 默认 127.0.0.1；只允许回环 IP 或 localhost，非回环报 UNSAFE_HTTP_BIND |
 | ALGORITHM_MCP_PORT | HTTP 默认 8000 |
-| ALGORITHM_LEGACY_TOOLS | 设为 1 暴露兼容工具；默认使用 22 个核心/管理接口 |
+| ALGORITHM_LEGACY_TOOLS | 设为 1 暴露保留的兼容工具；六个旧写接口仍停用；默认22个接口 |
 
 客户端配置以 clients/ 下文档为入口，使用绝对路径。各客户端复用同一 server.py，不为每个厂商维护服务器分支。默认不启用 Codex 日志监测；同步方式与范围见 SYNC_AND_DISCOVERY.md。
 
 偏好模板是 config/learning_preferences.example.md，复制到私人路径后自行编辑。不要将学习偏好或客户端凭据提交到仓库。
 
 固定课程规则版本为 `2`，来源为 `course_rules.py`，没有环境变量覆盖开关或写接口。完整规则随初始化下发；`get_course_rules` 只读返回版本、SHA-256 和正文。`get_learning_preferences` 每次读取当前私人文件，删除或修改它不影响固定规则。升级后须重新连接 MCP 以接收新版初始化指令；迁移及回滚见 [内置课程规则](COURSE_RULES.md)。
+
+导入/同步预算集中在input_limits.py，没有取消预算的环境开关。规范化数据必须满足严格字段与有效时间戳，详见 [预算及兼容性](INPUT_BUDGETS.md)。
