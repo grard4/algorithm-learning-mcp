@@ -38,3 +38,19 @@ def test_migration_checksum_and_repeat_start(tmp_path):
     assert KB(path).rows('PRAGMA integrity_check')[0]['integrity_check']=='ok'
     with db.connect() as c: c.execute("UPDATE schema_migrations SET sha256='tampered'")
     with pytest.raises(KBError): KB(path)
+
+
+def test_populated_legacy_copy_preserves_all_existing_rows(linked,tmp_path):
+    source,_,_=linked
+    target=tmp_path/'legacy-copy.sqlite3'
+    source.backup(target)
+    legacy=KB(target,initialize=False)
+    with legacy.connect() as c:
+        c.execute('DROP TABLE schema_migrations')
+        names=[r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")]
+        before={name:[tuple(r) for r in c.execute('SELECT * FROM "'+name+'"')] for name in names}
+    upgraded=KB(target)
+    with upgraded.connect() as c:
+        after={name:[tuple(r) for r in c.execute('SELECT * FROM "'+name+'"')] for name in names}
+    assert before==after
+    assert source.rows('SELECT count(*) n FROM schema_migrations')[0]['n']==1
