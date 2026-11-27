@@ -42,5 +42,6 @@ def main():
   for a in k.rows('SELECT * FROM archives'):
    if digest(Path(a['path']).read_bytes())!=a['sha256']:bad.append(a['path'])
   result={'integrity':k.rows('PRAGMA integrity_check'),'foreign_keys':k.rows('PRAGMA foreign_key_check'),'bad_archives':bad}
- print(json.dumps(result,ensure_ascii=False,indent=2))
+ # JSON escapes preserve Unicode values even when a redirected console uses ASCII/cp1252.
+ print(json.dumps(result,ensure_ascii=True,indent=2))
 if __name__=='__main__':main()

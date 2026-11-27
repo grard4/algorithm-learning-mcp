@@ -26,6 +26,7 @@
 | A02 | 高 | context.py:377 update | VERIFIED | 写事务验证聊天专题；test_audit_boundaries 的错专题拒绝、同专题跨聊天成功、跨专题关系成功 |
 | A03 | 高 | contracts.py:74 validate_changes | VERIFIED | 消息/归档/聊天/专题联查，显式 evidence_sources 作用域，来源声明及 Schema 校验；伪造来源拒绝、显式外专题引用成功 |
 | A03b | 高 | contracts.py evidence / context.py 去重分支 | VERIFIED | PR 前独立复核发现额外来源键可在同正文去重时覆盖旧声明；修前参数化回归 1 failed / 1 passed，修后 2 passed。现在验证全部声明并复验最终合并记录，失败时版本与原记录保持不变 |
+| C01b | 中 | cli.py main 输出 | FIXED | 首轮 Windows/Python 3.11 CI 复现恢复成功后 cp1252 无法编码中文而异常退出；改为可逆 JSON Unicode 转义，新增默认/cp1252/ASCII 子进程回归，含中文目标路径及完整返回内容检查；跨平台重验进行中 |
 | A04a | 高 | sync.py sync_file | VERIFIED | 比较 id、conversation_id、seq、role、timestamp、content、source_line；source_hash 保留最初归档；正文/角色/时间戳/换序回归 |
 | A04b | 高 | sync.py parse/read_bytes | VERIFIED | 半截尾行及不完整/损坏压缩帧拒绝；不推进游标；已提交归档的候选提取可恢复 |
 | A04c | 中 | sync.py unchanged 分支 | VERIFIED | 原 unchanged 提前返回会掩盖归档丢失/损坏；两项失败用例复现后，重放先核对归档，缺失时由同 hash 原文恢复，损坏时拒绝且不覆盖 |
