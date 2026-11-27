@@ -3,6 +3,7 @@ import argparse, hashlib, json, os, re, time
 from pathlib import Path
 import zstandard
 from kb import KB, KBError, ROOT, digest, dump, now, uid
+from archive_io import archive_path, publish
 
 def discovery_cutoff():
     """Persist a one-time discovery boundary so watch mode does not reset per poll."""
@@ -33,15 +34,28 @@ _scanned={}
 def read_bytes(path):
     raw=Path(path).read_bytes()
     if str(path).endswith('.zst'):
-        with zstandard.ZstdDecompressor().stream_reader(raw) as r: return r.read()
+        parts=[]
+        try:
+            while raw:
+                decoder=zstandard.ZstdDecompressor().decompressobj()
+                parts.append(decoder.decompress(raw))
+                if not decoder.eof:
+                    raise KBError('INVALID_LOG', '压缩日志帧不完整')
+                raw=decoder.unused_data
+        except zstandard.ZstdError as exc:
+            raise KBError('INVALID_LOG', '压缩日志损坏') from exc
+        return b''.join(parts)
     return raw
 def parse(raw):
     lines=raw.splitlines(keepends=True); events=[]
     for i,line in enumerate(lines,1):
         try: e=json.loads(line)
         except (ValueError,UnicodeDecodeError):
-            if i==len(lines) and not line.endswith(b'\n'): break
+            if i==len(lines) and not line.endswith(b'\n'):
+                raise KBError('INCOMPLETE_LOG', '尾行尚未完成，请稍后重试')
             raise KBError('INVALID_LOG',f'第 {i} 行无效')
+        if not isinstance(e, dict) or not isinstance(e.get('payload'), dict):
+            raise KBError('INVALID_LOG', f'第 {i} 行事件结构无效')
         events.append((i,e))
     if not events or events[0][1].get('type')!='session_meta': raise KBError('INVALID_LOG','缺少 session_meta')
     return events
@@ -51,6 +65,9 @@ def visible(events):
         p=e.get('payload',{})
         if e.get('type')=='response_item' and p.get('type')=='message' and p.get('role') in ('user','assistant'):
             content=p.get('content',[])
+            if (not isinstance(content,list) or any(not isinstance(x,dict) or
+                ('text' in x and not isinstance(x['text'],str)) for x in content)):
+                raise KBError('INVALID_LOG',f'第 {line} 行消息内容结构无效')
             text='\n'.join(x.get('text','') for x in content if x.get('type') in ('input_text','output_text','text'))
             if text: out.append(dict(seq=line,role=p['role'],timestamp=e.get('timestamp'),content=text,source_line=line))
     return out
@@ -106,7 +123,9 @@ def finish_extraction(kb,tid,cid):
         with kb.connect() as c:
             c.execute('INSERT OR IGNORE INTO extraction_seen VALUES(?,?)',(m['id'],now()))
 def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
-    raw=read_bytes(path); events=parse(raw); meta=events[0][1]['payload']; cid=meta['id']; messages=visible(events)
+    raw=read_bytes(path); events=parse(raw); meta=events[0][1]['payload']; cid=meta.get('id'); messages=visible(events)
+    sha=digest(raw)
+    archive=archive_path(kb,cid,sha,'.jsonl')
     known=kb.rows('SELECT * FROM conversations WHERE id=?',(cid,))
     if not known:
         if not name:
@@ -120,34 +139,33 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
         reg=kb.register(name,canonical,cid,title or name,meta.get('cwd',''),str(path)); tid=reg['topic_id']
     else:
         tid=known[0]['topic_id']
-        if known[0]['source_path']!=str(path):
-            def attach(c,u):
-                row=dict(c.execute('SELECT * FROM conversations WHERE id=?',(cid,)).fetchone());row['source_path']=str(path)
-                kb.change(c,u,'conversations',cid,row);return {'source_path':str(path)}
-            kb.mutate('attach-source','attach-source:'+cid+':'+digest(str(path)),'local-sync',cid,[str(path)],attach)
-    sha=digest(raw)
     state=kb.rows('SELECT * FROM sync_state WHERE conversation_id=?',(cid,))
+    # Even unchanged sources must not hide a missing or corrupt archive file.
+    publish(archive,raw)
     if state and state[0]['source_hash']==sha:
         finish_extraction(kb,tid,cid)
         return {'conversation_id':cid,'unchanged':True}
-    archive=kb.path.parent/'archives'/cid/(sha+'.jsonl'); archive.parent.mkdir(parents=True,exist_ok=True)
     # 内容寻址归档只创建一次，重试验证内容而非覆盖。
-    try:
-        with archive.open('xb') as f: f.write(raw)
-    except FileExistsError:
-        if digest(archive.read_bytes())!=sha: raise KBError('ARCHIVE_CORRUPT',str(archive))
     fresh=[]
     def fn(c,u):
+        previous=c.execute('SELECT line_count FROM sync_state WHERE conversation_id=?',(cid,)).fetchone()
+        if previous and previous['line_count']>len(events):
+            raise KBError('SOURCE_TRUNCATED','源日志行数减少，停止推进游标')
         c.execute('INSERT OR IGNORE INTO archives VALUES(?,?,?,?,?,?)',(sha,cid,str(archive),str(path),len(raw),now()))
         for m in messages:
             m['id']=digest([cid,m['seq']]); m['conversation_id']=cid; m['source_hash']=sha
-            old=c.execute('SELECT content,role FROM messages WHERE id=?',(m['id'],)).fetchone()
+            old=c.execute('SELECT * FROM messages WHERE id=?',(m['id'],)).fetchone()
             if old:
-                if old['content']!=m['content'] or old['role']!=m['role']: raise KBError('SOURCE_CHANGED','已有行被改写，保留原档并停止导入')
+                fields=('id','conversation_id','seq','role','timestamp','content','source_line')
+                if any(old[key]!=m[key] for key in fields): raise KBError('SOURCE_CHANGED','已有消息元数据或正文被改写，保留原档并停止导入')
             else:
                 c.execute('INSERT INTO messages VALUES(?,?,?,?,?,?,?,?)',tuple(m[k] for k in ('id','conversation_id','seq','role','timestamp','content','source_hash','source_line'))); fresh.append(m)
         prior_count=c.execute('SELECT count(*) FROM messages WHERE conversation_id=? AND seq>0',(cid,)).fetchone()[0]
         if prior_count>len(messages): raise KBError('SOURCE_TRUNCATED','源文件缩短，停止推进游标')
+        conv=dict(c.execute('SELECT * FROM conversations WHERE id=?',(cid,)).fetchone())
+        if conv['source_path']!=str(path):
+            conv['source_path']=str(path)
+            kb.change(c,u,'conversations',cid,conv)
         c.execute('INSERT OR REPLACE INTO sync_state VALUES(?,?,?,?,NULL)',(cid,sha,len(events),now()))
         return {'conversation_id':cid,'imported':len(fresh),'archive_sha256':sha,'messages':len(messages)}
     result=kb.mutate('sync','sync:'+cid+':'+sha,'local-sync',cid,[sha],fn)
@@ -193,15 +211,34 @@ def run(kb,home,discover=False,initial=False):
             _scanned[str(p)]=signature
         except Exception as e: results.append({'source':str(p),'error':str(e)})
     report(kb); return results
+def acquire_worker_lock(path):
+    """One worker per database, using the platform's native advisory lock."""
+    lock=Path(path).open('a+b')
+    try:
+        if os.name=='nt':
+            import msvcrt
+            if lock.seek(0,os.SEEK_END)==0:
+                lock.write(b'0');lock.flush()
+            lock.seek(0)
+            msvcrt.locking(lock.fileno(),msvcrt.LK_NBLCK,1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
+    except OSError as exc:
+        lock.close()
+        import errno
+        if exc.errno in (errno.EACCES,errno.EAGAIN,errno.EDEADLK):
+            return None
+        raise
+    return lock
+
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--home',default=str(Path.home()/'.codex')); ap.add_argument('--initial',action='store_true'); ap.add_argument('--discover',action='store_true'); ap.add_argument('--watch',action='store_true'); ap.add_argument('--interval',type=int,default=120); a=ap.parse_args(); kb=KB()
     lock=None
     if a.watch:
-        import msvcrt
-        lock=(kb.path.parent/'worker.lock').open('a+b')
-        lock.seek(0);lock.write(b'0');lock.flush();lock.seek(0)
-        try:msvcrt.locking(lock.fileno(),msvcrt.LK_NBLCK,1)
-        except OSError:return
+        lock=acquire_worker_lock(kb.path.parent/'worker.lock')
+        if lock is None:raise KBError('WORKER_RUNNING','已有同步进程持有数据库工作锁')
     while True:
         try:
             result=run(kb,Path(a.home),a.discover,a.initial)

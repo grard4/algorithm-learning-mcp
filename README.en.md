@@ -56,7 +56,7 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 
 Codex configuration is in the user's `config.toml` or project `.codex/config.toml`; see [Codex setup](docs/clients/codex.md). Other examples are indexed in [docs/clients](docs/clients/README.md). They are reference configurations only unless the compatibility report says otherwise.
 
-For Streamable HTTP, set `ALGORITHM_MCP_TRANSPORT=streamable-http`; by default the server binds only to `127.0.0.1:8000` at `/mcp`. Do not expose it to a network without TLS and an authentication/reverse-proxy layer. stdio is the recommended local single-user setup.
+For Streamable HTTP, set `ALGORITHM_MCP_TRANSPORT=streamable-http`; the default is `127.0.0.1:8000/mcp`. Non-loopback bindings now fail with UNSAFE_HTTP_BIND. Local HTTP remains supported, without built-in authentication or tenant isolation. Remote single-owner access requires an independently authenticated SSH tunnel; that deployment is not tested here. Never expose an unauthenticated forwarder. See [security notes](docs/SECURITY.md); stdio remains recommended locally.
 
 ## Learning preferences
 
@@ -144,6 +144,8 @@ Third-party components retain their respective copyrights and licenses. Contribu
 LICENSE contains the unchanged official English terms. Explanatory summaries do not amend them. The repository has been published. Verified capabilities and remaining limitations are documented below.
 
 ## Release acceptance and additional documentation
+
+The independent audit fixes dated 2026-11-27 are unreleased. See [fix report](FIX_REPORT.md), [test matrix](TEST_MATRIX.md), and [release readiness](RELEASE_READINESS.md) for current evidence and compatibility changes. Earlier client and test results below retain their historical scope and are not automatically counted as validation of this branch.
 
 On 2026-11-27, 16 isolated tests passed. Real Codex CLI approval, cancellation, creation, reads, update and audit were tested with synthetic data. Preference-tool execution, full Desktop coverage and OS isolation remain unverified. The Windows sandbox runtime issue is a disclosed limitation, not a successful isolation test. Third-party dependencies are installed separately, not bundled. See docs/CODEX_INTEGRATION_TEST.md.
 

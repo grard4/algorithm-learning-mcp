@@ -5,7 +5,7 @@
 | ALGORITHM_KB | SQLite 路径；默认项目 data/learning.sqlite3 |
 | ALGORITHM_PREFERENCES | UTF-8 私人偏好文件；默认 config/learning_preferences.md，上限 64 KiB |
 | ALGORITHM_MCP_TRANSPORT | stdio（默认）或 streamable-http |
-| ALGORITHM_MCP_HOST | HTTP 默认 127.0.0.1 |
+| ALGORITHM_MCP_HOST | HTTP 默认 127.0.0.1；只允许回环 IP 或 localhost，非回环报 UNSAFE_HTTP_BIND |
 | ALGORITHM_MCP_PORT | HTTP 默认 8000 |
 | ALGORITHM_LEGACY_TOOLS | 设为 1 暴露兼容工具；默认使用 21 个核心/管理接口 |
 

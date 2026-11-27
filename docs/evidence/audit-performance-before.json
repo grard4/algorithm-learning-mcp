@@ -1,0 +1,95 @@
+{
+  "label": "before",
+  "tokenizer": "cl100k_base",
+  "token_scope": "serialized request arguments and tool results only; not actual API billing",
+  "dataset": {
+    "knowledge_items": 500,
+    "progress_entries": 200,
+    "approved_links": 1
+  },
+  "results": {
+    "batch_progress": {
+      "requests": 10,
+      "input_tokens": 110,
+      "output_tokens": 16300,
+      "sql_queries": 2070,
+      "median_ms": 562.919,
+      "result_sha256": "26b16be27b6c8ed86ff9faafa308f566adee313f4490ee25c5b74277834fede5",
+      "coverage": "bounded_sources"
+    },
+    "concept_uncached": {
+      "requests": 20,
+      "input_tokens": 120,
+      "output_tokens": 2700,
+      "sql_queries": 280,
+      "median_ms": 2.124,
+      "result_sha256": "e02bd614cecb943dc5a4e1204fbcfa7920e962ce622134ee737d02625a37a3ac",
+      "coverage": "approved_links_only"
+    },
+    "concept_cached": {
+      "requests": 20,
+      "input_tokens": 120,
+      "output_tokens": 2700,
+      "sql_queries": 170,
+      "median_ms": 2.021,
+      "result_sha256": "e02bd614cecb943dc5a4e1204fbcfa7920e962ce622134ee737d02625a37a3ac",
+      "coverage": "approved_links_only",
+      "cache_hits": 19,
+      "cache_misses": 1
+    },
+    "L0_version": {
+      "requests": 10,
+      "input_tokens": 60,
+      "output_tokens": 270,
+      "sql_queries": 30,
+      "median_ms": 1.683,
+      "result_sha256": "6ea6acb6d523c2c10b54a53d8d93bef485e31517d6f1faa7d8c01fce141df26b",
+      "coverage": "not_applicable"
+    },
+    "L1_summary": {
+      "requests": 10,
+      "input_tokens": 60,
+      "output_tokens": 1220,
+      "sql_queries": 50,
+      "median_ms": 1.75,
+      "result_sha256": "c6e30dc0c2db8f46cde95fc13bd04f4f5f46b82967fd592ccaa9708917f31a5b",
+      "coverage": "not_applicable"
+    },
+    "L1_full": {
+      "requests": 10,
+      "input_tokens": 100,
+      "output_tokens": 8690,
+      "sql_queries": 40,
+      "median_ms": 1.738,
+      "result_sha256": "c1c8ed19e1fc57b819a36930c38aa1389f38cec74a8ec176647522148d333cef",
+      "coverage": "not_applicable"
+    },
+    "L2_search": {
+      "requests": 10,
+      "input_tokens": 50,
+      "output_tokens": 5090,
+      "sql_queries": 60,
+      "median_ms": 717.664,
+      "result_sha256": "1b44b580c77ec3075d69d0eb2b106888eee0bd81b42f62e28bff8f8b0656f07a",
+      "coverage": "bounded_sources"
+    },
+    "L3_chunk": {
+      "requests": 10,
+      "input_tokens": 130,
+      "output_tokens": 2080,
+      "sql_queries": 10,
+      "median_ms": 2.084,
+      "result_sha256": "6eb94eb89c5813cd00c54854cd52f28bd0f0019f19bb3088e517be1876f701d9",
+      "coverage": "not_applicable"
+    },
+    "unchanged": {
+      "requests": 10,
+      "input_tokens": 110,
+      "output_tokens": 320,
+      "sql_queries": 30,
+      "median_ms": 1.733,
+      "result_sha256": "e5910f50ac6c43d310a64b94364782630e72afffefb65ffa9138c46083dcb302",
+      "coverage": "not_applicable"
+    }
+  }
+}

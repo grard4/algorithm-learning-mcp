@@ -1,0 +1,10 @@
+[run]
+patch = subprocess
+omit =
+    tests/*
+    .venv/*
+    .release-audit/*
+    scripts/*
+    legacy_server.py
+[report]
+show_missing = True

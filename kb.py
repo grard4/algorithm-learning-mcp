@@ -25,12 +25,8 @@ class KB:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as c:
             c.execute('PRAGMA journal_mode=WAL')
-            c.executescript((ROOT/'schema.sql').read_text(encoding='utf-8'))
-            c.executescript((ROOT/'context_schema.sql').read_text(encoding='utf-8'))
-            c.executescript((ROOT/'c_context_schema.sql').read_text(encoding='utf-8'))
-            import notifications
-            c.execute('BEGIN IMMEDIATE')
-            notifications.install_transaction(c)
+            from migrations import initialize
+            initialize(c, ROOT)
     @contextlib.contextmanager
     def connect(self):
         c=sqlite3.connect(self.path, timeout=30); c.row_factory=sqlite3.Row
@@ -145,8 +141,19 @@ class KB:
             if key: groups.setdefault(key,[]).append(dict(id=r['id'],topic_id=r['topic_id'],claim_value=d.get('claim_value'),status=d.get('status'),evidence=d.get('evidence',[])))
         return {'method':'同 claim_key 不同 claim_value 的候选冲突；自然语言矛盾由课程代理复核','conflicts':[{'claim_key':k,'versions':v} for k,v in groups.items() if len({dump(x['claim_value']) for x in v})>1]}
     def backup(self,path):
+        import tempfile
         target=Path(path)
         if target.exists(): raise KBError('EXISTS','备份目标已存在')
         target.parent.mkdir(parents=True,exist_ok=True)
-        with self.connect() as src, contextlib.closing(sqlite3.connect(target)) as dst: src.backup(dst)
+        fd,temporary=tempfile.mkstemp(prefix='.backup-',dir=target.parent)
+        os.close(fd)
+        try:
+            with self.connect() as src, contextlib.closing(sqlite3.connect(temporary)) as dst:
+                src.backup(dst)
+                if dst.execute('PRAGMA integrity_check').fetchone()[0]!='ok' or dst.execute('PRAGMA foreign_key_check').fetchall():
+                    raise KBError('BACKUP_INVALID','备份完整性或外键检查失败')
+            try: os.link(temporary,target)
+            except FileExistsError as exc: raise KBError('EXISTS','备份目标已存在') from exc
+        finally:
+            os.unlink(temporary)
         return str(target)

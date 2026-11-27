@@ -117,13 +117,16 @@ def project(c, concept):
     events = c.execute('SELECT * FROM c_events WHERE concept_id=? ORDER BY seq LIMIT ?',
                        (cid, MAX_EVENTS+1)).fetchall()
     need(len(events) <= MAX_EVENTS, 'CONCEPT_EVENT_LIMIT')
-    removed = {x['target_seq'] for x in events if x['kind'] == 'retract'}
-    links = [inspect_link(c, x) for x in events if x['kind'] == 'link' and x['seq'] not in removed]
     # Detect cross-concept/corrupt retractions without treating them as legitimate.
-    invalid = c.execute('''SELECT 1 FROM c_events x JOIN c_events y ON x.target_seq=y.seq
+    invalid = c.execute('''SELECT 1 FROM c_events x LEFT JOIN c_events y ON x.target_seq=y.seq
                             WHERE (x.concept_id=? OR y.concept_id=?) AND
-                            (x.concept_id<>y.concept_id OR x.kind<>'retract') LIMIT 1''', (cid,cid)).fetchone()
+                            ((x.kind='retract' AND (y.seq IS NULL OR x.concept_id<>y.concept_id
+                              OR y.kind<>'link' OR y.seq>=x.seq))
+                             OR (x.kind<>'retract' AND x.target_seq IS NOT NULL)) LIMIT 1''', (cid,cid)).fetchone()
     need(not invalid, 'INVALID_RETRACTION')
+    removed = [x['target_seq'] for x in events if x['kind'] == 'retract']
+    need(len(removed)==len(set(removed)), 'INVALID_RETRACTION')
+    links = [inspect_link(c, x) for x in events if x['kind'] == 'link' and x['seq'] not in removed]
     duplicates = {}
     for item in links:
         duplicates.setdefault(item['knowledge_id'], []).append(item)

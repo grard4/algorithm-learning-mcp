@@ -388,6 +388,9 @@ class Context:
 
             if not conv: raise KBError('NOT_FOUND', conversation_id)
 
+            if conv['topic_id'] != topic_id:
+                raise KBError('TOPIC_MISMATCH', '来源聊天与更新目标专题不一致；跨专题引用请使用 evidence_sources 或 relations')
+
             ver = self.version_in(c, topic_id)
 
             if ver['topic_version'] != expected_version:
@@ -535,6 +538,12 @@ class Context:
                                     merged = dict(existing)
 
                                     merged['evidence'] = list(dict.fromkeys(existing.get('evidence', []) + data['evidence']))
+
+                                    if existing.get('evidence_sources') or data.get('evidence_sources'):
+                                        merged['evidence_sources'] = {**existing.get('evidence_sources', {}), **data.get('evidence_sources', {})}
+
+                                    validate_changes(c, topic_id, request_id, {'knowledge': [{
+                                        'id': duplicate['id'], 'expected_version': duplicate['version'], 'data': merged}]})
 
                                     save(table, duplicate['id'], merged, duplicate)
 

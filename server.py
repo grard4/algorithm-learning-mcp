@@ -20,6 +20,7 @@ from contracts import LearningChanges
 from preferences import read_preferences
 import compact_api, notifications
 from optimized_reads import ReadCache
+from archive_io import archive_path, publish
 
 
 
@@ -97,9 +98,9 @@ def _concept_read(fn, *args, check_health=True, **kwargs):
         c.row_factory=sqlite3.Row
         c.execute('PRAGMA query_only=ON')
         c.execute('BEGIN')
-        if check_health:
-            notifications.health(c)
         try:
+            if check_health:
+                notifications.health(c)
             return fn(c,*args,**kwargs)
         except (notifications.NoticeError, compact_api.core.ReadError) as exc:
             raise KBError(exc.code,exc.code) from exc
@@ -303,21 +304,20 @@ def record_conversation_update(conversation_id: str, messages: list[dict], reque
 
     if not conv: raise KBError('NOT_FOUND',conversation_id)
 
+    if not isinstance(messages,list) or not messages:
+        raise KBError('INVALID','messages 必须是非空数组')
+
     for m in messages:
 
-        if m.get('role') not in ('user','assistant') or not m.get('content') or not m.get('timestamp'): raise KBError('INVALID','消息需 role/content/timestamp')
+        if (not isinstance(m,dict) or m.get('role') not in ('user','assistant') or
+            not isinstance(m.get('content'),str) or not m['content'] or
+            not isinstance(m.get('timestamp'),str) or not m['timestamp']):
+            raise KBError('INVALID','消息需 role 及非空文本 content/timestamp')
 
     raw=(dump({'kind':'normalized-import','conversation_id':conversation_id,'messages':messages})+'\n').encode(); sha=digest(raw)
 
-    path=kb.path.parent/'archives'/conversation_id/(sha+'.normalized.json'); path.parent.mkdir(parents=True,exist_ok=True)
-
-    try:
-
-        with path.open('xb') as f:f.write(raw)
-
-    except FileExistsError:
-
-        if digest(path.read_bytes())!=sha: raise KBError('ARCHIVE_CORRUPT',str(path))
+    path=archive_path(kb,conversation_id,sha,'.normalized.json')
+    publish(path,raw)
 
     def fn(c,u):
 
@@ -509,5 +509,13 @@ if __name__=='__main__':
         raise SystemExit('ALGORITHM_MCP_TRANSPORT must be stdio or streamable-http')
     if transport=='streamable-http':
         mcp.settings.host=os.environ.get('ALGORITHM_MCP_HOST','127.0.0.1')
+        import ipaddress
+        host=mcp.settings.host
+        try:
+            local=ipaddress.ip_address(host).is_loopback
+        except ValueError:
+            local=host.lower()=='localhost'
+        if not local:
+            raise SystemExit('UNSAFE_HTTP_BIND: HTTP requires a loopback host; use an authenticated SSH tunnel for remote access. Direct remote and multi-tenant deployment are unsupported.')
         mcp.settings.port=int(os.environ.get('ALGORITHM_MCP_PORT','8000'))
     mcp.run(transport=transport)

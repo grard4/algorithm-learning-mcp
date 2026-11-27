@@ -56,7 +56,7 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 
 配置位置与步骤见 [Codex 接入](docs/clients/codex.md)。其他客户端入口见 [客户端目录](docs/clients/README.md)，未实测的示例仅供参考，不保证复制即用。
 
-设置 `ALGORITHM_MCP_TRANSPORT=streamable-http` 可启用 HTTP，默认地址为 `127.0.0.1:8000/mcp`。服务器没有内置认证或多租户隔离，不应直接暴露到网络。远程部署须另行提供 TLS、认证与安全代理层。本地使用优先选 stdio。
+设置 `ALGORITHM_MCP_TRANSPORT=streamable-http` 可启用 HTTP，默认地址为 `127.0.0.1:8000/mcp`。入口拒绝非回环绑定（UNSAFE_HTTP_BIND），保留本地 HTTP；无内置认证或多租户隔离。远程单用户访问方案是经过独立认证的 SSH 隧道，部署未实测；禁止无认证端口转发。本地使用优先选 stdio，详见 [安全说明](docs/SECURITY.md)。
 
 ## 自定义学习偏好
 
@@ -164,6 +164,8 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 正式 LICENSE 保留官方英文原文；本页中文说明不替代或修改许可证条款。仓库已公开发布；已验证能力与仍未验证的范围见下方验收说明。
 
 ## 发布验收与更多文档
+
+2026-11-27 独立审计修复位于待发布分支；本轮的安全边界、数据库兼容性及实际验证范围以 [修复报告](FIX_REPORT.md)、[测试矩阵](TEST_MATRIX.md) 和 [发布准备](RELEASE_READINESS.md) 为准。下述 16 项测试与真实客户端记录属于此前发布验收，未自动算作本轮验证。
 
 2026-11-27 完整隔离测试 16 项通过；真实 Codex CLI 已通过用户控制的批准、拒绝及五步合成知识读写验收。第三方依赖不捆绑分发。偏好工具、Desktop 全部场景及 OS 隔离不在已验证范围；Windows 管理员沙箱运行时故障按用户决定保留为已知限制。详见 docs/CODEX_INTEGRATION_TEST.md。
 

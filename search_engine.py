@@ -173,6 +173,7 @@ def search(cx,query='',topic_id=None,limit=None,related_to=None,since_version=No
   # All reads in one SQLite snapshot; archives can change without context_events.
 
   version=[c.execute('SELECT COALESCE(MAX(id),0) FROM change_history').fetchone()[0],c.execute('SELECT COALESCE(MAX(rowid),0) FROM archives').fetchone()[0],c.execute('SELECT COUNT(*) FROM messages').fetchone()[0]]
+  version.append(c.execute('SELECT epoch FROM r3_meta WHERE singleton=1').fetchone()[0])
 
   offsets=[0]*len(queries)
 
@@ -218,9 +219,17 @@ def search(cx,query='',topic_id=None,limit=None,related_to=None,since_version=No
 
   messages=[];history_loaded=False;history_incomplete=False
 
-  def refs(ids):
+  # Memoize only inside this read transaction; no cross-snapshot evidence cache.
+  evidence_exists={}
 
-   return [m for m in ids if isinstance(m,str) and c.execute('SELECT 1 FROM messages WHERE id=?',(m,)).fetchone()]
+  def refs(ids):
+   found=[]
+   for m in ids:
+    if not isinstance(m,str):continue
+    if m not in evidence_exists:
+     evidence_exists[m]=bool(c.execute('SELECT 1 FROM messages WHERE id=?',(m,)).fetchone())
+    if evidence_exists[m]:found.append(m)
+   return found
 
   groups=[];next_offsets=[];more=False
 

@@ -1,0 +1,67 @@
+{
+  "date": "2026-11-27",
+  "base_commit": "42f593752c295bb2ef5d647a40c00bead19dde94",
+  "branch": "audit/security-review-20261127",
+  "production_database_accessed": false,
+  "python_3_14_7": {
+    "tests": 75,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "python_3_12_15": {
+    "tests": 75,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "line_coverage": {
+    "covered": 1303,
+    "total": 1748,
+    "rate": 0.7454
+  },
+  "quality_checks": [
+    {
+      "check": "static",
+      "exit_code": 0
+    },
+    {
+      "check": "regression",
+      "exit_code": 0
+    },
+    {
+      "check": "dependency_consistency",
+      "exit_code": 0
+    },
+    {
+      "check": "vulnerabilities",
+      "exit_code": 0
+    }
+  ],
+  "dependency_audit": {
+    "packages": 67,
+    "known_vulnerabilities": 0
+  },
+  "runtime": {
+    "mcp": "1.30.0",
+    "pytest": "9.2.0",
+    "jsonschema": "4.26.0",
+    "zstandard": "0.25.0",
+    "starlette": "1.10.0",
+    "uvicorn": "0.54.0"
+  },
+  "database_checks": "per-test isolated sqlite3 integrity_check=ok and foreign_key_check=[]",
+  "protocol_validation": "Python MCP SDK simulation: stdio and loopback Streamable HTTP",
+  "not_verified": [
+    "third-party real clients",
+    "Linux",
+    "macOS",
+    "Python 3.11",
+    "Python 3.13",
+    "remote SSH deployment",
+    "production migration",
+    "GitHub CI execution"
+  ],
+  "performance_result_hashes_equal": true,
+  "verification_stage": "Initial local audit at e4ede4b; superseded by pr-ci-verification.json for current counts and CI"
+}

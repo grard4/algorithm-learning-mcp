@@ -9,15 +9,21 @@ from kb import KBError, digest
 TEXT = {'type': 'string', 'minLength': 1}
 REFS = {'type': 'array', 'items': TEXT, 'minItems': 1,
         'description': '归档 messages.id 字符串数组；不是对象数组。'}
+EVIDENCE_SOURCES = {'type': 'object', 'additionalProperties': {
+    'type': 'object', 'additionalProperties': False,
+    'required': ['conversation_id', 'topic_id', 'scope'],
+    'properties': {'conversation_id': TEXT, 'topic_id': TEXT,
+                   'scope': {'enum': ['same_topic', 'cross_topic']}}}}
 LIST_FIELDS = ('taught', 'practiced', 'understood', 'mastered', 'pending',
                'completed_exercises', 'pending_exercises', 'conclusions', 'common_errors')
 progress_fields = {key: {'type': 'array', 'items': {}} for key in LIST_FIELDS}
-progress_fields.update(stage={'type': 'string'}, mastery={'type': 'string'}, evidence=REFS)
+progress_fields.update(stage={'type': 'string'}, mastery={'type': 'string'}, evidence=REFS,
+                       evidence_sources=EVIDENCE_SOURCES)
 list_fields = {key: value for key, value in progress_fields.items() if value['type'] == 'array'}
 
 
 def entry_schema(kind):
-    fields = dict(title=TEXT, evidence=REFS)
+    fields = dict(title=TEXT, evidence=REFS, evidence_sources=EVIDENCE_SOURCES, source_conversation=TEXT)
     if kind == 'knowledge':
         fields.update(content=TEXT, status={'type': 'string'}, claim_key={'type': 'string'},
                       claim_value={}, verification={}, tags={'type': 'array', 'items': {'type': 'string'}})
@@ -96,15 +102,35 @@ def validate_changes(c, topic_id, request_id, changes):
                 problem = e.message[:240]
             issue(p, str(expected), problem)
 
-    def evidence(refs, p):
+    def evidence(refs, p, sources=None):
         if not isinstance(refs, list) or not refs:
             issue(p, '非空 string[]，元素为已归档 messages.id', '必须引用归档消息 ID')
             return
-        for i, ref in enumerate(refs):
+        # Extra declarations are persisted too; validate them before any merge.
+        checked = list(refs)
+        if isinstance(sources, dict):
+            checked.extend(ref for ref in sources if ref not in refs)
+        for i, ref in enumerate(checked):
             if not isinstance(ref, str):
                 issue(f'{p}[{i}]', 'string messages.id', '实际类型为 ' + type(ref).__name__)
-            elif not c.execute('SELECT id FROM messages WHERE id=?', (ref,)).fetchone():
-                issue(f'{p}[{i}]', '已存在的 messages.id', '归档消息不存在')
+            else:
+                origin = c.execute('SELECT m.conversation_id,v.topic_id,a.conversation_id AS archive_conversation '
+                    'FROM messages m JOIN conversations v ON v.id=m.conversation_id '
+                    'JOIN archives a ON a.sha256=m.source_hash WHERE m.id=?', (ref,)).fetchone()
+                if not origin:
+                    issue(f'{p}[{i}]', '已存在的 messages.id', '归档消息不存在')
+                    continue
+                if origin['archive_conversation'] != origin['conversation_id']:
+                    issue(f'{p}[{i}]', '消息与归档来源一致', '归档来源不匹配')
+                declared = sources.get(ref) if isinstance(sources, dict) else None
+                if declared is not None:
+                    if (not isinstance(declared, dict) or
+                        declared.get('conversation_id') != origin['conversation_id'] or
+                        declared.get('topic_id') != origin['topic_id'] or
+                        declared.get('scope') != ('cross_topic' if origin['topic_id'] != topic_id else 'same_topic')):
+                        issue(f'{p}[{i}]', '准确的 evidence_sources 来源及 scope', '声明来源与归档不一致')
+                elif origin['topic_id'] != topic_id:
+                    issue(f'{p}[{i}]', 'evidence_sources 显式 cross_topic 来源', '跨专题证据必须标记来源')
 
     if isinstance(changes, dict):
         patch = changes.get('progress')
@@ -131,13 +157,15 @@ def validate_changes(c, topic_id, request_id, changes):
                 for op in ('set', 'append'):
                     obj = patch.get(op, {})
                     if isinstance(obj, dict) and 'evidence' in obj:
-                        evidence(obj['evidence'], f'changes.progress.{op}.evidence')
+                        evidence(obj['evidence'], f'changes.progress.{op}.evidence', merged.get('evidence_sources'))
                         if isinstance(obj['evidence'], list): supplied.extend(obj['evidence'])
                 if not supplied:
                     issue('changes.progress.append.evidence', '非空 string[]，也可在 set.evidence 提供', '进度变更必须引用本次归档消息 ID')
             final_refs = merged.get('evidence')
             if not isinstance(final_refs, list) or not final_refs:
                 issue('changes.progress.append.evidence', '合并后 evidence 仍为非空 string[]', '最终进度必须保留归档消息 ID')
+            else:
+                evidence(final_refs, 'changes.progress.evidence', merged.get('evidence_sources'))
         planned = {}
         for group, table in (('knowledge', 'knowledge_items'), ('tasks', 'learning_tasks')):
             entries = changes.get(group, [])
@@ -150,7 +178,12 @@ def validate_changes(c, topic_id, request_id, changes):
                     old = c.execute(f'SELECT * FROM {table} WHERE id=?', (ident,)).fetchone()
                 before = json.loads(old['data']) if old else {}
                 merged = dict(before, **data)
-                evidence(merged.get('evidence'), p+'.data.evidence')
+                evidence(merged.get('evidence'), p+'.data.evidence', merged.get('evidence_sources'))
+                source = merged.get('source_conversation')
+                if source is not None:
+                    origin = c.execute('SELECT topic_id FROM conversations WHERE id=?', (source,)).fetchone() if isinstance(source, str) else None
+                    if not origin or origin['topic_id'] != topic_id:
+                        issue(p+'.data.source_conversation', '当前专题内真实来源聊天', '来源聊天不存在或属于其他专题')
                 for key in ('title', 'content') if group == 'knowledge' else ('title',):
                     if not isinstance(merged.get(key), str) or not merged[key]:
                         issue(p+'.data.'+key, '非空 string（新建必填；更新可继承）', '缺失或不是非空字符串')

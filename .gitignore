@@ -19,3 +19,8 @@ reports/
 
 # 本地发布核查材料，不进入发布内容
 .release-audit/
+.coverage
+.coverage.*
+coverage.xml
+test-results.xml
+.ruff_cache/

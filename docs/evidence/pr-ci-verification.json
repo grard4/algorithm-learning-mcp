@@ -1,0 +1,285 @@
+{
+  "date": "2026-11-27",
+  "base_commit": "42f593752c295bb2ef5d647a40c00bead19dde94",
+  "pr": 1,
+  "production_database_accessed": false,
+  "first_run": {
+    "run_id": 45956708638,
+    "head_sha": "90c375ef977365caf485a85be219b4eda06d48c3",
+    "conclusion": "failure",
+    "cause": "CLI JSON output raises UnicodeEncodeError on Windows cp1252 after successful restore",
+    "jobs": [
+      {
+        "id": 140364751142,
+        "name": "dependencies",
+        "conclusion": "success",
+        "evidence": [
+          "No known vulnerabilities found"
+        ]
+      },
+      {
+        "id": 140364751473,
+        "name": "test (macos-latest, 3.14)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0",
+          "============================== 77 passed in 9.23s =============================="
+        ]
+      },
+      {
+        "id": 140364751621,
+        "name": "test (windows-latest, 3.11)",
+        "conclusion": "failure",
+        "evidence": [
+          "platform win32 -- Python 3.11.9, pytest-9.2.0, pluggy-1.7.0",
+          "======================== 1 failed, 76 passed in 23.49s ========================"
+        ]
+      },
+      {
+        "id": 140364751615,
+        "name": "test (ubuntu-latest, 3.12)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0",
+          "============================== 77 passed in 8.99s =============================="
+        ]
+      },
+      {
+        "id": 140364751557,
+        "name": "test (ubuntu-latest, 3.11)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.11.18, pytest-9.2.0, pluggy-1.7.0",
+          "============================== 77 passed in 7.65s =============================="
+        ]
+      },
+      {
+        "id": 140364751581,
+        "name": "test (ubuntu-latest, 3.13)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.13.18, pytest-9.2.0, pluggy-1.7.0",
+          "============================== 77 passed in 9.46s =============================="
+        ]
+      },
+      {
+        "id": 140364751632,
+        "name": "test (ubuntu-latest, 3.14)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0",
+          "============================== 77 passed in 6.88s =============================="
+        ]
+      },
+      {
+        "id": 140364751574,
+        "name": "test (macos-latest, 3.13)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.13.17, pytest-9.2.0, pluggy-1.7.0",
+          "============================= 77 passed in 11.98s =============================="
+        ]
+      },
+      {
+        "id": 140364751652,
+        "name": "test (macos-latest, 3.12)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0",
+          "============================= 77 passed in 18.94s =============================="
+        ]
+      },
+      {
+        "id": 140364751802,
+        "name": "test (macos-latest, 3.11)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.11.9, pytest-9.2.0, pluggy-1.7.0",
+          "============================== 77 passed in 7.93s =============================="
+        ]
+      },
+      {
+        "id": 140364751530,
+        "name": "test (windows-latest, 3.14)",
+        "conclusion": "failure",
+        "evidence": [
+          "platform win32 -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0",
+          "======================== 1 failed, 76 passed in 21.86s ========================"
+        ]
+      },
+      {
+        "id": 140364751560,
+        "name": "test (windows-latest, 3.12)",
+        "conclusion": "failure",
+        "evidence": [
+          "platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0",
+          "======================== 1 failed, 76 passed in 21.23s ========================"
+        ]
+      },
+      {
+        "id": 140364751674,
+        "name": "test (windows-latest, 3.13)",
+        "conclusion": "failure",
+        "evidence": [
+          "platform win32 -- Python 3.13.17, pytest-9.2.0, pluggy-1.7.0",
+          "======================== 1 failed, 76 passed in 32.92s ========================"
+        ]
+      }
+    ]
+  },
+  "verified_run": {
+    "run_id": 45957357861,
+    "head_sha": "520e1a03c0c574d12ab636284a8b59a3f61e87a3",
+    "conclusion": "success",
+    "jobs": [
+      {
+        "id": 140366808902,
+        "name": "dependencies",
+        "conclusion": "success",
+        "evidence": [
+          "No known vulnerabilities found"
+        ]
+      },
+      {
+        "id": 140366809374,
+        "name": "test (macos-latest, 3.11)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.11.9, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================== 79 passed in 9.96s =============================="
+        ]
+      },
+      {
+        "id": 140366809287,
+        "name": "test (macos-latest, 3.12)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================= 79 passed in 20.95s =============================="
+        ]
+      },
+      {
+        "id": 140366809218,
+        "name": "test (macos-latest, 3.13)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.13.17, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================= 79 passed in 14.89s =============================="
+        ]
+      },
+      {
+        "id": 140366809417,
+        "name": "test (macos-latest, 3.14)",
+        "conclusion": "success",
+        "evidence": [
+          "platform darwin -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================= 79 passed in 13.55s =============================="
+        ]
+      },
+      {
+        "id": 140366809296,
+        "name": "test (ubuntu-latest, 3.11)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.11.18, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================= 79 passed in 12.70s =============================="
+        ]
+      },
+      {
+        "id": 140366809257,
+        "name": "test (ubuntu-latest, 3.12)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.12.16, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================= 79 passed in 12.46s =============================="
+        ]
+      },
+      {
+        "id": 140366809327,
+        "name": "test (ubuntu-latest, 3.13)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.13.18, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================= 79 passed in 11.32s =============================="
+        ]
+      },
+      {
+        "id": 140366809240,
+        "name": "test (ubuntu-latest, 3.14)",
+        "conclusion": "success",
+        "evidence": [
+          "platform linux -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    436    75%",
+          "============================== 79 passed in 7.13s =============================="
+        ]
+      },
+      {
+        "id": 140366809234,
+        "name": "test (windows-latest, 3.11)",
+        "conclusion": "success",
+        "evidence": [
+          "platform win32 -- Python 3.11.9, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    433    75%",
+          "============================= 79 passed in 22.44s ============================="
+        ]
+      },
+      {
+        "id": 140366809266,
+        "name": "test (windows-latest, 3.12)",
+        "conclusion": "success",
+        "evidence": [
+          "platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    433    75%",
+          "============================= 79 passed in 28.22s ============================="
+        ]
+      },
+      {
+        "id": 140366809542,
+        "name": "test (windows-latest, 3.13)",
+        "conclusion": "success",
+        "evidence": [
+          "platform win32 -- Python 3.13.17, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    433    75%",
+          "============================= 79 passed in 28.00s ============================="
+        ]
+      },
+      {
+        "id": 140366809334,
+        "name": "test (windows-latest, 3.14)",
+        "conclusion": "success",
+        "evidence": [
+          "platform win32 -- Python 3.14.10, pytest-9.2.0, pluggy-1.7.0",
+          "TOTAL                 1752    433    75%",
+          "============================= 79 passed in 26.21s ============================="
+        ]
+      }
+    ]
+  },
+  "local": {
+    "python_3_12_15": {
+      "passed": 79
+    },
+    "python_3_14_7": {
+      "passed": 79
+    },
+    "line_coverage": {
+      "covered": 1319,
+      "total": 1752,
+      "rate": 0.7529
+    },
+    "tracked_files_scanned": 125,
+    "privacy_pattern_findings": 0
+  },
+  "limits": [
+    "MCP SDK simulation is not third-party real-client acceptance",
+    "No production migration, remote deployment, merge or release",
+    "Hosted-runner action runtime deprecation warnings are not test failures"
+  ]
+}
