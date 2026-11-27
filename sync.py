@@ -4,6 +4,7 @@ from pathlib import Path
 import zstandard
 from kb import KB, KBError, ROOT, digest, dump, now, uid
 from archive_io import archive_path, publish
+from errors import error_response
 
 def discovery_cutoff():
     """Persist a one-time discovery boundary so watch mode does not reset per poll."""
@@ -209,7 +210,7 @@ def run(kb,home,discover=False,initial=False):
             result=sync_file(kb,p,allow_new=discover)
             results.append(result)
             _scanned[str(p)]=signature
-        except Exception as e: results.append({'source':str(p),'error':str(e)})
+        except Exception as e: results.append(error_response(e))
     report(kb); return results
 def acquire_worker_lock(path):
     """One worker per database, using the platform's native advisory lock."""
@@ -246,8 +247,12 @@ def main():
             with log.open('a',encoding='utf-8') as f: f.write(dump({'time':now(),'results':result})+'\n')
             if not a.watch: print(dump(result))
         except Exception as e:
-            with (kb.path.parent/'sync.jsonl').open('a',encoding='utf-8') as f: f.write(dump({'time':now(),'error':str(e)})+'\n')
-            if not a.watch: raise
+            with (kb.path.parent/'sync.jsonl').open('a',encoding='utf-8') as f: f.write(dump({'time':now(),**error_response(e)})+'\n')
+            if not a.watch: return 1
         if not a.watch: break
         a.initial=False; time.sleep(max(30,a.interval))
-if __name__=='__main__': main()
+if __name__=='__main__':
+    import sys
+    try: sys.exit(main())
+    except Exception as exc:
+        print(dump(error_response(exc))); sys.exit(1)

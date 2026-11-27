@@ -22,6 +22,7 @@ from course_rules import COURSE_INSTRUCTIONS, read_course_rules
 import compact_api, notifications
 from optimized_reads import ReadCache
 from archive_io import archive_path, publish
+from errors import error_response
 
 
 
@@ -51,19 +52,7 @@ def tool(fn):
 
         try: return {'ok':True,'data':fn(*a,**kw)}
 
-        except KBError as e:
-
-            error={'code':e.code,'message':e.message}
-
-            if e.details is not None: error['details']=e.details
-
-            return {'ok':False,'error':error}
-
-        except sqlite3.IntegrityError as e: return {'ok':False,'error':{'code':'CONSTRAINT','message':str(e)}}
-
-        except sqlite3.OperationalError as e: return {'ok':False,'error':{'code':'DATABASE','message':str(e),'retryable':'locked' in str(e)}}
-
-        except (ValueError, TypeError, KeyError, OSError) as e: return {'ok':False,'error':{'code':'INVALID_INPUT','message':str(e)}}
+        except Exception as exc: return error_response(exc)
 
     TOOLS[fn.__name__]=call
 
