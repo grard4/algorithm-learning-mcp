@@ -55,13 +55,36 @@ def test_changed_source_does_not_publish_or_advance(tmp_path):
     with pytest.raises(KBError):sync.sync_file(k,p)
     assert set(k.path.parent.rglob('archives/**/*.jsonl'))==before
 
-def test_window_budget(tmp_path):
-    params=zstandard.ZstdCompressionParameters.from_level(3,window_log=24,write_content_size=0)
+@pytest.mark.parametrize('window_log',[22,23,24,27])
+def test_window_budget(tmp_path,window_log):
+    import io
+    params=zstandard.ZstdCompressionParameters.from_level(3,window_log=window_log,write_content_size=0)
     compressor=zstandard.ZstdCompressor(compression_params=params).compressobj()
     compressed=compressor.compress(raw())+compressor.flush()
-    assert zstandard.get_frame_parameters(compressed).window_size>lim.WINDOW_BYTES
+    assert zstandard.get_frame_parameters(compressed).window_size==2**window_log
+    assert len(compressed)<lim.SOURCE_BYTES
+    assert len(raw())<min(lim.DECOMPRESSED_BYTES,lim.RATIO_ALLOWANCE)
+    with zstandard.ZstdDecompressor(max_window_size=2**window_log).stream_reader(io.BytesIO(compressed)) as reader:
+        assert reader.read()==raw()
+    # 0.25.0 forwards bytes to ZSTD_DCtx_setMaxWindowSize, despite the KiB docstring.
+    with pytest.raises(zstandard.ZstdError,match='too much memory'):
+        with zstandard.ZstdDecompressor(max_window_size=lim.WINDOW_BYTES//1024).stream_reader(io.BytesIO(compressed)) as reader:
+            reader.read()
     path=tmp_path/'large-window.zst';path.write_bytes(compressed)
-    with pytest.raises(KBError):sync.read_bytes(path)
+    k=KB(tmp_path/'window.sqlite3')
+    if window_log<=23:
+        assert sync.read_bytes(path)==raw()
+        assert sync.sync_file(k,path,name='Window')['imported']==1
+    else:
+        with pytest.raises(KBError) as caught:sync.sync_file(k,path,name='Window')
+        assert caught.value.code=='INVALID_LOG'
+        assert isinstance(caught.value.__cause__,zstandard.ZstdError)
+        assert 'too much memory' in str(caught.value.__cause__)
+        assert k.rows('SELECT * FROM messages')==[]
+        assert k.rows('SELECT * FROM sync_state')==[]
+        assert list(tmp_path.rglob('archives/**/*.jsonl'))==[]
+        path.write_bytes(zstandard.ZstdCompressor().compress(raw()))
+        assert sync.sync_file(k,path,name='Window')['imported']==1
 
 def test_frame_count_budget(tmp_path,monkeypatch):
     frame=zstandard.ZstdCompressor().compress(b'')
