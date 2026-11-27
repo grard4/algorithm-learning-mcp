@@ -73,3 +73,30 @@ def test_cross_topic_relation_remains_allowed(records):
                    {'knowledge':[{'id':ident,'data':knowledge('msg-'+cid)}]})
     assert ctx.update(a,'chat-a',ctx.version(a)['topic_version'],'rel',
         {'relations':[dict(source_id='ka',target_id='kb',kind='related',reason='explicit reference')]})
+
+
+@pytest.mark.parametrize('forged', [False, True])
+def test_dedup_preserves_valid_external_sources(records, forged):
+    kb, ctx, a, b = records
+    origin = {'conversation_id': 'chat-b', 'topic_id': b, 'scope': 'cross_topic'}
+    ctx.update(a, 'chat-a', ctx.version(a)['topic_version'], 'initial',
+        {'knowledge': [{'id': 'original', 'data': knowledge('msg-chat-b',
+            evidence_sources={'msg-chat-b': origin})}]})
+    before = kb.rows("SELECT * FROM knowledge_items WHERE id='original'")[0]
+    version = ctx.version(a)
+    data = knowledge()
+    if forged:
+        data['evidence_sources'] = {'msg-chat-b': {
+            'conversation_id': 'chat-a', 'topic_id': a, 'scope': 'same_topic'}}
+        with pytest.raises(KBError) as exc:
+            update(ctx, a, 'chat-a', data)
+        assert exc.value.code == 'VALIDATION_ERROR'
+        assert kb.rows("SELECT * FROM knowledge_items WHERE id='original'")[0] == before
+        assert ctx.version(a) == version
+    else:
+        update(ctx, a, 'chat-a', data)
+        row = kb.rows("SELECT * FROM knowledge_items WHERE id='original'")[0]
+        saved = json.loads(row['data'])
+        assert row['version'] == before['version'] + 1
+        assert saved['evidence'] == ['msg-chat-b', 'msg-chat-a']
+        assert saved['evidence_sources'] == {'msg-chat-b': origin}

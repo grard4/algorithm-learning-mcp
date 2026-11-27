@@ -542,6 +542,9 @@ class Context:
                                     if existing.get('evidence_sources') or data.get('evidence_sources'):
                                         merged['evidence_sources'] = {**existing.get('evidence_sources', {}), **data.get('evidence_sources', {})}
 
+                                    validate_changes(c, topic_id, request_id, {'knowledge': [{
+                                        'id': duplicate['id'], 'expected_version': duplicate['version'], 'data': merged}]})
+
                                     save(table, duplicate['id'], merged, duplicate)
 
                                     continue

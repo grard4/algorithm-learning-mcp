@@ -106,7 +106,11 @@ def validate_changes(c, topic_id, request_id, changes):
         if not isinstance(refs, list) or not refs:
             issue(p, '非空 string[]，元素为已归档 messages.id', '必须引用归档消息 ID')
             return
-        for i, ref in enumerate(refs):
+        # Extra declarations are persisted too; validate them before any merge.
+        checked = list(refs)
+        if isinstance(sources, dict):
+            checked.extend(ref for ref in sources if ref not in refs)
+        for i, ref in enumerate(checked):
             if not isinstance(ref, str):
                 issue(f'{p}[{i}]', 'string messages.id', '实际类型为 ' + type(ref).__name__)
             else:
