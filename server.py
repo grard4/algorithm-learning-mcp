@@ -509,5 +509,13 @@ if __name__=='__main__':
         raise SystemExit('ALGORITHM_MCP_TRANSPORT must be stdio or streamable-http')
     if transport=='streamable-http':
         mcp.settings.host=os.environ.get('ALGORITHM_MCP_HOST','127.0.0.1')
+        import ipaddress
+        host=mcp.settings.host
+        try:
+            local=ipaddress.ip_address(host).is_loopback
+        except ValueError:
+            local=host.lower()=='localhost'
+        if not local:
+            raise SystemExit('UNSAFE_HTTP_BIND: HTTP requires a loopback host; use an authenticated SSH tunnel for remote access. Direct remote and multi-tenant deployment are unsupported.')
         mcp.settings.port=int(os.environ.get('ALGORITHM_MCP_PORT','8000'))
     mcp.run(transport=transport)
