@@ -1,5 +1,6 @@
 """All tests use synthetic data under pytest's temporary directory."""
 import json
+import contextlib
 import sqlite3
 import pytest
 from kb import KB, now
@@ -15,7 +16,7 @@ def isolate_defaults(tmp_path, monkeypatch):
     monkeypatch.setenv('ALGORITHM_PREFERENCES',str(tmp_path/'missing-preferences.md'))
     yield
     for path in tmp_path.rglob('*.sqlite3'):
-        with sqlite3.connect(path) as c:
+        with contextlib.closing(sqlite3.connect(path)) as c:
             assert c.execute('PRAGMA integrity_check').fetchall()==[('ok',)],path.name
             assert c.execute('PRAGMA foreign_key_check').fetchall()==[],path.name
 

@@ -23,7 +23,6 @@ def test_multiprocess_same_request_is_idempotent(tmp_path):
 
 def test_process_death_rolls_back_transaction(tmp_path):
     db=KB(tmp_path/'crash.sqlite3')
-    code="from kb import KB; import sys,os; k=KB(sys.argv[1]); c=k.connect().__enter__()" # use a retained context below
     code="from kb import KB; import sys,os; k=KB(sys.argv[1]); cm=k.connect(); c=cm.__enter__(); c.execute('BEGIN IMMEDIATE'); c.execute(\"INSERT INTO topics VALUES('crash','Crash','crash',NULL,'now')\"); os._exit(17)"
     result=subprocess.run([sys.executable,'-c',code,str(db.path)],cwd=ROOT,timeout=30)
     assert result.returncode==17

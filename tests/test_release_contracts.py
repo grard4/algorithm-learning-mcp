@@ -1,6 +1,7 @@
 """发布前隔离契约检查；仅使用 pytest 临时目录。"""
 import json
 import sqlite3
+import contextlib
 from pathlib import Path
 import pytest
 from kb import KB, KBError, now
@@ -114,7 +115,7 @@ def test_unselected_rollout_is_not_imported(tmp_path):
 
 def test_base_schema_upgrade_preserves_existing_topic(tmp_path):
     path = tmp_path / "old.sqlite3"
-    with sqlite3.connect(path) as c:
+    with contextlib.closing(sqlite3.connect(path)) as c, c:
         c.executescript((Path(__file__).resolve().parents[1] / "schema.sql").read_text(encoding="utf-8"))
         c.execute("INSERT INTO topics VALUES(?,?,?,?,?)", ("old-topic", "Synthetic old topic", "old-topic", None, now()))
     kb = KB(path)
