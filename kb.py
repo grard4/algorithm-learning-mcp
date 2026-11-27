@@ -25,12 +25,8 @@ class KB:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.connect() as c:
             c.execute('PRAGMA journal_mode=WAL')
-            c.executescript((ROOT/'schema.sql').read_text(encoding='utf-8'))
-            c.executescript((ROOT/'context_schema.sql').read_text(encoding='utf-8'))
-            c.executescript((ROOT/'c_context_schema.sql').read_text(encoding='utf-8'))
-            import notifications
-            c.execute('BEGIN IMMEDIATE')
-            notifications.install_transaction(c)
+            from migrations import initialize
+            initialize(c, ROOT)
     @contextlib.contextmanager
     def connect(self):
         c=sqlite3.connect(self.path, timeout=30); c.row_factory=sqlite3.Row
