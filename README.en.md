@@ -145,6 +145,8 @@ LICENSE contains the unchanged official English terms. Explanatory summaries do 
 
 ## Release acceptance and additional documentation
 
+The independent audit fixes dated 2026-11-27 are unreleased. See [fix report](FIX_REPORT.md), [test matrix](TEST_MATRIX.md), and [release readiness](RELEASE_READINESS.md) for current evidence and compatibility changes. Earlier client and test results below retain their historical scope and are not automatically counted as validation of this branch.
+
 On 2026-11-27, 16 isolated tests passed. Real Codex CLI approval, cancellation, creation, reads, update and audit were tested with synthetic data. Preference-tool execution, full Desktop coverage and OS isolation remain unverified. The Windows sandbox runtime issue is a disclosed limitation, not a successful isolation test. Third-party dependencies are installed separately, not bundled. See docs/CODEX_INTEGRATION_TEST.md.
 
 See [installation](docs/INSTALLATION.md), [configuration](docs/CONFIGURATION.md), [usage](docs/USER_GUIDE.md), [security](docs/SECURITY.md), [third-party dependencies](docs/THIRD_PARTY.md), and [release acceptance](docs/FINAL_RELEASE_ACCEPTANCE.md). These reports are maintained in Simplified Chinese.

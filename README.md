@@ -165,6 +165,8 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 
 ## 发布验收与更多文档
 
+2026-11-27 独立审计修复位于待发布分支；本轮的安全边界、数据库兼容性及实际验证范围以 [修复报告](FIX_REPORT.md)、[测试矩阵](TEST_MATRIX.md) 和 [发布准备](RELEASE_READINESS.md) 为准。下述 16 项测试与真实客户端记录属于此前发布验收，未自动算作本轮验证。
+
 2026-11-27 完整隔离测试 16 项通过；真实 Codex CLI 已通过用户控制的批准、拒绝及五步合成知识读写验收。第三方依赖不捆绑分发。偏好工具、Desktop 全部场景及 OS 隔离不在已验证范围；Windows 管理员沙箱运行时故障按用户决定保留为已知限制。详见 docs/CODEX_INTEGRATION_TEST.md。
 
 - [安装与初始化](docs/INSTALLATION.md)
