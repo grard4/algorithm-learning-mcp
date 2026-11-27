@@ -219,9 +219,17 @@ def search(cx,query='',topic_id=None,limit=None,related_to=None,since_version=No
 
   messages=[];history_loaded=False;history_incomplete=False
 
-  def refs(ids):
+  # Memoize only inside this read transaction; no cross-snapshot evidence cache.
+  evidence_exists={}
 
-   return [m for m in ids if isinstance(m,str) and c.execute('SELECT 1 FROM messages WHERE id=?',(m,)).fetchone()]
+  def refs(ids):
+   found=[]
+   for m in ids:
+    if not isinstance(m,str):continue
+    if m not in evidence_exists:
+     evidence_exists[m]=bool(c.execute('SELECT 1 FROM messages WHERE id=?',(m,)).fetchone())
+    if evidence_exists[m]:found.append(m)
+   return found
 
   groups=[];next_offsets=[];more=False
 

@@ -53,3 +53,13 @@ def test_restore_epoch_invalidates_search_cursor(linked):
     with kb.connect() as c: c.execute("UPDATE r3_meta SET epoch='restored'")
     with pytest.raises(KBError):
         ctx.search(query='searchable',limit=1,cursor=first['next_cursor'])
+
+
+def test_progress_evidence_rechecked_next_snapshot(linked):
+    kb,ctx,tid=linked
+    ctx.update(tid,'chat',ctx.version(tid)['topic_version'],'progress',{'progress':{'append':{'taught':['needle'],'evidence':['msg']}}})
+    before=ctx.search(concepts=['needle'],detail='detailed')
+    assert before['groups'][0]['progress'][0]['state']=='taught'
+    with kb.connect() as c:c.execute("DELETE FROM messages WHERE id='msg'")
+    after=ctx.search(concepts=['needle'],detail='detailed')
+    assert after['groups'][0]['progress'][0]['state']=='unknown'
