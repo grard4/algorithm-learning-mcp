@@ -26,7 +26,7 @@
 | A02 | 高 | context.py:377 update | VERIFIED | 写事务验证聊天专题；test_audit_boundaries 的错专题拒绝、同专题跨聊天成功、跨专题关系成功 |
 | A03 | 高 | contracts.py:74 validate_changes | VERIFIED | 消息/归档/聊天/专题联查，显式 evidence_sources 作用域，来源声明及 Schema 校验；伪造来源拒绝、显式外专题引用成功 |
 | A03b | 高 | contracts.py evidence / context.py 去重分支 | VERIFIED | PR 前独立复核发现额外来源键可在同正文去重时覆盖旧声明；修前参数化回归 1 failed / 1 passed，修后 2 passed。现在验证全部声明并复验最终合并记录，失败时版本与原记录保持不变 |
-| C01b | 中 | cli.py main 输出 | FIXED | 首轮 Windows/Python 3.11 CI 复现恢复成功后 cp1252 无法编码中文而异常退出；改为可逆 JSON Unicode 转义，新增默认/cp1252/ASCII 子进程回归，含中文目标路径及完整返回内容检查；跨平台重验进行中 |
+| C01b | 中 | cli.py main 输出 | VERIFIED | 首轮 Windows/Python 3.11 CI 复现恢复成功后 cp1252 无法编码中文而异常退出；改为可逆 JSON Unicode 转义，新增默认/cp1252/ASCII 子进程回归，含中文目标路径及完整返回内容检查；三平台四版本各 79 项通过 |
 | A04a | 高 | sync.py sync_file | VERIFIED | 比较 id、conversation_id、seq、role、timestamp、content、source_line；source_hash 保留最初归档；正文/角色/时间戳/换序回归 |
 | A04b | 高 | sync.py parse/read_bytes | VERIFIED | 半截尾行及不完整/损坏压缩帧拒绝；不推进游标；已提交归档的候选提取可恢复 |
 | A04c | 中 | sync.py unchanged 分支 | VERIFIED | 原 unchanged 提前返回会掩盖归档丢失/损坏；两项失败用例复现后，重放先核对归档，缺失时由同 hash 原文恢复，损坏时拒绝且不覆盖 |
@@ -65,7 +65,7 @@ ReadCache 的 TTL/LRU/容量、返回副本、防止调用方修改缓存、源�
 
 ## C01—C03：工程覆盖
 
-Windows Python 3.12.15 与 3.14.7 均执行 75 项测试。3.11/3.13、Linux/macOS 为 NOT VERIFIED；12 组合工作流已创建但未推送触发。静态语法、有限 Ruff 严重错误集、依赖一致性、安全公告查询均执行，不将其描述为全面形式化证明。测试仍保留原根目录文件，新专项置于 unit/integration/security/stress/regression。第三方 Agent 客户端均待验证，不因缺少实机环境判定本轮失败。
+Windows Python 3.12.15 与 3.14.7 均执行 79 项测试；GitHub Windows/Ubuntu/macOS × Python 3.11–3.14 共 12 组合各 79 项通过（45957357861）。静态语法、有限 Ruff 严重错误集、依赖一致性、安全公告查询均执行，不将其描述为全面形式化证明。测试仍保留原根目录文件，新专项置于 unit/integration/security/stress/regression。第三方 Agent 客户端均待验证，不因缺少实机环境判定本轮失败。
 
 ## 证据与未覆盖项
 

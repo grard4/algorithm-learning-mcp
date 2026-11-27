@@ -62,5 +62,6 @@
     "production migration",
     "GitHub CI execution"
   ],
-  "performance_result_hashes_equal": true
+  "performance_result_hashes_equal": true,
+  "verification_stage": "Initial local audit at e4ede4b; superseded by pr-ci-verification.json for current counts and CI"
 }

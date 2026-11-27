@@ -1,6 +1,6 @@
 # 修复与验收报告
 
-本轮已完成本地独立复核、隔离复现、分组修复、回归和性能对照。Windows 两套 Python 各 75 项通过；生产数据未访问、未迁移。原 main 保持 42f593752c295bb2ef5d647a40c00bead19dde94，GitHub main 在开始及结束均核对为同一提交。工作位于独立 audit/security-review-20261127 分支；未 Push、合并、Release 或发布 PyPI。
+本轮已完成本地独立复核、隔离复现、分组修复、回归和性能对照。Windows 两套 Python 各 79 项通过；生产数据未访问、未迁移。原 main 保持 42f593752c295bb2ef5d647a40c00bead19dde94，GitHub main 在开始及结束均核对为同一提交。工作位于独立 audit/security-review-20261127 分支；已推送并创建草稿 PR #1；未合并、Release 或发布 PyPI。
 
 ## 阶段 1：基线
 
@@ -29,7 +29,7 @@
 - 测试入口使用 sys.executable；后台锁按平台选择 msvcrt/fcntl；Windows 排他测试通过。
 - 新增 tests/unit、integration、security、stress、regression，以及三系统四版本 CI、覆盖率、依赖公告和严重静态错误检查。
 
-所有已确认缺陷都有修复与回归。原事务/通知核心未复现的问题保留实现；未实施无收益的数据库大重构。Linux/macOS、未运行的 Python 版本及真实第三方客户端继续待验证。
+所有已确认缺陷都有修复与回归。原事务/通知核心未复现的问题保留实现；未实施无收益的数据库大重构。后续 PR 阶段已完成三平台四版本 CI；真实第三方客户端继续待验证。
 
 ## 阶段 6：性能对照
 
@@ -49,6 +49,10 @@
 
 ## 阶段 7：最终验收
 
-Python 3.14.7：75 passed / 0 failed / 0 skipped；Python 3.12.15 同样通过。最终覆盖率 74.54%，资源警告作为错误运行，无未解释失败。静态、依赖一致性、67 包安全公告查询通过。每个测试的临时数据库均检查完整性与外键。发布准备和未验证范围见 RELEASE_READINESS.md，详细矩阵见 TEST_MATRIX.md。
+Python 3.14.7：79 passed / 0 failed / 0 skipped；Python 3.12.15 同样通过。本地 Windows 最终覆盖率 75.29%，资源警告作为错误运行，无未解释失败。静态、依赖一致性、67 包安全公告查询通过。每个测试的临时数据库均检查完整性与外键。发布准备和未验证范围见 RELEASE_READINESS.md，详细矩阵见 TEST_MATRIX.md。
 
 兼容性变化均明确披露：非回环 HTTP 启动拒绝；错误专题更新拒绝；跨专题证据需要来源声明；偏好结果省略 path；恢复后的旧搜索游标需重新开始；无法识别的数据库 Schema 停止而非强行覆盖。原 MCP 工具名称和顶层参数保持兼容，原三份 SQL 与业务记录未替换。
+
+## PR 前复核与跨平台闭环
+
+规范复核 0 项阻断；需求复核发现并关闭 A03b 去重来源覆盖。CI 首轮发现 C01b：Windows cp1252 下 CLI 中文输出异常；修复为无损 JSON Unicode 转义，默认/cp1252/ASCII 与中文路径均验证。第二轮 45957357861 全部 13 个 job 成功：12 组合各 79 passed，加依赖安全审计。完整依据见 PRE_MERGE_REVIEW.md 和 docs/evidence/pr-ci-verification.json。

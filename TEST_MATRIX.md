@@ -1,6 +1,6 @@
 # 测试矩阵
 
-日期：2026-11-27。所有数据均为临时目录内合成数据。最终 Windows Python 3.14.7 与 3.12.15 各 **75 passed，0 failed，0 skipped**。原始基线 16/16 通过；新 A 组首次 12 failed / 5 passed 是修复前缺陷证据，已全部转绿。后续新发现均先保留失败复现，再修复。
+日期：2026-11-27。所有数据均为临时目录内合成数据。最终 Windows Python 3.14.7 与 3.12.15 各 **79 passed，0 failed，0 skipped**。原始基线 16/16 通过；新 A 组首次 12 failed / 5 passed 是修复前缺陷证据，已全部转绿。后续新发现均先保留失败复现，再修复。
 
 | 专项 | 实际执行与结论 | 证据 |
 |---|---|---|
@@ -21,12 +21,12 @@
 | B03 恢复/通知 | PASS：恢复轮换 epoch，游标检查与通知读取 | test_restore_epoch.py、test_cache_notifications.py |
 | B04 搜索 | PASS：5001 知识/2001 消息披露 incomplete、专题筛选、批量分页隔离、恢复及查询版本检查 | test_search_coverage.py |
 | B05 偏好 | PASS：64 KiB 边界、UTF-8、同 mtime 替换、脱敏及权限错误 | test_preferences*.py、test_release_contracts.py |
-| C01 后台锁 | PASS（Windows）：另一进程排他，退出后释放 | test_worker_lock.py |
+| C01 后台锁 | PASS（Windows/Linux/macOS）：另一进程排他，退出后释放 | test_worker_lock.py |
 | MCP stdio | PASS，Python SDK 模拟：初始化、21 工具、Schema、偏好、登记、归档、知识更新/读取 | test_mcp_stdio.py |
 | MCP HTTP | PASS，Python SDK 模拟：初始化、发现、偏好、登记、归档、更新、搜索、幂等、回滚 | test_mcp_http.py |
 | 数据库完整性 | PASS：每个测试结束逐个临时 *.sqlite3 执行 integrity_check、foreign_key_check | tests/conftest.py |
 | 静态检查 | PASS：Ruff E9/F63/F7/F82；41 个 Python 文件 AST 解析；git diff --check | quality gate + 审计记录 |
-| 覆盖率 | 1303/1748 行，74.54%；不是分支覆盖率，未覆盖旧工具等路径 | coverage.xml（忽略文件） |
+| 覆盖率 | 1319/1752 行，75.29%（Windows）；Linux/macOS 1316/1752；不是分支覆盖率，未覆盖旧工具等路径 | coverage.xml（忽略文件） |
 | 依赖检查 | PASS：pip check；67 个环境包 pip-audit 未发现已知漏洞 | .release-audit/quality/dependencies.json |
 | 发布内容扫描 | 已跟踪内容规则扫描无命中；不等同于所有 Git 历史/未知秘密都已审计 | scripts/release_audit.py 的 findings 复用 |
 | 性能对照 | PASS：九种结果哈希一致；输入输出 Token、SQL、延迟、命中率记录 | audit-performance-before/after.json |
@@ -35,9 +35,9 @@
 
 | 环境/能力 | 状态 |
 |---|---|
-| Windows + Python 3.12.15 / 3.14.7 | 已实测，每套 75 项通过 |
-| Windows + Python 3.11 / 3.13 | NOT VERIFIED |
-| Linux/macOS + Python 3.11–3.14 | NOT VERIFIED；CI 已配置，未触发 |
+| Windows + Python 3.12.15 / 3.14.7 | 已实测，每套 79 项通过 |
+| GitHub Windows + Python 3.11–3.14 | VERIFIED；4 组合各 79 项通过 |
+| GitHub Linux/macOS + Python 3.11–3.14 | VERIFIED；8 组合各 79 项通过 |
 | 真实第三方 Agent 客户端 | NOT VERIFIED；按用户环境限制不安装 |
 | 本轮真实 Codex 客户端业务调用 | NOT VERIFIED；不继承旧报告作为本轮证据 |
 | SSH 远程认证隧道/TLS 网关 | NOT VERIFIED；非回环直连不支持 |
@@ -53,3 +53,7 @@ python scripts/quality_gate.py --dependencies
 ```
 
 结果和日志写入忽略目录 .release-audit/quality。缺少依赖、测试失败或公告服务失败均产生非零退出码，不跳过失败。GitHub 工作流运行相同测试和静态检查，并保存 JUnit/覆盖率/依赖结果；未运行的 CI 不记为通过。
+
+## PR 阶段实测
+
+PR #1，代码提交 520e1a0，工作流 45957357861：12 个测试组合全部成功，每组 79 passed，无失败或跳过；独立依赖公告检查成功。首次 45956708638 的 Windows 编码失败已复现、修复并全矩阵复验；详见 PRE_MERGE_REVIEW.md 和 docs/evidence/pr-ci-verification.json。CI 产物保留 JUnit、覆盖率与依赖结果。
