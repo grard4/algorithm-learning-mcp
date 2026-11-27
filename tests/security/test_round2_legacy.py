@@ -26,6 +26,7 @@ def test_retired_write_all_entry_points(name,tmp_path):
     env=dict(os.environ,ALGORITHM_KB=str(tmp_path/'cli.sqlite3'),ALGORITHM_LEGACY_TOOLS='1')
     proc=subprocess.run([sys.executable,str(ROOT/'cli.py'),'call',name,'--args-file',str(arg)],cwd=ROOT,env=env,capture_output=True,text=True)
     assert json.loads(proc.stdout)['error']['code']=='LEGACY_WRITE_DISABLED'
+    assert proc.returncode==1
 
 def test_actual_legacy_discovery_and_direct_transport_rejection(tmp_path):
     async def run():
