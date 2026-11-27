@@ -3,6 +3,8 @@
 默认入口为根目录 README.md，英文版为 README.en.md。使用 Python 3.11+；本轮实际环境为 Windows 11 / Python 3.14.7。运行依赖安装命令：
 
 ```powershell
+git clone https://github.com/grard4/algorithm-learning-mcp.git
+cd algorithm-learning-mcp
 py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 ```
@@ -15,3 +17,5 @@ $env:ALGORITHM_KB = "$PWD/data/learning.sqlite3"
 ```
 
 stdio 服务等待客户端协议消息，不以终端无输出判断启动失败。可用临时目录运行 `python -m pytest` 验证；测试结果只覆盖执行环境。
+
+固定版本安装可在创建虚拟环境前执行 `git checkout v0.1.1`；直接使用 `main` 将取得最新提交。发布内容不包含虚拟环境、私人数据库、凭据或审计临时目录。

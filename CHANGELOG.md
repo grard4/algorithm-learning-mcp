@@ -1,6 +1,16 @@
-# Changelog
+# 变更记录
 
-## Unreleased
-- Prepared an independent, empty-data MCP derivative for multi-agent client validation.
-- Added on-demand learning preferences and stdio / Streamable HTTP entry points.
-- Added compatibility status documentation; non-Codex clients remain untested.
+## v0.1.1 — 2026-11-27
+
+- 将双语 README 和安装教程中的仓库占位符替换为公开仓库地址，区分运行依赖与开发测试依赖。
+- 更新公开发布状态、Codex CLI 实测结果和已知限制，避免历史审批失败被误读为当前状态。
+- 为阶段性审计标明历史范围，保留真实失败及后续验证证据。
+- 创建首个 GitHub Release；此前首次公开提交 `b007bf9` 未创建版本标签。
+- 本版本仅修改文档，业务代码、数据库 Schema、许可证及运行配置不变。
+
+## 首次公开提交 — 2026-11-27（未打标签）
+
+- 发布独立、空数据的算法学习 MCP 服务，支持 stdio 与 Streamable HTTP。
+- 提供按需学习偏好、多客户端配置说明、来源验证、增量上下文及审计能力。
+- 记录隔离工程测试和真实 Codex CLI 的批准、拒绝及合成知识读写验收；其他客户端未做真实测试。
+- 使用 PolyForm Noncommercial 1.0.0，限制商业利用；不宣称 OSI 开源。

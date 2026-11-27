@@ -1,6 +1,6 @@
 # OpenAI Codex setup
 
-**Client status:** partially verified in this environment. Codex CLI discovered the isolated server tools, but its first tool call was blocked by `MCP tool call requires approval, but approval policy is never`. See `docs/AGENT_COMPATIBILITY.md`.
+**客户端状态：部分验证。** Windows 上的真实 Codex CLI 已完成初始化、工具发现、用户批准/取消，以及合成知识创建、读取、更新和审计。早期非交互调用失败已由独立交互会话验证闭环；不代表 Desktop 全场景、偏好工具或 OS 隔离已验证。详见 [真实调用验收](../CODEX_INTEGRATION_TEST.md)。
 
 ## Requirements
 

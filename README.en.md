@@ -27,12 +27,11 @@ A model-independent MCP server for algorithm and programming-contest learning. O
 ## Install on Windows
 
 ```powershell
-git clone <repository-url> algorithm-learning-mcp
+git clone https://github.com/grard4/algorithm-learning-mcp.git
 cd algorithm-learning-mcp
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m pip install -r requirements-dev.txt
 Copy-Item config\learning_preferences.example.md config\learning_preferences.md
 python server.py
 ```
@@ -132,7 +131,7 @@ Restore writes a new destination and refuses overwrite. Stop the service before 
 
 Run `python -m pytest`. The test report records protocol-level results separately from client tests. To report a client test, submit client name/version, OS, transport, configuration with secrets redacted, `tools/list` output, representative read/write tool results, and logs. Compatibility statuses are updated only when evidence can be reproduced.
 
-See [CHANGELOG.md](CHANGELOG.md). The selected license is PolyForm Noncommercial 1.0.0. Remaining release checks and separate publication authorization are still required.
+See [CHANGELOG.md](CHANGELOG.md). The selected license is PolyForm Noncommercial 1.0.0. The repository is public. Published versions and release notes are available on [GitHub Releases](https://github.com/grard4/algorithm-learning-mcp/releases).
 
 ## Copyright and contributions
 
@@ -142,7 +141,7 @@ All noncommercial purposes are permitted. The license also expressly permits use
 
 Third-party components retain their respective copyrights and licenses. Contributors retain copyright in their contributions; no transfer to the maintainer is implied. Project names, logos, and trademarks are not automatically licensed by publishing the code. See [contribution rules](CONTRIBUTING.md), [copyright audit](docs/COPYRIGHT_AUDIT.md), and [licensing decision](docs/LICENSING_DECISION.md).
 
-LICENSE contains the unchanged official English terms. Explanatory summaries do not amend them. License setup is complete; final release acceptance is not. No public repository or push has been performed.
+LICENSE contains the unchanged official English terms. Explanatory summaries do not amend them. The repository has been published. Verified capabilities and remaining limitations are documented below.
 
 ## Release acceptance and additional documentation
 

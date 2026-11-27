@@ -24,15 +24,14 @@
 
 需要 Python 3.11 或更新版本（本机已测试 3.14.7），以及支持 JSON1、FTS5 的 SQLite。客户端须支持选定的传输方式和工具 Schema，协议能力不等于真实客户端兼容性已验证。
 
-仓库尚未公开，下面的仓库地址是待替换占位符。
+公开仓库：[grard4/algorithm-learning-mcp](https://github.com/grard4/algorithm-learning-mcp)。版本说明与下载见 [GitHub Releases](https://github.com/grard4/algorithm-learning-mcp/releases)。
 
 ```powershell
-git clone <repository-url> algorithm-learning-mcp
+git clone https://github.com/grard4/algorithm-learning-mcp.git
 cd algorithm-learning-mcp
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -r requirements.txt
-python -m pip install -r requirements-dev.txt
 Copy-Item config\learning_preferences.example.md config\learning_preferences.md
 python server.py
 ```
@@ -145,7 +144,7 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 
 ## 测试、常见问题与贡献
 
-执行 `python -m pytest` 运行测试。历史结果与验证边界见 [测试报告](docs/TEST_REPORT.md)。
+开发测试先执行 `python -m pip install -r requirements-dev.txt`，再执行 `python -m pytest`。历史结果与验证边界见 [测试报告](docs/TEST_REPORT.md)。
 
 - 查不到概念关联：新数据库没有经过审核的概念索引，不代表普通知识检索不可用。
 - 工具调用被审批阻止：遵循客户端正常授权流程，不降低安全策略；工具发现不能代替调用验证。
@@ -162,7 +161,7 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 
 第三方组件保留各自版权与许可证；未来贡献者保留自身贡献版权，不自动转让给维护者。项目名称、Logo 和商标不因代码公开自动获得授权。详见 [贡献规则](CONTRIBUTING.md)、[版权审计](docs/COPYRIGHT_AUDIT.md) 和 [许可决策](docs/LICENSING_DECISION.md)。
 
-正式 LICENSE 保留官方英文原文；本页中文说明不替代或修改许可证条款。许可证已配置，但完整发布验收仍未完成，尚未创建公开仓库或推送。
+正式 LICENSE 保留官方英文原文；本页中文说明不替代或修改许可证条款。仓库已公开发布；已验证能力与仍未验证的范围见下方验收说明。
 
 ## 发布验收与更多文档
 
