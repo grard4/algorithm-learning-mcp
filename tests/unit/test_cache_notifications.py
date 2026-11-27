@@ -75,3 +75,29 @@ def test_notice_cursor_epoch_and_tampering(linked):
         query(kb,lambda c:notifications.changes(c,cursor))
     with pytest.raises(notifications.NoticeError):
         query(kb,lambda c:notifications.changes(c,'not-base64'))
+
+
+def test_archive_delete_notice_and_cache_invalidation(linked):
+    kb,_,_=linked
+    cache=ReadCache(compact_api.search,notifications.health,ReadError,'test')
+    query(kb,lambda c:cache.query(c,['synthetic']))
+    with kb.connect() as c:
+        c.execute("DELETE FROM messages WHERE id='msg'")
+        c.execute("DELETE FROM archives WHERE sha256='archive'")
+    result=query(kb,lambda c:cache.query(c,['synthetic']))
+    assert not result['groups'][0]['items'][0]['reusable']
+    assert kb.rows("SELECT * FROM r3_notices WHERE source_table='archives' AND operation='delete'")
+
+
+def test_writer_process_invalidates_reader_cache(linked):
+    import subprocess,sys
+    from pathlib import Path
+    kb,_,_=linked
+    cache=ReadCache(compact_api.search,notifications.health,ReadError,'test')
+    before=query(kb,lambda c:cache.query(c,['synthetic']))
+    code="import sqlite3,sys; c=sqlite3.connect(sys.argv[1]); c.execute(\"UPDATE knowledge_items SET version=version+1 WHERE id='k'\"); c.commit(); c.close()"
+    run=subprocess.run([sys.executable,'-c',code,str(kb.path)],cwd=Path(__file__).resolve().parents[2],timeout=30)
+    assert run.returncode==0
+    after=query(kb,lambda c:cache.query(c,['synthetic']))
+    assert before!=after and cache.misses==2
+    assert not after['groups'][0]['items'][0]['reusable']
