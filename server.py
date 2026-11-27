@@ -23,6 +23,7 @@ import compact_api, notifications
 from optimized_reads import ReadCache
 from archive_io import archive_path, publish
 from errors import error_response
+from input_limits import NormalizedMessages, normalized_raw
 
 
 
@@ -237,28 +238,14 @@ def record_learning_result(task_id: str, data: dict, expected_version: int, requ
 
 @tool
 
-def record_conversation_update(conversation_id: str, messages: list[dict], request_id: str, actor: str='course-agent') -> dict:
+def record_conversation_update(conversation_id: str, messages: NormalizedMessages, request_id: str, actor: str='course-agent') -> dict:
 
     """导入规范化消息作为补充归档，不冒充本机原始日志。各消息需 role/content/timestamp。"""
 
-    conv=kb.rows('SELECT * FROM conversations WHERE id=?',(conversation_id,))
-
-    if not conv: raise KBError('NOT_FOUND',conversation_id)
-
-    if not isinstance(messages,list) or not messages:
-        raise KBError('INVALID','messages 必须是非空数组')
-
-    for m in messages:
-
-        if (not isinstance(m,dict) or m.get('role') not in ('user','assistant') or
-            not isinstance(m.get('content'),str) or not m['content'] or
-            not isinstance(m.get('timestamp'),str) or not m['timestamp']):
-            raise KBError('INVALID','消息需 role 及非空文本 content/timestamp')
-
-    raw=(dump({'kind':'normalized-import','conversation_id':conversation_id,'messages':messages})+'\n').encode(); sha=digest(raw)
-
+    raw=normalized_raw(conversation_id,messages,request_id,actor); sha=digest(raw)
     path=archive_path(kb,conversation_id,sha,'.normalized.json')
-    publish(path,raw)
+    conv=kb.rows('SELECT id FROM conversations WHERE id=?',(conversation_id,))
+    if not conv: raise KBError('NOT_FOUND','聊天未注册')
 
     def fn(c,u):
 
@@ -274,6 +261,7 @@ def record_conversation_update(conversation_id: str, messages: list[dict], reque
 
             c.execute('INSERT INTO messages VALUES(?,?,?,?,?,?,?,?)',(ident,conversation_id,seq,m['role'],m['timestamp'],m['content'],sha,i+1))
 
+        publish(path,raw)
         return {'message_ids':ids,'archive_sha256':sha}
 
     return kb.mutate('record_conversation_update',request_id,actor,conversation_id,messages,fn)
