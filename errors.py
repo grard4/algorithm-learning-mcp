@@ -8,7 +8,12 @@ LOG = logging.getLogger('algorithm-learning.errors')
 
 def error_response(exc):
     if isinstance(exc, KBError):
-        error = {'code': exc.code, 'message': exc.message}
+        # These codes historically used caller IDs as messages. Never echo them.
+        messages={'NOT_FOUND':'请求的实体不存在','EVIDENCE_NOT_FOUND':'引用的归档消息不存在',
+                  'SOURCE_AMBIGUOUS':'存在多个匹配来源；请核实来源关联',
+                  'VALIDATION_ERROR':'学习成果校验失败；请依据 details 修正字段'}
+        LOG.warning('code=%s type=KBError',exc.code)
+        error = {'code': exc.code, 'message': messages.get(exc.code,exc.message)}
         if exc.details is not None:
             error['details'] = exc.details
         return {'ok': False, 'error': error}

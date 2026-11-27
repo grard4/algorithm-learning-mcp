@@ -70,6 +70,19 @@ CHANGES_SCHEMA = {
 LearningChanges = Annotated[Any, WithJsonSchema(CHANGES_SCHEMA)]
 VALIDATOR = Draft202012Validator(CHANGES_SCHEMA)
 
+def schema_fields(schema):
+    """Only schema-owned names may appear in public validation locations."""
+    if isinstance(schema,dict):
+        return set(schema.get('properties',{})).union(*(schema_fields(v) for v in schema.values()))
+    if isinstance(schema,list):
+        return set().union(*(schema_fields(v) for v in schema))
+    return set()
+
+PUBLIC_FIELDS=schema_fields(CHANGES_SCHEMA)
+
+def safe_field(key):
+    return key if key in PUBLIC_FIELDS else '<field>'
+
 
 def validate_changes(c, topic_id, request_id, changes):
     """Collect independent shape/state/evidence errors before any entity write."""
@@ -80,7 +93,7 @@ def validate_changes(c, topic_id, request_id, changes):
         if row not in errors: errors.append(row)
 
     def path(parts):
-        return 'changes' + ''.join(f'[{x}]' if isinstance(x, int) else '.' + x for x in parts)
+        return 'changes' + ''.join(f'[{x}]' if isinstance(x, int) else '.' + safe_field(x) for x in parts)
 
     for e in VALIDATOR.iter_errors(changes):
         p = path(e.absolute_path)
@@ -93,13 +106,14 @@ def validate_changes(c, topic_id, request_id, changes):
                     issue(p + '.' + key, expected, '字段缺失')
         elif e.validator == 'additionalProperties' and isinstance(e.instance, dict):
             for key in set(e.instance) - set(e.schema.get('properties', {})):
-                issue(p+'.'+key, 'Schema 中列出的字段', '未知字段')
+                issue(p+'.<field>', 'Schema 中列出的字段', '未知字段')
         else:
             expected = e.schema.get('type', str(e.validator_value))
             if e.validator == 'type':
                 problem = ('必须是数组；' if expected == 'array' else '') + '实际类型为 ' + type(e.instance).__name__
             else:
-                problem = e.message[:240]
+                # jsonschema's message includes the rejected user value.
+                problem = '不满足 Schema 约束 ' + e.validator
             issue(p, str(expected), problem)
 
     def evidence(refs, p, sources=None):
@@ -146,7 +160,7 @@ def validate_changes(c, topic_id, request_id, changes):
                     if not isinstance(items, list): continue
                     target = merged.get(key, [])
                     if not isinstance(target, list):
-                        issue(f'changes.progress.{op}.{key}', '目标字段为 array', '合并目标不是数组')
+                        issue(f'changes.progress.{op}.{safe_field(key)}', '目标字段为 array', '合并目标不是数组')
                         continue
                     target = list(target); merged[key] = target
                     for item in items:
