@@ -58,3 +58,46 @@ def test_source_id_cannot_escape_archive_root(tmp_path):
     save(path,log(cid='../outside'))
     with pytest.raises(KBError): sync.sync_file(kb,path,name='Synthetic',canonical='synthetic')
     assert not kb.topics()
+
+
+def test_compressed_truncation_and_valid_frames(tmp_path):
+    import zstandard
+    raw=('\n'.join(json.dumps(e) for e in log())+'\n').encode()
+    path=tmp_path/'source.jsonl.zst'
+    compressed=zstandard.ZstdCompressor().compress(raw)
+    path.write_bytes(compressed[:-2])
+    with pytest.raises(KBError): sync.read_bytes(path)
+    path.write_bytes(compressed)
+    assert sync.read_bytes(path)==raw
+    path.write_bytes(compressed+compressed)
+    assert sync.read_bytes(path)==raw+raw
+
+
+def test_failure_inside_sync_rolls_back_and_retries(imported, monkeypatch):
+    kb,path=imported
+    save(path, log()+log('second')[1:])
+    before=kb.rows('SELECT * FROM sync_state')
+    original=kb.mutate
+    def fail(operation, request_id, actor, cid, payload, fn):
+        def interrupted(c,u):
+            fn(c,u)
+            raise RuntimeError('simulated interruption before commit')
+        return original(operation,request_id,actor,cid,payload,interrupted)
+    monkeypatch.setattr(kb,'mutate',fail)
+    with pytest.raises(RuntimeError): sync.sync_file(kb,path)
+    assert len(kb.rows('SELECT * FROM messages'))==1
+    assert kb.rows('SELECT * FROM sync_state')==before
+    monkeypatch.setattr(kb,'mutate',original)
+    assert sync.sync_file(kb,path)['imported']==1
+    assert sync.sync_file(kb,path)['unchanged']
+    for archive in kb.rows('SELECT * FROM archives'):
+        from pathlib import Path
+        assert sync.digest(Path(archive['path']).read_bytes())==archive['sha256']
+
+
+def test_message_reordering_rejected(imported):
+    kb,path=imported
+    save(path,log()+log('second')[1:])
+    sync.sync_file(kb,path)
+    save(path,[log()[0],log('second')[1],log()[1]])
+    with pytest.raises(KBError): sync.sync_file(kb,path)

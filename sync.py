@@ -1,5 +1,5 @@
 """只读适配本机 Codex rollout；格式变化时停止该文件并记录错误。"""
-import argparse, hashlib, json, os, re, time
+import argparse, hashlib, json, os, re, time, tempfile
 from pathlib import Path
 import zstandard
 from kb import KB, KBError, ROOT, digest, dump, now, uid
@@ -33,15 +33,28 @@ _scanned={}
 def read_bytes(path):
     raw=Path(path).read_bytes()
     if str(path).endswith('.zst'):
-        with zstandard.ZstdDecompressor().stream_reader(raw) as r: return r.read()
+        parts=[]
+        try:
+            while raw:
+                decoder=zstandard.ZstdDecompressor().decompressobj()
+                parts.append(decoder.decompress(raw))
+                if not decoder.eof:
+                    raise KBError('INVALID_LOG', '压缩日志帧不完整')
+                raw=decoder.unused_data
+        except zstandard.ZstdError as exc:
+            raise KBError('INVALID_LOG', '压缩日志损坏') from exc
+        return b''.join(parts)
     return raw
 def parse(raw):
     lines=raw.splitlines(keepends=True); events=[]
     for i,line in enumerate(lines,1):
         try: e=json.loads(line)
         except (ValueError,UnicodeDecodeError):
-            if i==len(lines) and not line.endswith(b'\n'): break
+            if i==len(lines) and not line.endswith(b'\n'):
+                raise KBError('INCOMPLETE_LOG', '尾行尚未完成，请稍后重试')
             raise KBError('INVALID_LOG',f'第 {i} 行无效')
+        if not isinstance(e, dict) or not isinstance(e.get('payload'), dict):
+            raise KBError('INVALID_LOG', f'第 {i} 行事件结构无效')
         events.append((i,e))
     if not events or events[0][1].get('type')!='session_meta': raise KBError('INVALID_LOG','缺少 session_meta')
     return events
@@ -107,6 +120,12 @@ def finish_extraction(kb,tid,cid):
             c.execute('INSERT OR IGNORE INTO extraction_seen VALUES(?,?)',(m['id'],now()))
 def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
     raw=read_bytes(path); events=parse(raw); meta=events[0][1]['payload']; cid=meta['id']; messages=visible(events)
+    if not isinstance(cid, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,199}', cid):
+        raise KBError('INVALID_SOURCE_ID', '聊天 ID 必须是安全的单一路径组件')
+    archive_root=(kb.path.parent/'archives').resolve()
+    archive_dir=archive_root/cid
+    if archive_dir.resolve().parent != archive_root:
+        raise KBError('INVALID_SOURCE_ID', '归档目录不能通过链接越界')
     known=kb.rows('SELECT * FROM conversations WHERE id=?',(cid,))
     if not known:
         if not name:
@@ -120,34 +139,43 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
         reg=kb.register(name,canonical,cid,title or name,meta.get('cwd',''),str(path)); tid=reg['topic_id']
     else:
         tid=known[0]['topic_id']
-        if known[0]['source_path']!=str(path):
-            def attach(c,u):
-                row=dict(c.execute('SELECT * FROM conversations WHERE id=?',(cid,)).fetchone());row['source_path']=str(path)
-                kb.change(c,u,'conversations',cid,row);return {'source_path':str(path)}
-            kb.mutate('attach-source','attach-source:'+cid+':'+digest(str(path)),'local-sync',cid,[str(path)],attach)
     sha=digest(raw)
     state=kb.rows('SELECT * FROM sync_state WHERE conversation_id=?',(cid,))
     if state and state[0]['source_hash']==sha:
         finish_extraction(kb,tid,cid)
         return {'conversation_id':cid,'unchanged':True}
-    archive=kb.path.parent/'archives'/cid/(sha+'.jsonl'); archive.parent.mkdir(parents=True,exist_ok=True)
+    archive=archive_dir/(sha+'.jsonl'); archive.parent.mkdir(parents=True,exist_ok=True)
     # 内容寻址归档只创建一次，重试验证内容而非覆盖。
+    fd, temporary=tempfile.mkstemp(prefix='.pending-',dir=archive.parent)
     try:
-        with archive.open('xb') as f: f.write(raw)
-    except FileExistsError:
-        if digest(archive.read_bytes())!=sha: raise KBError('ARCHIVE_CORRUPT',str(archive))
+        with os.fdopen(fd,'wb') as f:
+            f.write(raw); f.flush(); os.fsync(f.fileno())
+        try:
+            os.link(temporary, archive)
+        except FileExistsError:
+            if digest(archive.read_bytes())!=sha: raise KBError('ARCHIVE_CORRUPT',str(archive))
+    finally:
+        os.unlink(temporary)
     fresh=[]
     def fn(c,u):
+        previous=c.execute('SELECT line_count FROM sync_state WHERE conversation_id=?',(cid,)).fetchone()
+        if previous and previous['line_count']>len(events):
+            raise KBError('SOURCE_TRUNCATED','源日志行数减少，停止推进游标')
         c.execute('INSERT OR IGNORE INTO archives VALUES(?,?,?,?,?,?)',(sha,cid,str(archive),str(path),len(raw),now()))
         for m in messages:
             m['id']=digest([cid,m['seq']]); m['conversation_id']=cid; m['source_hash']=sha
-            old=c.execute('SELECT content,role FROM messages WHERE id=?',(m['id'],)).fetchone()
+            old=c.execute('SELECT * FROM messages WHERE id=?',(m['id'],)).fetchone()
             if old:
-                if old['content']!=m['content'] or old['role']!=m['role']: raise KBError('SOURCE_CHANGED','已有行被改写，保留原档并停止导入')
+                fields=('id','conversation_id','seq','role','timestamp','content','source_line')
+                if any(old[key]!=m[key] for key in fields): raise KBError('SOURCE_CHANGED','已有消息元数据或正文被改写，保留原档并停止导入')
             else:
                 c.execute('INSERT INTO messages VALUES(?,?,?,?,?,?,?,?)',tuple(m[k] for k in ('id','conversation_id','seq','role','timestamp','content','source_hash','source_line'))); fresh.append(m)
         prior_count=c.execute('SELECT count(*) FROM messages WHERE conversation_id=? AND seq>0',(cid,)).fetchone()[0]
         if prior_count>len(messages): raise KBError('SOURCE_TRUNCATED','源文件缩短，停止推进游标')
+        conv=dict(c.execute('SELECT * FROM conversations WHERE id=?',(cid,)).fetchone())
+        if conv['source_path']!=str(path):
+            conv['source_path']=str(path)
+            kb.change(c,u,'conversations',cid,conv)
         c.execute('INSERT OR REPLACE INTO sync_state VALUES(?,?,?,?,NULL)',(cid,sha,len(events),now()))
         return {'conversation_id':cid,'imported':len(fresh),'archive_sha256':sha,'messages':len(messages)}
     result=kb.mutate('sync','sync:'+cid+':'+sha,'local-sync',cid,[sha],fn)
