@@ -82,7 +82,7 @@ The server does not dictate a model. **Recommended teaching model:** GPT-6-Astra
 | `get_conversation_history` | Read targeted original messages in pages. |
 | `rollback_update`, `get_update_history`, `detect_knowledge_conflicts` | Audit and manage prior updates. |
 
-Full schemas and examples are discoverable through MCP `tools/list`; the server intentionally keeps default descriptions short. Legacy management tools remain callable through the local CLI or can be exposed by setting `ALGORITHM_LEGACY_TOOLS=1`.
+Full schemas and examples are discoverable through MCP `tools/list`; the server intentionally keeps default descriptions short. Legacy read tools remain available via `ALGORITHM_LEGACY_TOOLS=1`. Six unsafe legacy writes are retired across MCP, CLI and direct calls; use `update_learning` with a topic version and source evidence. See [input budgets and compatibility](docs/INPUT_BUDGETS.md).
 
 ## Client compatibility and privacy
 
@@ -148,8 +148,12 @@ LICENSE contains the unchanged official English terms. Explanatory summaries do 
 
 ## Release acceptance and additional documentation
 
-On 2026-11-27, PR #1 audit fixes were merged; PR #2 delivers built-in course rules version `2`. The latest functional commit passed 88 local tests and all 13 CI jobs. See [test matrix](TEST_MATRIX.md), [rule verification](docs/COURSE_RULES_VERIFICATION.md), and [release readiness](RELEASE_READINESS.md) for exact commits and scope. The existing `v0.1.1` tag predates these code changes. Earlier client and test results below retain their historical scope and do not validate the new rules in real clients.
+On 2026-11-27, PR #1 audit fixes were merged; PR #2 delivers built-in course rules version `2`. That PR #2 functional commit passed 88 local tests and all 13 CI jobs (historical evidence). See [test matrix](TEST_MATRIX.md), [rule verification](docs/COURSE_RULES_VERIFICATION.md), and [release readiness](RELEASE_READINESS.md) for exact commits and scope. The existing `v0.1.1` tag predates these code changes. Earlier client and test results below retain their historical scope and do not validate the new rules in real clients.
 
 On 2026-11-27, 16 isolated tests passed. Real Codex CLI approval, cancellation, creation, reads, update and audit were tested with synthetic data. Preference-tool execution, full Desktop coverage and OS isolation remain unverified. The Windows sandbox runtime issue is a disclosed limitation, not a successful isolation test. Third-party dependencies are installed separately, not bundled. See docs/CODEX_INTEGRATION_TEST.md.
 
 See [installation](docs/INSTALLATION.md), [configuration](docs/CONFIGURATION.md), [usage](docs/USER_GUIDE.md), [security](docs/SECURITY.md), [third-party dependencies](docs/THIRD_PARTY.md), and [release acceptance](docs/FINAL_RELEASE_ACCEPTANCE.md). These reports are maintained in Simplified Chinese.
+
+## Second audit round
+
+The isolated second-round branch retires unsafe legacy writes, sanitizes system errors, bounds imports and sync resources, and preserves archive recovery. Windows Python 3.12 and 3.14 each passed 154 tests; ten isolated resource probes behaved as expected. Course-rule text and current migration SQL remain unchanged. See [round-two test matrix](ROUND2_TEST_MATRIX.md) for current CI evidence and unverified scope. This remains a trusted single-user local service, not an authenticated public or multi-tenant deployment.

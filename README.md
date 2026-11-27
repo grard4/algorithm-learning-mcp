@@ -86,7 +86,7 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 | `get_conversation_history` | 分页读取指定原始消息。 |
 | `rollback_update`、`get_update_history`、`detect_knowledge_conflicts` | 审计、回滚与冲突检查。 |
 
-默认提供 22 个工具，完整参数以 `tools/list` 返回的 Schema 为准。旧管理能力保留在本地 CLI，或通过 `ALGORITHM_LEGACY_TOOLS=1` 暴露。
+默认提供 22 个工具，完整参数以 `tools/list` 返回的 Schema 为准。旧读取兼容工具可通过 `ALGORITHM_LEGACY_TOOLS=1` 暴露；六个不安全旧写接口在 MCP、CLI 和直接调用中均已停用，使用 `update_learning` 替代。兼容变化与导入上限见 [输入预算](docs/INPUT_BUDGETS.md)。
 
 使用顺序示例：先取得真实聊天 ID，通过 `get_context_manifest` 查询已有映射；需要时才注册。授课前按需读取专题上下文，遇到相关概念再搜索，形成持久成果后携带来源证据调用 `update_learning`。不能猜测聊天 ID 或把讲授自动等同于掌握。
 
@@ -167,6 +167,8 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 正式 LICENSE 保留官方英文原文；本页中文说明不替代或修改许可证条款。仓库已公开发布；已验证能力与仍未验证的范围见下方验收说明。
 
 ## 发布验收与更多文档
+
+第二轮审计修复在独立分支完成：Windows Python3.12/3.14各154项通过，10个隔离资源探针符合预期；旧写停用、错误脱敏、导入和同步预算及恢复已验证。固定规则内容不变，Schema演进仅作设计。当前CI及未验证事项见 [第二轮测试矩阵](ROUND2_TEST_MATRIX.md) 和 [发布准备](RELEASE_READINESS.md)；不宣称支持公网部署。下段为PR #2历史交付。
 
 2026-11-27：PR #1 审计修复已合并；PR #2 交付内置课程规则版本 `2`，最新功能提交通过本地 88 项测试与 13 个 CI 作业。当前安全边界、兼容性和验证范围见 [测试矩阵](TEST_MATRIX.md)、[规则验收](docs/COURSE_RULES_VERIFICATION.md) 与 [发布准备](RELEASE_READINESS.md)。既有 `v0.1.1` 标签不包含这些后续代码变更；下述 16 项及真实客户端记录属于早期发布验收。
 

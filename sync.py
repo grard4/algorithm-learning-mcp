@@ -1,9 +1,11 @@
 """只读适配本机 Codex rollout；格式变化时停止该文件并记录错误。"""
-import argparse, hashlib, json, os, re, time
+import argparse, hashlib, io, json, os, re, time
 from pathlib import Path
 import zstandard
 from kb import KB, KBError, ROOT, digest, dump, now, uid
 from archive_io import archive_path, publish
+from errors import error_response
+import input_limits as limits
 
 def discovery_cutoff():
     """Persist a one-time discovery boundary so watch mode does not reset per poll."""
@@ -32,33 +34,71 @@ def configured_aliases():
     return [row for row in rows if isinstance(row,dict) and isinstance(row.get('name'),str) and isinstance(row.get('canonical'),str) and isinstance(row.get('aliases',[]),list)]
 _scanned={}
 def read_bytes(path):
-    raw=Path(path).read_bytes()
+    path=Path(path)
+    if path.stat().st_size>limits.SOURCE_BYTES: limits.too_large('源文件超过字节预算')
+    raw=bytearray()
+    with path.open('rb') as source:
+        while True:
+            part=source.read(min(limits.CHUNK_BYTES,limits.SOURCE_BYTES-len(raw)+1))
+            if not part: break
+            raw.extend(part)
+            if len(raw)>limits.SOURCE_BYTES: limits.too_large('源文件超过字节预算')
+    raw=bytes(raw)
     if str(path).endswith('.zst'):
-        parts=[]
+        if not raw: raise KBError('INVALID_LOG','压缩日志为空')
+        budget=min(limits.DECOMPRESSED_BYTES,max(limits.RATIO_ALLOWANCE,len(raw)*limits.COMPRESSION_RATIO))
+        output=bytearray()
         try:
-            while raw:
-                decoder=zstandard.ZstdDecompressor().decompressobj()
-                parts.append(decoder.decompress(raw))
-                if not decoder.eof:
-                    raise KBError('INVALID_LOG', '压缩日志帧不完整')
-                raw=decoder.unused_data
+            # stream_reader bounds each output allocation, but accepts truncated EOF.
+            # After bounding the full output, a second pass verifies frame completion.
+            factory=zstandard.ZstdDecompressor(max_window_size=limits.WINDOW_BYTES)
+            with factory.stream_reader(io.BytesIO(raw),read_across_frames=True) as reader:
+                while True:
+                    part=reader.read(min(limits.CHUNK_BYTES,budget-len(output)+1))
+                    if not part: break
+                    output.extend(part)
+                    if len(output)>budget: limits.too_large('解压结果超过大小或压缩比预算')
+            decoder=factory.decompressobj();frames=0
+            for offset in range(0,len(raw),limits.CHUNK_BYTES):
+                remaining=raw[offset:offset+limits.CHUNK_BYTES]
+                while remaining:
+                    if decoder.eof: decoder=factory.decompressobj()
+                    verified=decoder.decompress(remaining)
+                    del verified
+                    if decoder.eof:
+                        frames+=1
+                        if frames>limits.EVENTS: limits.too_large('压缩帧超过数量预算')
+                        remaining=decoder.unused_data
+                    else:
+                        remaining=b''
+            if not decoder.eof: raise KBError('INVALID_LOG','压缩日志帧不完整')
         except zstandard.ZstdError as exc:
-            raise KBError('INVALID_LOG', '压缩日志损坏') from exc
-        return b''.join(parts)
+            raise KBError('INVALID_LOG','压缩日志损坏或窗口超过预算') from exc
+        return bytes(output)
     return raw
+
 def parse(raw):
-    lines=raw.splitlines(keepends=True); events=[]
-    for i,line in enumerate(lines,1):
+    if len(raw)>limits.DECOMPRESSED_BYTES: limits.too_large('日志超过字节预算')
+    events=[];nodes=0;i=0;stream=io.BytesIO(raw)
+    while True:
+        line=stream.readline(limits.LINE_BYTES+1)
+        if not line: break
+        i+=1
+        if i>limits.EVENTS: limits.too_large('日志事件超过数量预算')
+        if len(line)>limits.LINE_BYTES: limits.too_large('日志行超过字节预算')
+        limits.check_json_depth(line)
         try: e=json.loads(line)
         except (ValueError,UnicodeDecodeError):
-            if i==len(lines) and not line.endswith(b'\n'):
-                raise KBError('INCOMPLETE_LOG', '尾行尚未完成，请稍后重试')
+            if not line.endswith(b'\n'):
+                raise KBError('INCOMPLETE_LOG','尾行尚未完成，请稍后重试')
             raise KBError('INVALID_LOG',f'第 {i} 行无效')
-        if not isinstance(e, dict) or not isinstance(e.get('payload'), dict):
-            raise KBError('INVALID_LOG', f'第 {i} 行事件结构无效')
+        nodes+=limits.count_nodes(e,limits.JSON_NODES-nodes)
+        if not isinstance(e,dict) or not isinstance(e.get('payload'),dict):
+            raise KBError('INVALID_LOG',f'第 {i} 行事件结构无效')
         events.append((i,e))
     if not events or events[0][1].get('type')!='session_meta': raise KBError('INVALID_LOG','缺少 session_meta')
     return events
+
 def visible(events):
     out=[]
     for line,e in events:
@@ -68,9 +108,19 @@ def visible(events):
             if (not isinstance(content,list) or any(not isinstance(x,dict) or
                 ('text' in x and not isinstance(x['text'],str)) for x in content)):
                 raise KBError('INVALID_LOG',f'第 {line} 行消息内容结构无效')
-            text='\n'.join(x.get('text','') for x in content if x.get('type') in ('input_text','output_text','text'))
-            if text: out.append(dict(seq=line,role=p['role'],timestamp=e.get('timestamp'),content=text,source_line=line))
+            parts=[];size=0
+            for x in content:
+                if x.get('type') in ('input_text','output_text','text'):
+                    text=x.get('text','')
+                    size+=limits.utf8_size(text,limits.MESSAGE_BYTES,'message')+(1 if parts else 0)
+                    if size>limits.MESSAGE_BYTES: limits.too_large('单条消息超过字节预算')
+                    parts.append(text)
+            text='\n'.join(parts)
+            if text:
+                limits.timestamp(e.get('timestamp'))
+                out.append(dict(seq=line,role=p['role'],timestamp=e['timestamp'],content=text,source_line=line))
     return out
+
 def intent(messages):
     # 只读取用户明确的长期课程请求；混合领域留给代理确认。
     for m in messages:
@@ -136,13 +186,13 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
                 with kb.connect() as c: c.execute('INSERT OR REPLACE INTO discovery_candidates VALUES(?,?,?,?)',(cid,str(path),'多个领域或课程范围不明确，需课程代理确认',now()))
                 return {'candidate':cid}
             name+='算法学习'
-        reg=kb.register(name,canonical,cid,title or name,meta.get('cwd',''),str(path)); tid=reg['topic_id']
+        reg=kb.register(name,canonical or '',cid,title or name,meta.get('cwd',''),str(path)); tid=reg['topic_id']
     else:
         tid=known[0]['topic_id']
     state=kb.rows('SELECT * FROM sync_state WHERE conversation_id=?',(cid,))
     # Even unchanged sources must not hide a missing or corrupt archive file.
-    publish(archive,raw)
     if state and state[0]['source_hash']==sha:
+        publish(archive,raw)
         finish_extraction(kb,tid,cid)
         return {'conversation_id':cid,'unchanged':True}
     # 内容寻址归档只创建一次，重试验证内容而非覆盖。
@@ -167,6 +217,7 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
             conv['source_path']=str(path)
             kb.change(c,u,'conversations',cid,conv)
         c.execute('INSERT OR REPLACE INTO sync_state VALUES(?,?,?,?,NULL)',(cid,sha,len(events),now()))
+        publish(archive,raw)
         return {'conversation_id':cid,'imported':len(fresh),'archive_sha256':sha,'messages':len(messages)}
     result=kb.mutate('sync','sync:'+cid+':'+sha,'local-sync',cid,[sha],fn)
     # 即使上次在归档后中断，重新运行仍补齐提取；每条候选有稳定幂等键。
@@ -209,7 +260,7 @@ def run(kb,home,discover=False,initial=False):
             result=sync_file(kb,p,allow_new=discover)
             results.append(result)
             _scanned[str(p)]=signature
-        except Exception as e: results.append({'source':str(p),'error':str(e)})
+        except Exception as e: results.append(error_response(e))
     report(kb); return results
 def acquire_worker_lock(path):
     """One worker per database, using the platform's native advisory lock."""
@@ -246,8 +297,12 @@ def main():
             with log.open('a',encoding='utf-8') as f: f.write(dump({'time':now(),'results':result})+'\n')
             if not a.watch: print(dump(result))
         except Exception as e:
-            with (kb.path.parent/'sync.jsonl').open('a',encoding='utf-8') as f: f.write(dump({'time':now(),'error':str(e)})+'\n')
-            if not a.watch: raise
+            with (kb.path.parent/'sync.jsonl').open('a',encoding='utf-8') as f: f.write(dump({'time':now(),**error_response(e)})+'\n')
+            if not a.watch: return 1
         if not a.watch: break
         a.initial=False; time.sleep(max(30,a.interval))
-if __name__=='__main__': main()
+if __name__=='__main__':
+    import sys
+    try: sys.exit(main())
+    except Exception as exc:
+        print(dump(error_response(exc))); sys.exit(1)

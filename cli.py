@@ -44,4 +44,9 @@ def main():
   result={'integrity':k.rows('PRAGMA integrity_check'),'foreign_keys':k.rows('PRAGMA foreign_key_check'),'bad_archives':bad}
  # JSON escapes preserve Unicode values even when a redirected console uses ASCII/cp1252.
  print(json.dumps(result,ensure_ascii=True,indent=2))
-if __name__=='__main__':main()
+if __name__=='__main__':
+ try:main()
+ except Exception as exc:
+  from errors import error_response
+  print(json.dumps(error_response(exc),ensure_ascii=True))
+  sys.exit(1)

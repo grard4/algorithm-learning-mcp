@@ -1,0 +1,24 @@
+{
+  "commit": "930429550bb09ec9c4b1f3dac9968d5d48d4660e",
+  "tree": "a4a7338860ba00e47bfa6a52d6afdfb631c9f292",
+  "tool_count": 22,
+  "transport": "stdio Python SDK",
+  "measurements": {
+    "instructions": {
+      "utf8_bytes": 8248,
+      "cl100k_base": 2891,
+      "o200k_base": 2230
+    },
+    "tools_list": {
+      "utf8_bytes": 16529,
+      "cl100k_base": 4067,
+      "o200k_base": 4054
+    },
+    "input_schemas": {
+      "utf8_bytes": 13132,
+      "cl100k_base": 3164,
+      "o200k_base": 3286
+    }
+  },
+  "actual_client_billing": "NOT VERIFIED; excludes client framing/caching/model-specific processing"
+}
