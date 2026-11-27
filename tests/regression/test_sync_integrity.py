@@ -101,3 +101,43 @@ def test_message_reordering_rejected(imported):
     sync.sync_file(kb,path)
     save(path,[log()[0],log('second')[1],log()[1]])
     with pytest.raises(KBError): sync.sync_file(kb,path)
+
+
+def test_actual_process_death_during_sync_recovers(imported):
+    import subprocess,sys
+    from pathlib import Path
+    kb,path=imported
+    save(path,log()+log('second')[1:])
+    code='''import sys,os
+from kb import KB
+import sync
+k=KB(sys.argv[1]); original=k.mutate
+def crash(operation,request,actor,cid,payload,fn):
+    def interrupted(c,u):
+        fn(c,u)
+        os._exit(17)
+    return original(operation,request,actor,cid,payload,interrupted)
+k.mutate=crash
+sync.sync_file(k,sys.argv[2])
+'''
+    result=subprocess.run([sys.executable,'-c',code,str(kb.path),str(path)],cwd=Path(__file__).resolve().parents[2],timeout=30)
+    assert result.returncode==17
+    assert len(kb.rows('SELECT * FROM messages'))==1
+    assert sync.sync_file(kb,path)['imported']==1
+    assert sync.sync_file(kb,path)['unchanged']
+
+
+def test_extraction_resumes_after_committed_archive(imported,monkeypatch):
+    kb,path=imported
+    save(path,log()+log('复杂度与正确性：'+'synthetic explanation '*30,role='assistant')[1:])
+    original=sync.finish_extraction
+    def fail(*args):raise RuntimeError('interrupted after archive commit')
+    monkeypatch.setattr(sync,'finish_extraction',fail)
+    with pytest.raises(RuntimeError):sync.sync_file(kb,path)
+    assert len(kb.rows('SELECT * FROM messages'))==2
+    assert not kb.rows('SELECT * FROM knowledge_items')
+    monkeypatch.setattr(sync,'finish_extraction',original)
+    assert sync.sync_file(kb,path)['unchanged']
+    assert len(kb.rows('SELECT * FROM knowledge_items'))==1
+    sync.sync_file(kb,path)
+    assert len(kb.rows('SELECT * FROM knowledge_items'))==1
