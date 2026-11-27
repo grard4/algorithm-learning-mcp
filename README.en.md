@@ -62,6 +62,8 @@ For Streamable HTTP, set `ALGORITHM_MCP_TRANSPORT=streamable-http`; the default 
 
 Copy `config/learning_preferences.example.md` to `config/learning_preferences.md` and write natural-language teaching preferences. The server reads it through `get_learning_preferences` when requested and reloads changed files. Missing or empty files use a generic default. Keep your private file out of source control; `.gitignore` excludes it.
 
+Fixed writing and course-formatting rules live in `course_rules.py`, are included directly in MCP initialization instructions, and can also be read through `get_course_rules`. Deleting or editing preferences cannot change these rules. Their task scopes and explicit exceptions remain applicable. See [built-in course rules](docs/COURSE_RULES.md) for migration and enforcement boundaries: delivery of instructions is not a guarantee that an external client or model follows them.
+
 The server does not dictate a model. **Recommended teaching model:** GPT-6-Astra, Medium or High reasoning. Algorithm teaching involves building complete knowledge structures, rigorous mathematical derivations, algorithm correctness and complexity proofs, and reliable code. Users may choose another model; reasoning, knowledge accuracy, context handling, and teaching quality can differ. Other models may provide shallower explanations, less rigorous derivations, or incorrect code; users are responsible for checking those outputs. This recommendation is not a server requirement.
 
 ## Main tools
@@ -75,6 +77,7 @@ The server does not dictate a model. **Recommended teaching model:** GPT-6-Astra
 | `update_learning` | Atomically record evidence-backed progress, knowledge, tasks, and relations. |
 | `get_global_overview` | Read a compact or explicitly requested full overview. |
 | `get_learning_preferences` | Read user preferences without requiring a particular model. |
+| `get_course_rules` | Read versioned built-in course rules; no mutation endpoint exists. |
 | `search_concept_knowledge`, `read_concept_link`, `get_concept_changes` | Read approved concept links and their source invalidations; link does not imply mastery. |
 | `get_conversation_history` | Read targeted original messages in pages. |
 | `rollback_update`, `get_update_history`, `detect_knowledge_conflicts` | Audit and manage prior updates. |

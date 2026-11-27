@@ -62,6 +62,8 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 
 将 `config/learning_preferences.example.md` 复制为 `config/learning_preferences.md`，使用自然语言填写教学要求。`get_learning_preferences` 按需读取并在文件变化后重新加载；缺失或为空时使用通用默认值。私人偏好文件已由 `.gitignore` 排除，不应提交。
 
+课程写作与排版的固定规则由 `course_rules.py` 提供，随 MCP 初始化指令直接下发，也可通过只读 `get_course_rules` 查询；不属于个人偏好，删除、清空或修改偏好文件不会改变它们。规则的适用范围及明确例外保持有效。升级迁移和执行边界见 [内置课程规则](docs/COURSE_RULES.md)。
+
 ## 推荐模型与课程质量
 
 推荐主要教学模型为 **GPT-6-Astra（High 或 Medium 思考强度）**。这是维护者的使用建议，不是服务器硬性依赖，也不是课程质量保证。
@@ -79,6 +81,7 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 | `update_learning` | 在同一事务中更新有证据支持的进度、知识、任务和关联。 |
 | `get_global_overview` | 读取精简概览；详细概览按需获取。 |
 | `get_learning_preferences` | 读取学习偏好。 |
+| `get_course_rules` | 读取代码内置、版本化的课程规则；无写接口。 |
 | `search_concept_knowledge`、`read_concept_link`、`get_concept_changes` | 读取已存在的批准概念关联及来源失效信息。 |
 | `get_conversation_history` | 分页读取指定原始消息。 |
 | `rollback_update`、`get_update_history`、`detect_knowledge_conflicts` | 审计、回滚与冲突检查。 |
