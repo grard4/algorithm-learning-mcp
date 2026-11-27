@@ -57,3 +57,19 @@ def test_explicit_external_reference_allowed(records):
     kb, ctx, a, b = records
     assert update(ctx, a, 'chat-a', knowledge('msg-chat-b', evidence_sources={
         'msg-chat-b': {'conversation_id': 'chat-b', 'topic_id': b, 'scope': 'cross_topic'}}))
+
+
+def test_forged_external_locator_rejected(records):
+    kb, ctx, a, b = records
+    with pytest.raises(KBError):
+        update(ctx, a, 'chat-a', knowledge('msg-chat-b', evidence_sources={
+            'msg-chat-b': {'conversation_id': 'chat-a', 'topic_id': b, 'scope': 'cross_topic'}}))
+
+
+def test_cross_topic_relation_remains_allowed(records):
+    kb, ctx, a, b = records
+    for tid, cid, ident in [(a,'chat-a','ka'),(b,'chat-b','kb')]:
+        ctx.update(tid,cid,ctx.version(tid)['topic_version'],'create-'+cid,
+                   {'knowledge':[{'id':ident,'data':knowledge('msg-'+cid)}]})
+    assert ctx.update(a,'chat-a',ctx.version(a)['topic_version'],'rel',
+        {'relations':[dict(source_id='ka',target_id='kb',kind='related',reason='explicit reference')]})
