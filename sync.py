@@ -140,11 +140,12 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
     else:
         tid=known[0]['topic_id']
     state=kb.rows('SELECT * FROM sync_state WHERE conversation_id=?',(cid,))
+    # Even unchanged sources must not hide a missing or corrupt archive file.
+    publish(archive,raw)
     if state and state[0]['source_hash']==sha:
         finish_extraction(kb,tid,cid)
         return {'conversation_id':cid,'unchanged':True}
     # 内容寻址归档只创建一次，重试验证内容而非覆盖。
-    publish(archive,raw)
     fresh=[]
     def fn(c,u):
         previous=c.execute('SELECT line_count FROM sync_state WHERE conversation_id=?',(cid,)).fetchone()

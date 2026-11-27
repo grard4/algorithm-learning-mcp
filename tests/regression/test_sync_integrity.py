@@ -141,3 +141,22 @@ def test_extraction_resumes_after_committed_archive(imported,monkeypatch):
     assert len(kb.rows('SELECT * FROM knowledge_items'))==1
     sync.sync_file(kb,path)
     assert len(kb.rows('SELECT * FROM knowledge_items'))==1
+
+
+def test_unchanged_sync_checks_archive_corruption(imported):
+    from pathlib import Path
+    kb,path=imported
+    archive=Path(kb.rows('SELECT path FROM archives')[0]['path'])
+    archive.write_bytes(b'corrupt synthetic archive')
+    with pytest.raises(KBError) as caught:sync.sync_file(kb,path)
+    assert caught.value.code=='ARCHIVE_CORRUPT'
+    assert archive.read_bytes()==b'corrupt synthetic archive'
+
+
+def test_unchanged_sync_recovers_missing_archive(imported):
+    from pathlib import Path
+    kb,path=imported
+    archive=Path(kb.rows('SELECT path FROM archives')[0]['path'])
+    archive.unlink()
+    sync.sync_file(kb,path)
+    assert archive.read_bytes()==path.read_bytes()
