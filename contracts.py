@@ -9,15 +9,21 @@ from kb import KBError, digest
 TEXT = {'type': 'string', 'minLength': 1}
 REFS = {'type': 'array', 'items': TEXT, 'minItems': 1,
         'description': '归档 messages.id 字符串数组；不是对象数组。'}
+EVIDENCE_SOURCES = {'type': 'object', 'additionalProperties': {
+    'type': 'object', 'additionalProperties': False,
+    'required': ['conversation_id', 'topic_id', 'scope'],
+    'properties': {'conversation_id': TEXT, 'topic_id': TEXT,
+                   'scope': {'enum': ['same_topic', 'cross_topic']}}}}
 LIST_FIELDS = ('taught', 'practiced', 'understood', 'mastered', 'pending',
                'completed_exercises', 'pending_exercises', 'conclusions', 'common_errors')
 progress_fields = {key: {'type': 'array', 'items': {}} for key in LIST_FIELDS}
-progress_fields.update(stage={'type': 'string'}, mastery={'type': 'string'}, evidence=REFS)
+progress_fields.update(stage={'type': 'string'}, mastery={'type': 'string'}, evidence=REFS,
+                       evidence_sources=EVIDENCE_SOURCES)
 list_fields = {key: value for key, value in progress_fields.items() if value['type'] == 'array'}
 
 
 def entry_schema(kind):
-    fields = dict(title=TEXT, evidence=REFS)
+    fields = dict(title=TEXT, evidence=REFS, evidence_sources=EVIDENCE_SOURCES, source_conversation=TEXT)
     if kind == 'knowledge':
         fields.update(content=TEXT, status={'type': 'string'}, claim_key={'type': 'string'},
                       claim_value={}, verification={}, tags={'type': 'array', 'items': {'type': 'string'}})
