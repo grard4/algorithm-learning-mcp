@@ -1,8 +1,9 @@
 """只读适配本机 Codex rollout；格式变化时停止该文件并记录错误。"""
-import argparse, hashlib, json, os, re, time, tempfile
+import argparse, hashlib, json, os, re, time
 from pathlib import Path
 import zstandard
 from kb import KB, KBError, ROOT, digest, dump, now, uid
+from archive_io import archive_path, publish
 
 def discovery_cutoff():
     """Persist a one-time discovery boundary so watch mode does not reset per poll."""
@@ -123,12 +124,8 @@ def finish_extraction(kb,tid,cid):
             c.execute('INSERT OR IGNORE INTO extraction_seen VALUES(?,?)',(m['id'],now()))
 def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
     raw=read_bytes(path); events=parse(raw); meta=events[0][1]['payload']; cid=meta.get('id'); messages=visible(events)
-    if not isinstance(cid, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,199}', cid):
-        raise KBError('INVALID_SOURCE_ID', '聊天 ID 必须是安全的单一路径组件')
-    archive_root=(kb.path.parent/'archives').resolve()
-    archive_dir=archive_root/cid
-    if archive_dir.resolve().parent != archive_root:
-        raise KBError('INVALID_SOURCE_ID', '归档目录不能通过链接越界')
+    sha=digest(raw)
+    archive=archive_path(kb,cid,sha,'.jsonl')
     known=kb.rows('SELECT * FROM conversations WHERE id=?',(cid,))
     if not known:
         if not name:
@@ -142,23 +139,12 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
         reg=kb.register(name,canonical,cid,title or name,meta.get('cwd',''),str(path)); tid=reg['topic_id']
     else:
         tid=known[0]['topic_id']
-    sha=digest(raw)
     state=kb.rows('SELECT * FROM sync_state WHERE conversation_id=?',(cid,))
     if state and state[0]['source_hash']==sha:
         finish_extraction(kb,tid,cid)
         return {'conversation_id':cid,'unchanged':True}
-    archive=archive_dir/(sha+'.jsonl'); archive.parent.mkdir(parents=True,exist_ok=True)
     # 内容寻址归档只创建一次，重试验证内容而非覆盖。
-    fd, temporary=tempfile.mkstemp(prefix='.pending-',dir=archive.parent)
-    try:
-        with os.fdopen(fd,'wb') as f:
-            f.write(raw); f.flush(); os.fsync(f.fileno())
-        try:
-            os.link(temporary, archive)
-        except FileExistsError:
-            if digest(archive.read_bytes())!=sha: raise KBError('ARCHIVE_CORRUPT',str(archive))
-    finally:
-        os.unlink(temporary)
+    publish(archive,raw)
     fresh=[]
     def fn(c,u):
         previous=c.execute('SELECT line_count FROM sync_state WHERE conversation_id=?',(cid,)).fetchone()
