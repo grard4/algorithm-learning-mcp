@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import stat
 from pathlib import Path
 
 DEFAULT_TEXT = (
@@ -10,7 +11,6 @@ DEFAULT_TEXT = (
     "do not infer mastery without evidence."
 )
 MAX_BYTES = 64 * 1024
-_cache: dict[str, tuple[int, int, str]] = {}
 
 
 def preference_path() -> Path:
@@ -20,27 +20,26 @@ def preference_path() -> Path:
 
 def read_preferences() -> dict:
     path = preference_path()
-    key = str(path.resolve())
     try:
-        stat = path.stat()
+        # A bounded fresh read also detects replacement with preserved size/mtime.
+        # Configuration is operator-owned; callers cannot supply arbitrary paths.
+        if not path.is_file():
+            if not path.exists():
+                return {"status": "missing", "source": "default", "text": DEFAULT_TEXT}
+            return {"status": "invalid", "source": "file", "error": "preference path must be a regular file"}
+        with path.open('rb') as stream:
+            if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
+                return {"status": "invalid", "source": "file", "error": "preference path must be a regular file"}
+            raw=stream.read(MAX_BYTES+1)
+        if len(raw)>MAX_BYTES:
+            return {"status": "invalid", "source": "file", "error": f"file exceeds {MAX_BYTES} bytes"}
+        text=raw.decode('utf-8').strip()
     except FileNotFoundError:
-        _cache.pop(key, None)
         return {"status": "missing", "source": "default", "text": DEFAULT_TEXT}
-    if not path.is_file():
-        return {"status": "invalid", "source": "file", "error": "preference path must be a regular file"}
-    if stat.st_size > MAX_BYTES:
-        return {"status": "invalid", "source": "file", "error": f"file exceeds {MAX_BYTES} bytes"}
-    cached = _cache.get(key)
-    if cached and cached[:2] == (stat.st_mtime_ns, stat.st_size):
-        text = cached[2]
-    else:
-        try:
-            text = path.read_text(encoding="utf-8").strip()
-        except UnicodeError:
-            return {"status": "invalid", "source": "file", "error": "file must be valid UTF-8"}
-        except OSError as exc:
-            return {"status": "unavailable", "source": "file", "error": str(exc)}
-        _cache[key] = (stat.st_mtime_ns, stat.st_size, text)
+    except UnicodeError:
+        return {"status": "invalid", "source": "file", "error": "file must be valid UTF-8"}
+    except OSError:
+        return {"status": "unavailable", "source": "file", "error": "preference file could not be read"}
     if not text:
         return {"status": "empty", "source": "default", "text": DEFAULT_TEXT}
-    return {"status": "custom", "source": "file", "path": str(path), "text": text}
+    return {"status": "custom", "source": "file", "text": text}
