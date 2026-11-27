@@ -43,3 +43,9 @@ A06设计文档 docs/SCHEMA_EVOLUTION.md 已完成。现有5项迁移回归通�
 最终业务提交9304295：Windows Python3.14.7，154 passed/0 failed/0 skipped（27.56秒）；Python3.12.15，154 passed/0 failed/0 skipped（22.39秒）。Ruff、pip check、pip-audit全部通过。测试结束逐库integrity_check与foreign_key_check通过，10个资源子进程也各自核验。CI以ROUND2_TEST_MATRIX.md记录为准，未运行的环境不继承PR #2旧结果。
 
 核心改动：server.py、errors.py、cli.py、sync.py、input_limits.py；安全测试与scripts/round2_resource_probe.py；工作流补充每平台资源测量。各阶段为独立提交，不包含生产数据或生效配置。原始基线失败、夹具错误与阶段试验日志保留在本机忽略目录；公开报告只保留脱敏摘要。
+
+## GitHub交付与最终结论
+
+草稿PR #3，分支audit/round2-20261127。提交c001e4f的工作流45995062371全部13个作业成功；12组合逐日志确认各154项通过、0失败、0跳过，各10个资源探针符合预期，依赖检查成功。记录见docs/evidence/round2-ci.json。未合并、未部署、未创建Release/PyPI。
+
+A01–A04及新增A07/A08为VERIFIED；A05/A06为DESIGN_DECISION，不强行改写规则或Schema。满足披露兼容性收紧后的可信本机单用户候选验收标准；不满足公网部署标准。遗留：厂商客户端实机、实际Token计费、生产升级、断电/磁盘满完整场景、任意并发OS内存隔离未验证。下一步审阅草稿，批准后再合并；部署仍需备份和副本验收。
