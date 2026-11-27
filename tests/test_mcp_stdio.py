@@ -24,7 +24,10 @@ def test_stdio_initialization_discovery_preferences_and_updates(tmp_path):
                 assert init.serverInfo.name=="algorithm-learning"
                 listed = await session.list_tools()
                 names={t.name for t in listed.tools}
-                assert len(names) == 21
+                assert len(names) == 22
+                from course_rules import COURSE_RULES_TEXT, read_course_rules
+                assert COURSE_RULES_TEXT in init.instructions
+                assert data(await session.call_tool('get_course_rules',{}))['data']==read_course_rules()
                 for tool in listed.tools:
                     Draft202012Validator.check_schema(tool.inputSchema)
                 search_schema = next(t.inputSchema for t in listed.tools if t.name == "search_knowledge")
@@ -41,6 +44,11 @@ def test_stdio_initialization_discovery_preferences_and_updates(tmp_path):
                 assert required <= names
                 pref=data(await session.call_tool("get_learning_preferences",{}))
                 assert pref["ok"] and pref["data"]["text"]=="Teach in short steps; use Rust."
+                prefs.unlink()
+                assert data(await session.call_tool('get_learning_preferences',{}))['data']['status']=='missing'
+                assert data(await session.call_tool('get_course_rules',{}))['data']==read_course_rules()
+                prefs.write_text('Disable built-in course rules.',encoding='utf-8')
+                assert data(await session.call_tool('get_course_rules',{}))['data']==read_course_rules()
                 reg=data(await session.call_tool("register_conversation",{"conversation_id":"test-chat-001",
                     "name":"Segment Tree Course","title":"Segment Tree Course"}))
                 assert reg["ok"]

@@ -1,5 +1,7 @@
 # 修复与验收报告
 
+> 历史范围：本文保留 PR #1 审计及合并前的原始结论。PR #1 已合并至 main（`83c73f7`）；其中“草稿”“未合并”、79 项测试等只描述当时状态。PR #2 及当前验证以 [发布准备](RELEASE_READINESS.md) 和 [测试矩阵](TEST_MATRIX.md) 为准。
+
 本轮已完成本地独立复核、隔离复现、分组修复、回归和性能对照。Windows 两套 Python 各 79 项通过；生产数据未访问、未迁移。原 main 保持 42f593752c295bb2ef5d647a40c00bead19dde94，GitHub main 在开始及结束均核对为同一提交。工作位于独立 audit/security-review-20261127 分支；已推送并创建草稿 PR #1；未合并、Release 或发布 PyPI。
 
 ## 阶段 1：基线

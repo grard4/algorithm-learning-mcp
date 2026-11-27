@@ -14,13 +14,13 @@ A model-independent MCP server for algorithm and programming-contest learning. O
 - Layered context reads (manifest, current topic, relevant search, targeted history) and versioned deltas.
 - Evidence-backed, idempotent learning updates with optimistic version checks and audit history.
 - Incremental import of Codex rollout files as an optional Codex-specific adapter; it is disabled unless explicitly invoked. Other agents use the standard registration and update tools. See [sync and discovery limits](docs/SYNC_AND_DISCOVERY.md).
-- User-editable natural-language learning preferences, read on demand.
+- Built-in course rules, version `2`, delivered at initialization, separately from user-editable preferences read on demand.
 - SQLite backup/restore/verification commands.
 - Standard MCP tools over stdio and Streamable HTTP; no model provider is required by the server.
 
 ## Requirements
 
-- Python 3.11 or newer (tested locally with Python 3.14.7).
+- Python 3.11 or newer (CI covers Python 3.11–3.14 on Windows, Ubuntu and macOS; see [test matrix](TEST_MATRIX.md)).
 - SQLite with JSON1 and FTS5 (the Python Windows build used here includes both).
 - Any MCP client that supports the selected transport and tool schemas. Client support is not implied by protocol capability.
 
@@ -62,6 +62,8 @@ For Streamable HTTP, set `ALGORITHM_MCP_TRANSPORT=streamable-http`; the default 
 
 Copy `config/learning_preferences.example.md` to `config/learning_preferences.md` and write natural-language teaching preferences. The server reads it through `get_learning_preferences` when requested and reloads changed files. Missing or empty files use a generic default. Keep your private file out of source control; `.gitignore` excludes it.
 
+Fixed writing and course-formatting rules live in `course_rules.py`, are included directly in MCP initialization instructions, and can also be read through `get_course_rules`. Deleting or editing preferences cannot change these rules. Their task scopes and explicit exceptions remain applicable. See [built-in course rules](docs/COURSE_RULES.md) for migration and enforcement boundaries: delivery of instructions is not a guarantee that an external client or model follows them.
+
 The server does not dictate a model. **Recommended teaching model:** GPT-6-Astra, Medium or High reasoning. Algorithm teaching involves building complete knowledge structures, rigorous mathematical derivations, algorithm correctness and complexity proofs, and reliable code. Users may choose another model; reasoning, knowledge accuracy, context handling, and teaching quality can differ. Other models may provide shallower explanations, less rigorous derivations, or incorrect code; users are responsible for checking those outputs. This recommendation is not a server requirement.
 
 ## Main tools
@@ -75,6 +77,7 @@ The server does not dictate a model. **Recommended teaching model:** GPT-6-Astra
 | `update_learning` | Atomically record evidence-backed progress, knowledge, tasks, and relations. |
 | `get_global_overview` | Read a compact or explicitly requested full overview. |
 | `get_learning_preferences` | Read user preferences without requiring a particular model. |
+| `get_course_rules` | Read versioned built-in course rules; no mutation endpoint exists. |
 | `search_concept_knowledge`, `read_concept_link`, `get_concept_changes` | Read approved concept links and their source invalidations; link does not imply mastery. |
 | `get_conversation_history` | Read targeted original messages in pages. |
 | `rollback_update`, `get_update_history`, `detect_knowledge_conflicts` | Audit and manage prior updates. |
@@ -129,7 +132,7 @@ Restore writes a new destination and refuses overwrite. Stop the service before 
 
 ## Tests and support
 
-Run `python -m pytest`. The test report records protocol-level results separately from client tests. To report a client test, submit client name/version, OS, transport, configuration with secrets redacted, `tools/list` output, representative read/write tool results, and logs. Compatibility statuses are updated only when evidence can be reproduced.
+Run `python -m pytest`. The [current test matrix](TEST_MATRIX.md) records protocol-level results separately from client tests; `docs/TEST_REPORT.md` preserves the earlier release baseline. The default interface exposes 22 tools. To report a client test, submit client name/version, OS, transport, configuration with secrets redacted, `tools/list` output, representative read/write tool results, and logs. Compatibility statuses are updated only when evidence can be reproduced.
 
 See [CHANGELOG.md](CHANGELOG.md). The selected license is PolyForm Noncommercial 1.0.0. The repository is public. Published versions and release notes are available on [GitHub Releases](https://github.com/grard4/algorithm-learning-mcp/releases).
 
@@ -145,7 +148,7 @@ LICENSE contains the unchanged official English terms. Explanatory summaries do 
 
 ## Release acceptance and additional documentation
 
-The independent audit fixes dated 2026-11-27 are unreleased. See [fix report](FIX_REPORT.md), [test matrix](TEST_MATRIX.md), and [release readiness](RELEASE_READINESS.md) for current evidence and compatibility changes. Earlier client and test results below retain their historical scope and are not automatically counted as validation of this branch.
+On 2026-11-27, PR #1 audit fixes were merged; PR #2 delivers built-in course rules version `2`. The latest functional commit passed 88 local tests and all 13 CI jobs. See [test matrix](TEST_MATRIX.md), [rule verification](docs/COURSE_RULES_VERIFICATION.md), and [release readiness](RELEASE_READINESS.md) for exact commits and scope. The existing `v0.1.1` tag predates these code changes. Earlier client and test results below retain their historical scope and do not validate the new rules in real clients.
 
 On 2026-11-27, 16 isolated tests passed. Real Codex CLI approval, cancellation, creation, reads, update and audit were tested with synthetic data. Preference-tool execution, full Desktop coverage and OS isolation remain unverified. The Windows sandbox runtime issue is a disclosed limitation, not a successful isolation test. Third-party dependencies are installed separately, not bundled. See docs/CODEX_INTEGRATION_TEST.md.
 

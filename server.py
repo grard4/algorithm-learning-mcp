@@ -18,16 +18,14 @@ from mcp.types import TextContent
 
 from contracts import LearningChanges
 from preferences import read_preferences
+from course_rules import COURSE_INSTRUCTIONS, read_course_rules
 import compact_api, notifications
 from optimized_reads import ReadCache
 from archive_io import archive_path, publish
 
 
 
-mcp=FastMCP('algorithm-learning', instructions=(
-    'For course planning, teaching, exercises, or progress policy, read get_learning_preferences. '
-    'Use shared context only as needed; do not infer mastery without evidence.'
-)); kb=KB()
+mcp=FastMCP('algorithm-learning', instructions=COURSE_INSTRUCTIONS); kb=KB()
 
 context=Context(kb)
 _read_cache=ReadCache(compact_api.search, notifications.health, compact_api.core.ReadError, 'open-source-release-v1')
@@ -35,7 +33,7 @@ compact_api.search=_read_cache.query
 
 TOOLS={}
 
-PUBLIC={'register_conversation','get_topic_context','search_knowledge','read_knowledge','get_learning_preferences',
+PUBLIC={'register_conversation','get_topic_context','search_knowledge','read_knowledge','get_learning_preferences','get_course_rules',
 
         'update_learning','get_global_overview','get_context_manifest','get_context_delta','get_topic_version',
 
@@ -129,8 +127,13 @@ def get_concept_changes(cursor: str|None=None, limit: int=10) -> dict:
 @tool
 
 def get_learning_preferences() -> dict:
-    """Read the user-owned learning preferences; fall back safely when absent."""
+    """Read editable preferences, not built-in course rules; missing files use defaults."""
     return read_preferences()
+
+@tool
+def get_course_rules() -> dict:
+    """Read mandatory built-in course rules; preferences cannot override or delete them."""
+    return read_course_rules()
 
 @tool
 

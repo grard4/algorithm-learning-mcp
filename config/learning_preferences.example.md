@@ -1,8 +1,9 @@
 # Learning preferences
 
 Edit this file in your own installation. It is read on demand through the
-`get_learning_preferences` MCP tool and reloaded when its modification time or
-size changes. Keep private preferences out of shared/public repositories.
+`get_learning_preferences` MCP tool and freshly read on every call.
+Keep private preferences out of shared/public repositories. Fixed course rules
+are shipped in code and delivered separately; do not copy them into this file.
 
 ## Goals and current level
 - Goals: ICPC / algorithm contest problem solving
@@ -15,7 +16,7 @@ size changes. Keep private preferences out of shared/public repositories.
 
 ## Code
 - Language/version: C++17
-- Naming/comment style: concise names; comments in the learner's preferred language
+- Comment language: the learner's preferred language
 
 ## Practice and review
 - Describe preferred difficulty, hint policy, review cadence, and progress-recording preferences.

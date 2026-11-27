@@ -1,5 +1,7 @@
 # 分阶段修复设计
 
+> 历史范围：本文保留 PR #1 审计及合并前的原始结论。PR #1 已合并至 main（`83c73f7`）；其中“草稿”“未合并”、79 项测试等只描述当时状态。PR #2 及当前验证以 [发布准备](RELEASE_READINESS.md) 和 [测试矩阵](TEST_MATRIX.md) 为准。
+
 1. 已完成基线、A 项失败复现；先提交证据，不改业务源码。
 2. A01：保持 loopback HTTP，显式拒绝非回环。远程访问使用独立认证 SSH 隧道或受验证的网关，当前不实现多租户或远程管理员。未经验证的网关部署不作为已支持模式。
 3. A02/A03：同一事务内验证目标归属；扩展 evidence_sources 元数据（不更改原 evidence string[]），外专题引用需显式 scope= cross_topic 和准确 topic_id/conversation_id；关系至少一端属于当前专题。保留原工具名称和参数。

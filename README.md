@@ -16,13 +16,13 @@
 - L0 索引、L1 本专题摘要、L2 相关知识、L3 指定历史分页读取，支持版本游标与增量读取。
 - 学习更新要求来源证据，支持原子事务、幂等请求、乐观版本检查与审计历史。
 - 可选 Codex 会话日志导入，只有主动执行才启用；其他 Agent 使用标准注册和更新工具。详见 [同步边界](docs/SYNC_AND_DISCOVERY.md)。
-- 按需读取使用者自行编辑的自然语言学习偏好。
+- 固定课程规则版本 `2` 随初始化下发；按需读取可编辑的个人学习偏好，两者独立。
 - 数据库备份、恢复与完整性验证。
 - 支持 stdio 和 Streamable HTTP；当前不实现 MCP Resources 或 Prompts。
 
 ## 系统要求与安装
 
-需要 Python 3.11 或更新版本（本机已测试 3.14.7），以及支持 JSON1、FTS5 的 SQLite。客户端须支持选定的传输方式和工具 Schema，协议能力不等于真实客户端兼容性已验证。
+需要 Python 3.11 或更新版本（三平台 CI 已覆盖 3.11–3.14，范围见 [测试矩阵](TEST_MATRIX.md)），以及支持 JSON1、FTS5 的 SQLite。客户端须支持选定的传输方式和工具 Schema，协议能力不等于真实客户端兼容性已验证。
 
 公开仓库：[grard4/algorithm-learning-mcp](https://github.com/grard4/algorithm-learning-mcp)。版本说明与下载见 [GitHub Releases](https://github.com/grard4/algorithm-learning-mcp/releases)。
 
@@ -62,6 +62,8 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 
 将 `config/learning_preferences.example.md` 复制为 `config/learning_preferences.md`，使用自然语言填写教学要求。`get_learning_preferences` 按需读取并在文件变化后重新加载；缺失或为空时使用通用默认值。私人偏好文件已由 `.gitignore` 排除，不应提交。
 
+课程写作与排版的固定规则由 `course_rules.py` 提供，随 MCP 初始化指令直接下发，也可通过只读 `get_course_rules` 查询；不属于个人偏好，删除、清空或修改偏好文件不会改变它们。规则的适用范围及明确例外保持有效。升级迁移和执行边界见 [内置课程规则](docs/COURSE_RULES.md)。
+
 ## 推荐模型与课程质量
 
 推荐主要教学模型为 **GPT-6-Astra（High 或 Medium 思考强度）**。这是维护者的使用建议，不是服务器硬性依赖，也不是课程质量保证。
@@ -79,11 +81,12 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 | `update_learning` | 在同一事务中更新有证据支持的进度、知识、任务和关联。 |
 | `get_global_overview` | 读取精简概览；详细概览按需获取。 |
 | `get_learning_preferences` | 读取学习偏好。 |
+| `get_course_rules` | 读取代码内置、版本化的课程规则；无写接口。 |
 | `search_concept_knowledge`、`read_concept_link`、`get_concept_changes` | 读取已存在的批准概念关联及来源失效信息。 |
 | `get_conversation_history` | 分页读取指定原始消息。 |
 | `rollback_update`、`get_update_history`、`detect_knowledge_conflicts` | 审计、回滚与冲突检查。 |
 
-完整参数以 `tools/list` 返回的 Schema 为准。旧管理能力保留在本地 CLI，或通过 `ALGORITHM_LEGACY_TOOLS=1` 暴露。
+默认提供 22 个工具，完整参数以 `tools/list` 返回的 Schema 为准。旧管理能力保留在本地 CLI，或通过 `ALGORITHM_LEGACY_TOOLS=1` 暴露。
 
 使用顺序示例：先取得真实聊天 ID，通过 `get_context_manifest` 查询已有映射；需要时才注册。授课前按需读取专题上下文，遇到相关概念再搜索，形成持久成果后携带来源证据调用 `update_learning`。不能猜测聊天 ID 或把讲授自动等同于掌握。
 
@@ -144,7 +147,7 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 
 ## 测试、常见问题与贡献
 
-开发测试先执行 `python -m pip install -r requirements-dev.txt`，再执行 `python -m pytest`。历史结果与验证边界见 [测试报告](docs/TEST_REPORT.md)。
+开发测试先执行 `python -m pip install -r requirements-dev.txt`，再执行 `python -m pytest`。当前结果与验证边界见 [测试矩阵](TEST_MATRIX.md)，早期记录见 [历史测试报告](docs/TEST_REPORT.md)。
 
 - 查不到概念关联：新数据库没有经过审核的概念索引，不代表普通知识检索不可用。
 - 工具调用被审批阻止：遵循客户端正常授权流程，不降低安全策略；工具发现不能代替调用验证。
@@ -165,7 +168,7 @@ python cli.py restore backups\backup-2026-01-01.sqlite3 data\restored.sqlite3
 
 ## 发布验收与更多文档
 
-2026-11-27 独立审计修复位于待发布分支；本轮的安全边界、数据库兼容性及实际验证范围以 [修复报告](FIX_REPORT.md)、[测试矩阵](TEST_MATRIX.md) 和 [发布准备](RELEASE_READINESS.md) 为准。下述 16 项测试与真实客户端记录属于此前发布验收，未自动算作本轮验证。
+2026-11-27：PR #1 审计修复已合并；PR #2 交付内置课程规则版本 `2`，最新功能提交通过本地 88 项测试与 13 个 CI 作业。当前安全边界、兼容性和验证范围见 [测试矩阵](TEST_MATRIX.md)、[规则验收](docs/COURSE_RULES_VERIFICATION.md) 与 [发布准备](RELEASE_READINESS.md)。既有 `v0.1.1` 标签不包含这些后续代码变更；下述 16 项及真实客户端记录属于早期发布验收。
 
 2026-11-27 完整隔离测试 16 项通过；真实 Codex CLI 已通过用户控制的批准、拒绝及五步合成知识读写验收。第三方依赖不捆绑分发。偏好工具、Desktop 全部场景及 OS 隔离不在已验证范围；Windows 管理员沙箱运行时故障按用户决定保留为已知限制。详见 docs/CODEX_INTEGRATION_TEST.md。
 

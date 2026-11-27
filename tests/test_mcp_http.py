@@ -26,10 +26,14 @@ def test_streamable_http_initialization_and_tools(tmp_path):
                         async with ClientSession(read,write) as session:
                             init=await session.initialize()
                             assert init.serverInfo.name=="algorithm-learning"
+                            from course_rules import COURSE_RULES_TEXT, read_course_rules
+                            assert COURSE_RULES_TEXT in init.instructions
                             names={t.name for t in (await session.list_tools()).tools}
                             assert "get_learning_preferences" in names
                             pref=await session.call_tool("get_learning_preferences",{})
                             assert json.loads(pref.content[0].text)["ok"]
+                            rules=await session.call_tool('get_course_rules',{})
+                            assert json.loads(rules.content[0].text)['data']==read_course_rules()
                             async def call(name,args):
                                 result=await session.call_tool(name,args)
                                 value=json.loads(result.content[0].text)
