@@ -43,9 +43,19 @@ def test_explicit_conditions_survive_policy_extraction():
                       '日期、版本、文件名', '不因此索要 GUI 授权',
                       '未做的验证不得声称完成'):
         assert condition in text
-    # The excluded first paragraphs remain personal, rather than silently widening scope.
-    assert '文件为 UTF-8 `.md`' not in text
-    assert '仅静态检查规则覆盖旧的' not in text
+    # Added first-paragraph requirements are independent of the learner's editor.
+    sections = {key: body for key, _, body in course_rules.RULES}
+    first7 = sections['section-7'].split('\n\n')[0]
+    first9 = sections['section-9'].split('\n\n')[0]
+    for requirement in ('文件为 UTF-8 `.md`', '采用标准 Markdown',
+                        '标题 `#` 至 `######` 连续', '段落留空行',
+                        '不依赖编辑器专属扩展'):
+        assert requirement in first7
+    for requirement in ('助手负责内容、文件及静态检查', '用户负责最终视觉验收',
+                        '只有用户明确要求 GUI 检查时才可在授权范围执行',
+                        '笼统“检查排版”“验证讲义”及旧预览要求不算授权'):
+        assert requirement in first9
+    assert 'Typora' not in first7 + first9
 
 
 def test_rule_tool_has_no_write_parameters():
