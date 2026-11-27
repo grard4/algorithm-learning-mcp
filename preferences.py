@@ -23,9 +23,7 @@ def read_preferences() -> dict:
     try:
         # A bounded fresh read also detects replacement with preserved size/mtime.
         # Configuration is operator-owned; callers cannot supply arbitrary paths.
-        if not path.is_file():
-            if not path.exists():
-                return {"status": "missing", "source": "default", "text": DEFAULT_TEXT}
+        if not stat.S_ISREG(path.stat().st_mode):
             return {"status": "invalid", "source": "file", "error": "preference path must be a regular file"}
         with path.open('rb') as stream:
             if not stat.S_ISREG(os.fstat(stream.fileno()).st_mode):
