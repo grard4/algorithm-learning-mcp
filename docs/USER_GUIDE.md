@@ -1,5 +1,7 @@
 # 使用流程与能力边界
 
+> 课程规划、授课、练习及进度策略前读取 `get_learning_preferences`。固定课程规则已随初始化完整下发，已有正文无需重复读取；丢失初始化上下文时调用只读 `get_course_rules`。偏好与固定规则分开保存，删除偏好不会删除固定层，具体适用条件见 [内置课程规则](COURSE_RULES.md)。
+
 长期课程使用真实聊天 ID。先通过 get_context_manifest 的 current_only 模式查询已有关联；未关联时才 register_conversation。按需读本专题摘要，出现具体交叉知识时再检索，避免默认读取所有专题历史。
 
 只保存持久成果，update_learning 使用 topic_version 乐观锁和唯一 request_id；来源为归档 messages.id。新知识需要 data.title/content/evidence；进度改变需 progress.set.evidence 或 progress.append.evidence。证据是消息 ID 字符串数组，不是证据对象或模型自我判断。发生版本冲突先读取变化，不能盲目覆盖。

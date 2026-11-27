@@ -1,5 +1,20 @@
 # 测试矩阵
 
+> 当前结果见下节“PR #2 当前验证”。后文“PR #1 审计基线”保留当时的 79 项、21 工具及覆盖率，不能作为当前版本的计数。所有工程测试使用隔离合成数据。
+
+## PR #2 当前验证
+
+最新功能提交 `85527e9`（规则版本 `2`）：Windows Python 3.14 全量 **88 passed**；初版提交 `749480b` 已在 Windows Python 3.12、3.14 各通过 88 项。GitHub Actions 工作流 `45972017756` 的三平台 × Python 3.11–3.14 共 12 个测试作业及 1 个依赖检查作业全部成功。
+
+| 专项 | 验证范围 | 证据 |
+|---|---|---|
+| 固定规则 | 缺失、空白、损坏、超限、目录、冲突偏好不改变规则；无 setter；返回副本隔离；保留条件例外及补充首段内容 | `tests/test_course_rules.py` |
+| MCP stdio / HTTP | 初始化携带全文、默认 22 工具、只读版本与哈希/正文一致；原读写流程仍通过 | `tests/test_mcp_stdio.py`、`tests/test_mcp_http.py` |
+| 既有回归 | 原审计修复的全量回归随当前测试集执行 | CI 与 [规则验收](docs/COURSE_RULES_VERIFICATION.md) |
+| 真实客户端及生产 | 未在本次执行真实课程生成、切换生产服务或迁移私人数据 | 不将 SDK 结果扩大为真实客户端结论 |
+
+## PR #1 审计基线（历史）
+
 日期：2026-11-27。所有数据均为临时目录内合成数据。最终 Windows Python 3.14.7 与 3.12.15 各 **79 passed，0 failed，0 skipped**。原始基线 16/16 通过；新 A 组首次 12 failed / 5 passed 是修复前缺陷证据，已全部转绿。后续新发现均先保留失败复现，再修复。
 
 | 专项 | 实际执行与结论 | 证据 |
@@ -31,7 +46,7 @@
 | 发布内容扫描 | 已跟踪内容规则扫描无命中；不等同于所有 Git 历史/未知秘密都已审计 | scripts/release_audit.py 的 findings 复用 |
 | 性能对照 | PASS：九种结果哈希一致；输入输出 Token、SQL、延迟、命中率记录 | audit-performance-before/after.json |
 
-## 执行环境边界
+## PR #1 执行环境边界（历史）
 
 | 环境/能力 | 状态 |
 |---|---|
@@ -54,6 +69,6 @@ python scripts/quality_gate.py --dependencies
 
 结果和日志写入忽略目录 .release-audit/quality。缺少依赖、测试失败或公告服务失败均产生非零退出码，不跳过失败。GitHub 工作流运行相同测试和静态检查，并保存 JUnit/覆盖率/依赖结果；未运行的 CI 不记为通过。
 
-## PR 阶段实测
+## PR #1 阶段实测（历史）
 
 PR #1，代码提交 520e1a0，工作流 45957357861：12 个测试组合全部成功，每组 79 passed，无失败或跳过；独立依赖公告检查成功。首次 45956708638 的 Windows 编码失败已复现、修复并全矩阵复验；详见 PRE_MERGE_REVIEW.md 和 docs/evidence/pr-ci-verification.json。CI 产物保留 JUnit、覆盖率与依赖结果。

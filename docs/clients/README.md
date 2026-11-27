@@ -1,5 +1,7 @@
 # Client setup references
 
+> 当前默认接口为 22 工具，课程规则版本 `2` 随初始化直接下发。升级后重新连接，再核对 `get_course_rules` 和个人偏好；只有确认规则生效后才移除偏好中的重复条目。各客户端仍须独立验收，不能由协议测试推定其遵从初始化指令。详见 [规则迁移](../COURSE_RULES.md)。
+
 These tutorials launch the same MCP server; there are no per-client server forks. Replace local paths and use a database owned by the current learner. Unless the status matrix records a real-client test, examples are reference-only and unverified.
 
 - [Codex](codex.md)

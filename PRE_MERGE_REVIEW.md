@@ -1,5 +1,7 @@
 # 合并前复核与第二次审核
 
+> 历史范围：本文保留 PR #1 审计及合并前的原始结论。PR #1 已合并至 main（`83c73f7`）；其中“草稿”“未合并”、79 项测试等只描述当时状态。PR #2 及当前验证以 [发布准备](RELEASE_READINESS.md) 和 [测试矩阵](TEST_MATRIX.md) 为准。
+
 日期：2026-11-27。范围：用户批准的差异复核、审计分支推送、草稿 PR 和跨平台 CI；不包括合并、发布或生产部署。
 
 草稿 PR：grard4/algorithm-learning-mcp#1。基线 main 为 42f593752c295bb2ef5d647a40c00bead19dde94；修复分支为 audit/security-review-20261127。

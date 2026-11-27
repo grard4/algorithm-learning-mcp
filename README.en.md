@@ -14,13 +14,13 @@ A model-independent MCP server for algorithm and programming-contest learning. O
 - Layered context reads (manifest, current topic, relevant search, targeted history) and versioned deltas.
 - Evidence-backed, idempotent learning updates with optimistic version checks and audit history.
 - Incremental import of Codex rollout files as an optional Codex-specific adapter; it is disabled unless explicitly invoked. Other agents use the standard registration and update tools. See [sync and discovery limits](docs/SYNC_AND_DISCOVERY.md).
-- User-editable natural-language learning preferences, read on demand.
+- Built-in course rules, version `2`, delivered at initialization, separately from user-editable preferences read on demand.
 - SQLite backup/restore/verification commands.
 - Standard MCP tools over stdio and Streamable HTTP; no model provider is required by the server.
 
 ## Requirements
 
-- Python 3.11 or newer (tested locally with Python 3.14.7).
+- Python 3.11 or newer (CI covers Python 3.11–3.14 on Windows, Ubuntu and macOS; see [test matrix](TEST_MATRIX.md)).
 - SQLite with JSON1 and FTS5 (the Python Windows build used here includes both).
 - Any MCP client that supports the selected transport and tool schemas. Client support is not implied by protocol capability.
 
@@ -132,7 +132,7 @@ Restore writes a new destination and refuses overwrite. Stop the service before 
 
 ## Tests and support
 
-Run `python -m pytest`. The test report records protocol-level results separately from client tests. To report a client test, submit client name/version, OS, transport, configuration with secrets redacted, `tools/list` output, representative read/write tool results, and logs. Compatibility statuses are updated only when evidence can be reproduced.
+Run `python -m pytest`. The [current test matrix](TEST_MATRIX.md) records protocol-level results separately from client tests; `docs/TEST_REPORT.md` preserves the earlier release baseline. The default interface exposes 22 tools. To report a client test, submit client name/version, OS, transport, configuration with secrets redacted, `tools/list` output, representative read/write tool results, and logs. Compatibility statuses are updated only when evidence can be reproduced.
 
 See [CHANGELOG.md](CHANGELOG.md). The selected license is PolyForm Noncommercial 1.0.0. The repository is public. Published versions and release notes are available on [GitHub Releases](https://github.com/grard4/algorithm-learning-mcp/releases).
 
@@ -148,7 +148,7 @@ LICENSE contains the unchanged official English terms. Explanatory summaries do 
 
 ## Release acceptance and additional documentation
 
-The independent audit fixes dated 2026-11-27 are unreleased. See [fix report](FIX_REPORT.md), [test matrix](TEST_MATRIX.md), and [release readiness](RELEASE_READINESS.md) for current evidence and compatibility changes. Earlier client and test results below retain their historical scope and are not automatically counted as validation of this branch.
+On 2026-11-27, PR #1 audit fixes were merged; PR #2 delivers built-in course rules version `2`. The latest functional commit passed 88 local tests and all 13 CI jobs. See [test matrix](TEST_MATRIX.md), [rule verification](docs/COURSE_RULES_VERIFICATION.md), and [release readiness](RELEASE_READINESS.md) for exact commits and scope. The existing `v0.1.1` tag predates these code changes. Earlier client and test results below retain their historical scope and do not validate the new rules in real clients.
 
 On 2026-11-27, 16 isolated tests passed. Real Codex CLI approval, cancellation, creation, reads, update and audit were tested with synthetic data. Preference-tool execution, full Desktop coverage and OS isolation remain unverified. The Windows sandbox runtime issue is a disclosed limitation, not a successful isolation test. Third-party dependencies are installed separately, not bundled. See docs/CODEX_INTEGRATION_TEST.md.
 

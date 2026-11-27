@@ -1,5 +1,7 @@
 # 审计基线
 
+> 历史范围：本文保留 PR #1 审计及合并前的原始结论。PR #1 已合并至 main（`83c73f7`）；其中“草稿”“未合并”、79 项测试等只描述当时状态。PR #2 及当前验证以 [发布准备](RELEASE_READINESS.md) 和 [测试矩阵](TEST_MATRIX.md) 为准。
+
 核查日期：2026-11-27（Asia/Shanghai）。目标：grard4/algorithm-learning-mcp。
 
 - 本地与 GitHub main：`42f593752c295bb2ef5d647a40c00bead19dde94`。
