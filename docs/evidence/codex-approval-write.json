@@ -1,0 +1,36 @@
+{
+  "date": "2026-11-27",
+  "client": "Codex CLI 0.171.0-alpha.13.2",
+  "transport": "stdio",
+  "approved_calls": 5,
+  "successful_calls": 5,
+  "tool_counts": {
+    "update_learning": 2,
+    "read_knowledge": 2,
+    "get_update_history": 1
+  },
+  "topic_versions": [
+    5,
+    6,
+    7
+  ],
+  "knowledge_versions": [
+    1,
+    2
+  ],
+  "chinese_title_preserved": true,
+  "learning_progress_unchanged": true,
+  "cleanup": {
+    "method": "local isolated KB transaction; not MCP",
+    "remaining_test_knowledge": 0,
+    "audit_entries_retained": 3
+  },
+  "integrity_check": "ok",
+  "foreign_key_errors": 0,
+  "verification_note": "before-write table hashes used sqlite.Row repr and are invalid; progress compared with earlier tuple-based before-readonly baseline instead",
+  "limitations": [
+    "Desktop UI not tested",
+    "OS sandbox not accepted",
+    "MCP server is not a multi-user security sandbox"
+  ]
+}

@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+.env
+config/learning_preferences.md
+config/initial_threads.json
+config/discovery_since.txt
+config/topic_aliases.json
+data/*
+!data/.gitkeep
+archives/
+backups/
+reports/
+*.sqlite3
+*.sqlite3-*
+*.db
+*.log
+
+# 本地发布核查材料，不进入发布内容
+.release-audit/

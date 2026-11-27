@@ -1,0 +1,10 @@
+PRAGMA foreign_keys=ON;
+CREATE TABLE IF NOT EXISTS c_migrations(name TEXT PRIMARY KEY,sha256 TEXT NOT NULL,applied_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS c_concepts(id TEXT PRIMARY KEY,canonical TEXT NOT NULL UNIQUE,name TEXT NOT NULL,created_at TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS c_requests(request_id TEXT PRIMARY KEY,payload_hash TEXT NOT NULL,actor TEXT NOT NULL,created_at TEXT NOT NULL,result TEXT NOT NULL CHECK(json_valid(result)));
+CREATE TABLE IF NOT EXISTS c_events(seq INTEGER PRIMARY KEY AUTOINCREMENT,concept_id TEXT NOT NULL REFERENCES c_concepts(id),version INTEGER NOT NULL,request_id TEXT NOT NULL REFERENCES c_requests(request_id),kind TEXT NOT NULL CHECK(kind IN ('create','alias','link','assertion','scope','retract')),data TEXT NOT NULL CHECK(json_valid(data)),topic_id TEXT REFERENCES topics(id),conversation_id TEXT REFERENCES conversations(id),message_id TEXT REFERENCES messages(id),knowledge_id TEXT REFERENCES knowledge_items(id) ON DELETE SET NULL,task_id TEXT REFERENCES learning_tasks(id) ON DELETE SET NULL,target_seq INTEGER UNIQUE REFERENCES c_events(seq),created_at TEXT NOT NULL,UNIQUE(concept_id,version));
+CREATE INDEX IF NOT EXISTS c_alias_normalized ON c_events(json_extract(data,'$.normalized')) WHERE kind='alias';
+CREATE INDEX IF NOT EXISTS c_event_concept ON c_events(concept_id,seq);
+CREATE INDEX IF NOT EXISTS c_event_kind ON c_events(kind,seq);
+CREATE INDEX IF NOT EXISTS c_event_knowledge ON c_events(knowledge_id,seq);
+CREATE INDEX IF NOT EXISTS c_event_source ON c_events(topic_id,message_id);

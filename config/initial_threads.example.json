@@ -1,0 +1,8 @@
+[
+  {
+    "id": "<real-codex-conversation-id>",
+    "title": "<conversation-title>",
+    "name": "<topic-name-confirmed-by-you>",
+    "canonical": "<optional-confirmed-canonical>"
+  }
+]

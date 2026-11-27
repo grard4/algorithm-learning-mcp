@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-27",
+  "client": "Codex CLI 0.171.0-alpha.13.2",
+  "test": "user_cancel_readonly_mcp",
+  "decision": "Cancel",
+  "server_delivered_tool_calls": 0,
+  "checked_tables": 30,
+  "tables_unchanged": true,
+  "integrity_check": "ok",
+  "foreign_key_check_errors": 0,
+  "scope": "独立测试数据库；不代表 Desktop 全部功能、写入或 OS 隔离已验证"
+}

@@ -1,0 +1,12 @@
+{
+  "date": "2026-11-26",
+  "client": "OpenAI Codex CLI",
+  "version": "0.171.0-alpha.13.2",
+  "os": "Windows 11",
+  "server_key": "algorithm_learning_open_source",
+  "transport": "stdio",
+  "result": "tool_discovered_call_blocked",
+  "error": "MCP tool call requires approval, but approval policy is never",
+  "mutations": "none confirmed; registration tool was not reached",
+  "status": "partial verification only"
+}

@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-27",
+  "client": "Codex CLI",
+  "version": "0.171.0-alpha.13.2",
+  "os": "Windows 11",
+  "transport": "stdio",
+  "started_at": "2026-11-27T02:22:19.494764+00:00",
+  "finished_at": "2026-11-27T02:23:19.703309+00:00",
+  "status": "部分验证；工具调用仍被审批策略拒绝",
+  "calls": [
+    {
+      "id": "item_2",
+      "server": "release_acceptance",
+      "tool": "get_learning_preferences",
+      "arguments": {},
+      "error": {
+        "message": "MCP tool call requires approval, but approval policy is never"
+      },
+      "status": "failed"
+    }
+  ],
+  "persistent_config_hash_unchanged": true,
+  "safety_policy_changed": false,
+  "real_business_calls_completed": 0,
+  "earlier_attempt": "本轮首次启动因测试命令的键名转义错误退出；修正调用命令后重试，未改持久配置。"
+}

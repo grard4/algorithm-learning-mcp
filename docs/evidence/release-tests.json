@@ -1,0 +1,109 @@
+{
+  "date": "2026-11-27",
+  "syntax_modules": 22,
+  "config_files": [
+    "config/initial_threads.example.json",
+    "config/topic_aliases.example.json"
+  ],
+  "fenced_configuration": {
+    "json": 6,
+    "toml": 3,
+    "yaml_unexecuted": 0
+  },
+  "tests": [
+    {
+      "name": "test_blank_database_and_r3_journal",
+      "seconds": 1.64,
+      "status": "passed"
+    },
+    {
+      "name": "test_concurrent_independent_topic_writes",
+      "seconds": 3.259,
+      "status": "passed"
+    },
+    {
+      "name": "test_registration_idempotency_and_backup_restore",
+      "seconds": 1.923,
+      "status": "passed"
+    },
+    {
+      "name": "test_streamable_http_initialization_and_tools",
+      "seconds": 3.082,
+      "status": "passed"
+    },
+    {
+      "name": "test_stdio_initialization_discovery_preferences_and_updates",
+      "seconds": 2.996,
+      "status": "passed"
+    },
+    {
+      "name": "test_missing_empty_invalid_and_reload",
+      "seconds": 0.058,
+      "status": "passed"
+    },
+    {
+      "name": "test_aggregate_validation_and_no_partial_data",
+      "seconds": 1.901,
+      "status": "passed"
+    },
+    {
+      "name": "test_missing_evidence_rejected",
+      "seconds": 1.736,
+      "status": "passed"
+    },
+    {
+      "name": "test_update_replay_conflict_and_persistence",
+      "seconds": 2.051,
+      "status": "passed"
+    },
+    {
+      "name": "test_mid_transaction_failure_rolls_back",
+      "seconds": 2.065,
+      "status": "passed"
+    },
+    {
+      "name": "test_existing_mapping_reuse_and_conflict",
+      "seconds": 2.42,
+      "status": "passed"
+    },
+    {
+      "name": "test_preference_size_boundary",
+      "seconds": 0.028,
+      "status": "passed"
+    },
+    {
+      "name": "test_unselected_rollout_is_not_imported",
+      "seconds": 1.73,
+      "status": "passed"
+    },
+    {
+      "name": "test_base_schema_upgrade_preserves_existing_topic",
+      "seconds": 3.672,
+      "status": "passed"
+    },
+    {
+      "name": "test_discovery_cutoff_is_persisted_once",
+      "seconds": 0.036,
+      "status": "passed"
+    },
+    {
+      "name": "test_invalid_discovery_cutoff_fails_closed",
+      "seconds": 0.037,
+      "status": "passed"
+    }
+  ],
+  "total": 16,
+  "failures": 0,
+  "errors": 0,
+  "duration_seconds": 29.151,
+  "test_environment": "Windows 11 / Python 3.14.7 / MCP Python SDK 1.30.0",
+  "temporary_databases_only": true,
+  "final_static_checks": {
+    "python": 22,
+    "markdown": 43,
+    "json_examples": 6,
+    "toml_examples": 3,
+    "yaml_manual_only": 1,
+    "isolated_databases_integrity_ok": 27
+  }
+}

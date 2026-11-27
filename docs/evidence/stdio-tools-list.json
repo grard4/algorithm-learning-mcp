@@ -1,0 +1,1110 @@
+{
+  "server_name": "algorithm-learning",
+  "server_version": "1.30.0",
+  "negotiated_protocol_version": "2025-11-25",
+  "tools": [
+    {
+      "name": "search_concept_knowledge",
+      "description": "Search approved concept links only; it does not infer or update learning state.",
+      "inputSchema": {
+        "properties": {
+          "concepts": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Concepts",
+            "type": "array"
+          },
+          "limit": {
+            "default": 2,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "topic_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topic Ids"
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cursor"
+          },
+          "known_versions": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "string"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Known Versions"
+          }
+        },
+        "required": [
+          "concepts"
+        ],
+        "title": "search_concept_knowledgeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_concept_link",
+      "description": "Read and revalidate one concept-link event and its source proof.",
+      "inputSchema": {
+        "properties": {
+          "event_seq": {
+            "title": "Event Seq",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "event_seq"
+        ],
+        "title": "read_concept_linkArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_concept_changes",
+      "description": "Read concept-source invalidations using an explicit cursor.",
+      "inputSchema": {
+        "properties": {
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cursor"
+          },
+          "limit": {
+            "default": 10,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "get_concept_changesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_learning_preferences",
+      "description": "Read the user-owned learning preferences; fall back safely when absent.",
+      "inputSchema": {
+        "properties": {},
+        "title": "get_learning_preferencesArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "record_conversation_update",
+      "description": "导入规范化消息作为补充归档，不冒充本机原始日志。各消息需 role/content/timestamp。",
+      "inputSchema": {
+        "properties": {
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "messages": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "actor": {
+            "default": "course-agent",
+            "title": "Actor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id",
+          "messages",
+          "request_id"
+        ],
+        "title": "record_conversation_updateArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "rollback_update",
+      "description": "回滚结构化变更并新增审计；后续更新存在时拒绝覆盖。",
+      "inputSchema": {
+        "properties": {
+          "update_id": {
+            "title": "Update Id",
+            "type": "string"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "actor": {
+            "default": "course-agent",
+            "title": "Actor",
+            "type": "string"
+          }
+        },
+        "required": [
+          "update_id",
+          "request_id"
+        ],
+        "title": "rollback_updateArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_conversation_tree",
+      "description": "逻辑根、专题和原聊天关联，不代表原生聊天合并。",
+      "inputSchema": {
+        "properties": {},
+        "title": "get_conversation_treeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_update_history",
+      "description": "分页审计；full=true 才返回完整 before/after。",
+      "inputSchema": {
+        "properties": {
+          "entity_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Entity Id"
+          },
+          "after_id": {
+            "default": 0,
+            "title": "After Id",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "full": {
+            "default": false,
+            "title": "Full",
+            "type": "boolean"
+          }
+        },
+        "title": "get_update_historyArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "detect_knowledge_conflicts",
+      "description": "检测明确标记的命题值冲突；返回所有版本，不自动裁决自然语言。",
+      "inputSchema": {
+        "properties": {},
+        "title": "detect_knowledge_conflictsArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "sync_conversation",
+      "description": "主动只读同步已登记的本地会话日志；未登记来源返回错误。",
+      "inputSchema": {
+        "properties": {
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversation_id"
+        ],
+        "title": "sync_conversationArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_sync_health",
+      "description": "同步游标、待人工判定新课程和数据库一致性。",
+      "inputSchema": {
+        "properties": {},
+        "title": "get_sync_healthArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "register_conversation",
+      "description": "仅未关联课程需注册：已有专题用 topic_id，新领域用 name；服务端解析别名/生成规范标识，不猜 canonical。已有聊天复用，矛盾参数报冲突。",
+      "inputSchema": {
+        "properties": {
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "name": {
+            "default": "",
+            "title": "Name",
+            "type": "string"
+          },
+          "canonical": {
+            "default": "",
+            "title": "Canonical",
+            "type": "string"
+          },
+          "title": {
+            "default": "",
+            "title": "Title",
+            "type": "string"
+          },
+          "cwd": {
+            "default": "",
+            "title": "Cwd",
+            "type": "string"
+          },
+          "parent_topic_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Parent Topic Id"
+          },
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topic Id"
+          }
+        },
+        "required": [
+          "conversation_id"
+        ],
+        "title": "register_conversationArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_context_manifest",
+      "description": "L0 索引；恢复关联用 conversation_id + current_only=true，仅返回当前映射。registered=false 才需注册。",
+      "inputSchema": {
+        "properties": {
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Conversation Id"
+          },
+          "known_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Known Version"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 30,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "current_only": {
+            "default": false,
+            "title": "Current Only",
+            "type": "boolean"
+          }
+        },
+        "title": "get_context_manifestArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_topic_context",
+      "description": "L1 当前专题摘要；仅确实持有旧摘要时传 known_version。",
+      "inputSchema": {
+        "properties": {
+          "topic_id": {
+            "title": "Topic Id",
+            "type": "string"
+          },
+          "known_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Known Version"
+          },
+          "full": {
+            "default": false,
+            "title": "Full",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "topic_id"
+        ],
+        "title": "get_topic_contextArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_topic_version",
+      "description": "只读取专题、摘要与归档版本。",
+      "inputSchema": {
+        "properties": {
+          "topic_id": {
+            "title": "Topic Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic_id"
+        ],
+        "title": "get_topic_versionArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_context_delta",
+      "description": "版本之后的变更；按 next_version 翻页，截短字段按需完整读取。",
+      "inputSchema": {
+        "properties": {
+          "topic_id": {
+            "title": "Topic Id",
+            "type": "string"
+          },
+          "after_version": {
+            "title": "After Version",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 5,
+            "title": "Limit",
+            "type": "integer"
+          },
+          "full": {
+            "default": false,
+            "title": "Full",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "topic_id",
+          "after_version"
+        ],
+        "title": "get_context_deltaArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "search_knowledge",
+      "description": "L2：query旧式查询或concepts批量1..10个短语，每项独立limit。detail=compact/standard/detailed；批量进度为待核实投影。next_cursor续页，数据变化须重查。",
+      "inputSchema": {
+        "properties": {
+          "query": {
+            "default": "",
+            "title": "Query",
+            "type": "string"
+          },
+          "topic_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topic Id"
+          },
+          "limit": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Limit"
+          },
+          "related_to": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Related To"
+          },
+          "since_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Since Version"
+          },
+          "concepts": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Concepts"
+          },
+          "topic_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Topic Ids"
+          },
+          "include_progress": {
+            "default": true,
+            "title": "Include Progress",
+            "type": "boolean"
+          },
+          "detail": {
+            "default": "compact",
+            "enum": [
+              "compact",
+              "standard",
+              "detailed"
+            ],
+            "title": "Detail",
+            "type": "string"
+          },
+          "cursor": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Cursor"
+          }
+        },
+        "title": "search_knowledgeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "read_knowledge",
+      "description": "按字段分页读取知识原文；可传已持有的实体版本。",
+      "inputSchema": {
+        "properties": {
+          "knowledge_id": {
+            "title": "Knowledge Id",
+            "type": "string"
+          },
+          "known_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Known Version"
+          },
+          "field": {
+            "default": "content",
+            "title": "Field",
+            "type": "string"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "chars": {
+            "default": 3000,
+            "title": "Chars",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "knowledge_id"
+        ],
+        "title": "read_knowledgeArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_global_overview",
+      "description": "全局索引；用户要求全部详细进度时才用 full=true。",
+      "inputSchema": {
+        "properties": {
+          "full": {
+            "default": false,
+            "title": "Full",
+            "type": "boolean"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "limit": {
+            "default": 30,
+            "title": "Limit",
+            "type": "integer"
+          }
+        },
+        "title": "get_global_overviewArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "update_learning",
+      "description": "原子增量更新；进度改变需 progress.set/append.evidence:string[]；新知识需 data.title/content/evidence，非 summary。期望版本为 topic_version；参数错误一次返回全部字段路径。",
+      "inputSchema": {
+        "properties": {
+          "topic_id": {
+            "title": "Topic Id",
+            "type": "string"
+          },
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "expected_version": {
+            "title": "Expected Version",
+            "type": "integer"
+          },
+          "request_id": {
+            "title": "Request Id",
+            "type": "string"
+          },
+          "changes": {
+            "additionalProperties": false,
+            "properties": {
+              "progress": {
+                "additionalProperties": false,
+                "description": "实际改变进度时，set.evidence 或 append.evidence 必须提供本次归档 ID；合并后的 evidence 也须非空。没有 progress.evidence 字段。",
+                "properties": {
+                  "set": {
+                    "additionalProperties": true,
+                    "description": "替换列出的字段；已知类型如下，其他历史扩展字段可保留 JSON 值。",
+                    "properties": {
+                      "taught": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "practiced": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "understood": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "mastered": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "pending": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "completed_exercises": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "pending_exercises": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "conclusions": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "common_errors": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "stage": {
+                        "type": "string"
+                      },
+                      "mastery": {
+                        "type": "string"
+                      },
+                      "evidence": {
+                        "description": "归档 messages.id 字符串数组；不是对象数组。",
+                        "items": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "append": {
+                    "additionalProperties": {
+                      "items": {},
+                      "type": "array"
+                    },
+                    "description": "向列表追加并去重；evidence 是归档 ID 字符串数组。",
+                    "properties": {
+                      "taught": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "practiced": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "understood": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "mastered": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "pending": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "completed_exercises": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "pending_exercises": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "conclusions": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "common_errors": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "evidence": {
+                        "description": "归档 messages.id 字符串数组；不是对象数组。",
+                        "items": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "minItems": 1,
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "remove": {
+                    "additionalProperties": {
+                      "items": {},
+                      "type": "array"
+                    },
+                    "description": "从列表删除匹配值；不可删空最终 evidence。",
+                    "properties": {
+                      "taught": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "practiced": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "understood": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "mastered": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "pending": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "completed_exercises": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "pending_exercises": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "conclusions": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "common_errors": {
+                        "items": {},
+                        "type": "array"
+                      },
+                      "evidence": {
+                        "items": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "type": "object"
+                  }
+                },
+                "type": "object"
+              },
+              "knowledge": {
+                "items": {
+                  "additionalProperties": false,
+                  "allOf": [
+                    {
+                      "if": {
+                        "not": {
+                          "required": [
+                            "id"
+                          ]
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "data": {
+                            "required": [
+                              "title",
+                              "content",
+                              "evidence"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "properties": {
+                    "id": {
+                      "description": "可选自定义新 ID；已存在时为修改。",
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "expected_version": {
+                      "description": "修改已存在的 id 时必填当前实体版本；新建不需要。",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "data": {
+                      "additionalProperties": true,
+                      "description": "新建需必填字段；id 更新可省略未修改字段，继承旧值。扩展元数据保留。",
+                      "properties": {
+                        "title": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "evidence": {
+                          "description": "归档 messages.id 字符串数组；不是对象数组。",
+                          "items": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "content": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "claim_key": {
+                          "type": "string"
+                        },
+                        "claim_value": {},
+                        "verification": {},
+                        "tags": {
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "tasks": {
+                "items": {
+                  "additionalProperties": false,
+                  "allOf": [
+                    {
+                      "if": {
+                        "not": {
+                          "required": [
+                            "id"
+                          ]
+                        }
+                      },
+                      "then": {
+                        "properties": {
+                          "data": {
+                            "required": [
+                              "title",
+                              "status",
+                              "evidence"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  ],
+                  "properties": {
+                    "id": {
+                      "description": "可选自定义新 ID；已存在时为修改。",
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "expected_version": {
+                      "description": "修改已存在的 id 时必填当前实体版本；新建不需要。",
+                      "minimum": 0,
+                      "type": "integer"
+                    },
+                    "data": {
+                      "additionalProperties": true,
+                      "description": "新建需必填字段；id 更新可省略未修改字段，继承旧值。扩展元数据保留。",
+                      "properties": {
+                        "title": {
+                          "minLength": 1,
+                          "type": "string"
+                        },
+                        "evidence": {
+                          "description": "归档 messages.id 字符串数组；不是对象数组。",
+                          "items": {
+                            "minLength": 1,
+                            "type": "string"
+                          },
+                          "minItems": 1,
+                          "type": "array"
+                        },
+                        "status": {
+                          "enum": [
+                            "pending",
+                            "attempted",
+                            "completed",
+                            "unknown"
+                          ]
+                        }
+                      },
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "relations": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "source_id": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "target_id": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "kind": {
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "reason": {
+                      "minLength": 1,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "source_id",
+                    "target_id",
+                    "kind",
+                    "reason"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 20,
+                "type": "array"
+              }
+            },
+            "title": "Changes",
+            "type": "object"
+          }
+        },
+        "required": [
+          "topic_id",
+          "conversation_id",
+          "expected_version",
+          "request_id",
+          "changes"
+        ],
+        "title": "update_learningArguments",
+        "type": "object"
+      }
+    },
+    {
+      "name": "get_conversation_history",
+      "description": "L3 单条原文；latest 取最近消息；长消息用 message_id+next_offset 续读。",
+      "inputSchema": {
+        "properties": {
+          "conversation_id": {
+            "title": "Conversation Id",
+            "type": "string"
+          },
+          "after_seq": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "After Seq"
+          },
+          "message_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Message Id"
+          },
+          "offset": {
+            "default": 0,
+            "title": "Offset",
+            "type": "integer"
+          },
+          "chars": {
+            "default": 3000,
+            "title": "Chars",
+            "type": "integer"
+          },
+          "latest": {
+            "default": false,
+            "title": "Latest",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "conversation_id"
+        ],
+        "title": "get_conversation_historyArguments",
+        "type": "object"
+      }
+    }
+  ]
+}

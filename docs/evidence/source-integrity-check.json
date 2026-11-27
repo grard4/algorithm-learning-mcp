@@ -1,0 +1,118 @@
+{
+  "date": "2026-11-27",
+  "scope": "仅比较独立发布副本本轮开始与结束的运行源码、Schema、模板和依赖文件；不是原业务数据库验证",
+  "checked_files": 22,
+  "all_unchanged": true,
+  "checks": [
+    {
+      "file": "cli.py",
+      "sha256": "b14d6cc199930d571c53bb2bdbe94cde8a410b36e93948bac0e42009a38318a2",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "compact_api.py",
+      "sha256": "05f50c374fd3bbd69d3446cc1510f9bf0c5fda6cfe5418ef5a28f7c8b389fa4c",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "concept_reader.py",
+      "sha256": "2b73ea7f1f666b8408805fc2e375be9c20c25305f5f2ce0f4a5454db00dd278d",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "context.py",
+      "sha256": "2fe0054cd340e03fc6ce8ffb1f4f694ed98ccdcf062c9ad76eafe5421d8e5379",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "context_schema.sql",
+      "sha256": "4041fe3bd44ea08bf8fdc0b2626f1ec70e1f9a634c39970244f3b573cf567c17",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "contracts.py",
+      "sha256": "be79cf4850119f1a5fc9b98ab7e19dbb788bef04777b142eec96ae37f9e17968",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "c_context_schema.sql",
+      "sha256": "9eafadbce9375966441d57677c2b63ec375c441885fd6755bc84bca9001e2017",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "kb.py",
+      "sha256": "3cdce662ed33761435e1f89b0fbe3522e136205355c462dca1d8710cec4afe02",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "legacy_server.py",
+      "sha256": "5c683da766bf1a5a2ec6c1a7776a5ebf8c231517f118a6e3881d38b0a9034383",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "notifications.py",
+      "sha256": "234f6196c3d48b8cb7cb0ade02c0730e86a47b6b8587dd8afd2c258df8bc37d5",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "optimized_reads.py",
+      "sha256": "d9252420938f6d355cdeeb91d6d49ea5f03200cd68f1a8f4509e9d862cb57442",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "preferences.py",
+      "sha256": "eb3fb9044e80073bfa4f8e2d926ceea605fb6c6bdfeff92fe1992569a159af75",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "requirements-dev.txt",
+      "sha256": "0a2ef984ec6666e0751964751ec06c8f5a185c37f20a5cafa7e3dcae1c65e737",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "requirements.txt",
+      "sha256": "60dd56c939b5ceaa81edf91a9c87998862d2b7893ce33a7a7410f28e000fe7f7",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "schema.sql",
+      "sha256": "5f11ed1ec2a12b1b87d86c712fe2f75c86d60930bca03670773b366f5fcd4272",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "search_engine.py",
+      "sha256": "765cda351acefc48fa606c059f10204f012355839a137cf2a0bc0014080e1892",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "server.py",
+      "sha256": "eaa074ababf17f81da85721e1d1cf05961d169f70b6141e21bf4bbff73c15793",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "sync.py",
+      "sha256": "4eb0ff1e0bb3929f4896ff3fe855bd0bb97ea14e5fc38a506e2b2fa6599ec3de",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "topic_identity.py",
+      "sha256": "2dd02f26fffedca9c89a6fea843fbdd253ed7ba15bcdd6006f597ac42c52c67b",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "config/initial_threads.example.json",
+      "sha256": "483455222310ac0e6bca989df981ef470b54cac8b1d9ecf9ce93507df268728d",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "config/learning_preferences.example.md",
+      "sha256": "37de71d3fd9674806e5707afed46f8743a777edf592dd9356addcff24ab8ffae",
+      "unchanged_this_stage": true
+    },
+    {
+      "file": "config/topic_aliases.example.json",
+      "sha256": "977786add97445916dc659a422f01ed649a5b46b5e65cccdd1bf6b7a89701ee2",
+      "unchanged_this_stage": true
+    }
+  ]
+}
