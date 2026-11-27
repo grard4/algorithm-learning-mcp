@@ -61,3 +61,15 @@ def test_publish_failure_rolls_back(service,monkeypatch):
     monkeypatch.setattr(s,'publish',fail)
     assert not s.record_conversation_update('chat',[msg()],'failure')['ok']
     assert snapshot(k)==before
+
+def test_replay_checks_and_recovers_archive(service):
+    from pathlib import Path
+    s,k=service;messages=[msg()]
+    first=s.record_conversation_update('chat',messages,'replay')
+    path=Path(k.rows('SELECT path FROM archives')[0]['path'])
+    original=path.read_bytes();path.unlink()
+    assert s.record_conversation_update('chat',messages,'replay')==first
+    assert path.read_bytes()==original
+    path.write_bytes(b'corrupt')
+    assert s.record_conversation_update('chat',messages,'replay')['error']['code']=='ARCHIVE_CORRUPT'
+    assert path.read_bytes()==b'corrupt'

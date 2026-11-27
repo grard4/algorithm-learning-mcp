@@ -27,7 +27,12 @@ from input_limits import NormalizedMessages, normalized_raw
 
 
 
-mcp=FastMCP('algorithm-learning', instructions=COURSE_INSTRUCTIONS); kb=KB()
+mcp=FastMCP('algorithm-learning', instructions=COURSE_INSTRUCTIONS)
+try:
+    kb=KB()
+except Exception as exc:
+    # Startup precedes the MCP wrapper: fail without leaking a filesystem traceback.
+    raise SystemExit(error_response(exc)['error']['code']) from None
 
 context=Context(kb)
 _read_cache=ReadCache(compact_api.search, notifications.health, compact_api.core.ReadError, 'open-source-release-v1')
@@ -247,7 +252,9 @@ def record_conversation_update(conversation_id: str, messages: NormalizedMessage
     conv=kb.rows('SELECT id FROM conversations WHERE id=?',(conversation_id,))
     if not conv: raise KBError('NOT_FOUND','聊天未注册')
 
+    published=False
     def fn(c,u):
+        nonlocal published
 
         c.execute('INSERT OR IGNORE INTO archives VALUES(?,?,?,?,?,?)',(sha,conversation_id,str(path),'normalized-import',len(raw),now()))
 
@@ -262,9 +269,13 @@ def record_conversation_update(conversation_id: str, messages: NormalizedMessage
             c.execute('INSERT INTO messages VALUES(?,?,?,?,?,?,?,?)',(ident,conversation_id,seq,m['role'],m['timestamp'],m['content'],sha,i+1))
 
         publish(path,raw)
+        published=True
         return {'message_ids':ids,'archive_sha256':sha}
 
-    return kb.mutate('record_conversation_update',request_id,actor,conversation_id,messages,fn)
+    result=kb.mutate('record_conversation_update',request_id,actor,conversation_id,messages,fn)
+    # An idempotent replay skips fn; still recover/check its content-addressed file.
+    if not published: publish(path,raw)
+    return result
 
 @tool
 

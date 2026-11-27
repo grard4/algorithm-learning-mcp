@@ -36,3 +36,24 @@ def test_cli_error_no_traceback(tmp_path,operation):
     assert p.returncode==1
     assert not json.loads(p.stdout)['ok']
     assert 'private-location' not in p.stdout+p.stderr and 'Traceback' not in p.stderr
+
+def test_startup_storage_error_no_traceback(tmp_path):
+    root=Path(__file__).resolve().parents[2]
+    blocked=tmp_path/'private-location';blocked.write_text('file',encoding='utf-8')
+    env=dict(os.environ,ALGORITHM_KB=str(blocked/'db.sqlite3'))
+    p=subprocess.run([sys.executable,str(root/'server.py')],cwd=root,env=env,capture_output=True,text=True)
+    assert p.returncode!=0
+    assert 'private-location' not in p.stdout+p.stderr and 'Traceback' not in p.stderr
+
+def test_sync_worker_errors_hide_source_path(tmp_path,monkeypatch,caplog):
+    import sync
+    from kb import KB
+    k=KB(tmp_path/'db.sqlite3');k.register('Test','','chat','Test')
+    p=tmp_path/'rollout-chat-private-location.jsonl';p.write_bytes(b'')
+    monkeypatch.setattr(sync,'sources',lambda home:[p])
+    monkeypatch.setattr(sync,'report',lambda kb:None)
+    def fail(*a,**kw):raise PermissionError(13,'private-location')
+    monkeypatch.setattr(sync,'sync_file',fail)
+    result=sync.run(k,tmp_path)
+    assert result[0]['error']['code']=='PERMISSION_DENIED'
+    assert 'private-location' not in json.dumps(result)+caplog.text
