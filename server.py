@@ -32,6 +32,7 @@ _read_cache=ReadCache(compact_api.search, notifications.health, compact_api.core
 compact_api.search=_read_cache.query
 
 TOOLS={}
+LEGACY_WRITES=frozenset({'add_knowledge', 'add_knowledge_relation', 'update_topic_progress', 'record_learning_result', 'update_knowledge', 'record_learning_task'})
 
 PUBLIC={'register_conversation','get_topic_context','search_knowledge','read_knowledge','get_learning_preferences','get_course_rules',
 
@@ -66,7 +67,7 @@ def tool(fn):
 
     TOOLS[fn.__name__]=call
 
-    if fn.__name__ in PUBLIC or os.environ.get('ALGORITHM_LEGACY_TOOLS')=='1':
+    if fn.__name__ not in LEGACY_WRITES and (fn.__name__ in PUBLIC or os.environ.get('ALGORITHM_LEGACY_TOOLS')=='1'):
 
         @functools.wraps(fn)
 
@@ -207,95 +208,43 @@ def get_recent_updates(limit: int=20, since: str|None=None) -> list:
 
 def update_topic_progress(topic_id: str, data: dict, expected_version: int, request_id: str, conversation_id: str, actor: str='course-agent') -> dict:
 
-    """整体替换专题档案；须先读取并合并，携带 evidence 消息 ID 和版本。"""
-
-    evidence(data)
-
-    required={'stage','taught','practiced','understood','mastered','pending','completed_exercises','pending_exercises','conclusions','common_errors','mastery','evidence'}
-
-    if not required<=data.keys(): raise KBError('INVALID','缺少进度字段：'+','.join(sorted(required-data.keys())))
-
-    return kb.write('topic_progress',topic_id,data,request_id,actor,conversation_id,expected_version)
+    """Retired unsafe legacy write; use update_learning with topic_version and evidence."""
+    raise KBError('LEGACY_WRITE_DISABLED','旧写入接口已停用；请使用 update_learning 并提供 topic_version 和证据来源')
 
 @tool
 
 def add_knowledge(topic_id: str, data: dict, request_id: str, conversation_id: str, actor: str='course-agent') -> dict:
 
-    """新增知识。data 含 title/content/status/evidence，可含 claim_key/value/tags。"""
-
-    evidence(data)
-
-    if not data.get('title') or not data.get('content'): raise KBError('INVALID','需要 title/content')
-
-    data=dict(data,source_conversation=conversation_id)
-
-    data['content_hash']=digest(data['content'])
-
-    ident=digest(['knowledge',request_id])
-
-    result=kb.write('knowledge_items',ident,data,request_id,actor,conversation_id,topic_id=topic_id)
-
-    result['duplicates']=kb.rows("SELECT id FROM knowledge_items WHERE json_extract(data,'$.content_hash')=? AND id<>?",(data['content_hash'],ident))
-
-    return result
+    """Retired unsafe legacy write; use update_learning with topic_version and evidence."""
+    raise KBError('LEGACY_WRITE_DISABLED','旧写入接口已停用；请使用 update_learning 并提供 topic_version 和证据来源')
 
 @tool
 
 def update_knowledge(knowledge_id: str, data: dict, expected_version: int, request_id: str, conversation_id: str, actor: str='course-agent') -> dict:
 
-    """版本检查后修改；重要争议结论应另建条目并共享 claim_key。"""
-
-    evidence(data)
-
-    old=kb.get('knowledge_items',knowledge_id)['data']
-
-    if old.get('claim_key') and (old.get('claim_key')!=data.get('claim_key') or old.get('claim_value')!=data.get('claim_value')):
-
-        raise KBError('CLAIM_CONFLICT','命题值改变应另建知识条目并建立 conflicts 关联；保留不同结论')
-
-    if old.get('status') in ('verified','reviewed_summary') and old.get('content')!=data.get('content') and not data.get('verification'):
-
-        raise KBError('REVIEW_REQUIRED','重要结论修改需要 verification 说明及可核查证据，或另建候选条目')
-
-    return kb.write('knowledge_items',knowledge_id,data,request_id,actor,conversation_id,expected_version)
+    """Retired unsafe legacy write; use update_learning with topic_version and evidence."""
+    raise KBError('LEGACY_WRITE_DISABLED','旧写入接口已停用；请使用 update_learning 并提供 topic_version 和证据来源')
 
 @tool
 
 def add_knowledge_relation(source_id: str, target_id: str, kind: str, reason: str, request_id: str, conversation_id: str, actor: str='course-agent') -> dict:
 
-    """建立双向可查询的有向关系；kind 建议 prerequisite/application/related/conflicts。"""
-
-    if source_id==target_id: raise KBError('INVALID','不能自关联')
-
-    ident=digest([source_id,target_id,kind])
-
-    existing=kb.rows('SELECT id FROM knowledge_relations WHERE id=?',(ident,))
-
-    if existing: return {'id':ident,'duplicate':True}
-
-    return kb.write('knowledge_relations',ident,{'reason':reason},request_id,actor,conversation_id,extra={'source_id':source_id,'target_id':target_id,'kind':kind})
+    """Retired unsafe legacy write; use update_learning with topic_version and evidence."""
+    raise KBError('LEGACY_WRITE_DISABLED','旧写入接口已停用；请使用 update_learning 并提供 topic_version 和证据来源')
 
 @tool
 
 def record_learning_task(topic_id: str, data: dict, request_id: str, conversation_id: str, actor: str='course-agent') -> dict:
 
-    """记录练习；data 含 title、status、evidence，不把布置等同完成。"""
-
-    evidence(data)
-
-    if not data.get('title') or data.get('status') not in ('pending','attempted','completed','unknown'): raise KBError('INVALID','需要 title 和有效 status')
-
-    return kb.write('learning_tasks',digest(['task',request_id]),data,request_id,actor,conversation_id,topic_id=topic_id)
+    """Retired unsafe legacy write; use update_learning with topic_version and evidence."""
+    raise KBError('LEGACY_WRITE_DISABLED','旧写入接口已停用；请使用 update_learning 并提供 topic_version 和证据来源')
 
 @tool
 
 def record_learning_result(task_id: str, data: dict, expected_version: int, request_id: str, conversation_id: str, actor: str='course-agent') -> dict:
 
-    """更新练习结果；分别记录自述、局部测试及 OJ 通过证据。"""
-
-    evidence(data)
-
-    return kb.write('learning_tasks',task_id,data,request_id,actor,conversation_id,expected_version)
+    """Retired unsafe legacy write; use update_learning with topic_version and evidence."""
+    raise KBError('LEGACY_WRITE_DISABLED','旧写入接口已停用；请使用 update_learning 并提供 topic_version 和证据来源')
 
 @tool
 
