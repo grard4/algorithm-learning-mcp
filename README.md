@@ -56,7 +56,7 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 
 配置位置与步骤见 [Codex 接入](docs/clients/codex.md)。其他客户端入口见 [客户端目录](docs/clients/README.md)，未实测的示例仅供参考，不保证复制即用。
 
-设置 `ALGORITHM_MCP_TRANSPORT=streamable-http` 可启用 HTTP，默认地址为 `127.0.0.1:8000/mcp`。服务器没有内置认证或多租户隔离，不应直接暴露到网络。远程部署须另行提供 TLS、认证与安全代理层。本地使用优先选 stdio。
+设置 `ALGORITHM_MCP_TRANSPORT=streamable-http` 可启用 HTTP，默认地址为 `127.0.0.1:8000/mcp`。入口拒绝非回环绑定（UNSAFE_HTTP_BIND），保留本地 HTTP；无内置认证或多租户隔离。远程单用户访问方案是经过独立认证的 SSH 隧道，部署未实测；禁止无认证端口转发。本地使用优先选 stdio，详见 [安全说明](docs/SECURITY.md)。
 
 ## 自定义学习偏好
 

@@ -1,4 +1,4 @@
-import asyncio, json, tempfile
+import asyncio, json, tempfile, sys
 from pathlib import Path
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[1]
 async def main():
     (ROOT/".release-audit").mkdir(exist_ok=True)
     with tempfile.TemporaryDirectory(dir=ROOT/".release-audit") as temp:
-        params=StdioServerParameters(command=str(ROOT/".venv"/"Scripts"/"python.exe"),
+        params=StdioServerParameters(command=sys.executable,
             args=[str(ROOT/"server.py")],cwd=str(ROOT),env={"ALGORITHM_KB":str(Path(temp)/"evidence.sqlite3")})
         async with stdio_client(params) as (read,write):
             async with ClientSession(read,write) as session:

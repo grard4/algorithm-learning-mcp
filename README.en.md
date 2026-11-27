@@ -56,7 +56,7 @@ ALGORITHM_PREFERENCES = "C:\\Users\\you\\AppData\\Local\\algorithm-learning\\lea
 
 Codex configuration is in the user's `config.toml` or project `.codex/config.toml`; see [Codex setup](docs/clients/codex.md). Other examples are indexed in [docs/clients](docs/clients/README.md). They are reference configurations only unless the compatibility report says otherwise.
 
-For Streamable HTTP, set `ALGORITHM_MCP_TRANSPORT=streamable-http`; by default the server binds only to `127.0.0.1:8000` at `/mcp`. Do not expose it to a network without TLS and an authentication/reverse-proxy layer. stdio is the recommended local single-user setup.
+For Streamable HTTP, set `ALGORITHM_MCP_TRANSPORT=streamable-http`; the default is `127.0.0.1:8000/mcp`. Non-loopback bindings now fail with UNSAFE_HTTP_BIND. Local HTTP remains supported, without built-in authentication or tenant isolation. Remote single-owner access requires an independently authenticated SSH tunnel; that deployment is not tested here. Never expose an unauthenticated forwarder. See [security notes](docs/SECURITY.md); stdio remains recommended locally.
 
 ## Learning preferences
 

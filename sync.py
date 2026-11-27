@@ -64,6 +64,9 @@ def visible(events):
         p=e.get('payload',{})
         if e.get('type')=='response_item' and p.get('type')=='message' and p.get('role') in ('user','assistant'):
             content=p.get('content',[])
+            if (not isinstance(content,list) or any(not isinstance(x,dict) or
+                ('text' in x and not isinstance(x['text'],str)) for x in content)):
+                raise KBError('INVALID_LOG',f'第 {line} 行消息内容结构无效')
             text='\n'.join(x.get('text','') for x in content if x.get('type') in ('input_text','output_text','text'))
             if text: out.append(dict(seq=line,role=p['role'],timestamp=e.get('timestamp'),content=text,source_line=line))
     return out
@@ -119,7 +122,7 @@ def finish_extraction(kb,tid,cid):
         with kb.connect() as c:
             c.execute('INSERT OR IGNORE INTO extraction_seen VALUES(?,?)',(m['id'],now()))
 def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
-    raw=read_bytes(path); events=parse(raw); meta=events[0][1]['payload']; cid=meta['id']; messages=visible(events)
+    raw=read_bytes(path); events=parse(raw); meta=events[0][1]['payload']; cid=meta.get('id'); messages=visible(events)
     if not isinstance(cid, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]{0,199}', cid):
         raise KBError('INVALID_SOURCE_ID', '聊天 ID 必须是安全的单一路径组件')
     archive_root=(kb.path.parent/'archives').resolve()
@@ -221,15 +224,34 @@ def run(kb,home,discover=False,initial=False):
             _scanned[str(p)]=signature
         except Exception as e: results.append({'source':str(p),'error':str(e)})
     report(kb); return results
+def acquire_worker_lock(path):
+    """One worker per database, using the platform's native advisory lock."""
+    lock=Path(path).open('a+b')
+    try:
+        if os.name=='nt':
+            import msvcrt
+            if lock.seek(0,os.SEEK_END)==0:
+                lock.write(b'0');lock.flush()
+            lock.seek(0)
+            msvcrt.locking(lock.fileno(),msvcrt.LK_NBLCK,1)
+        else:
+            import fcntl
+            fcntl.flock(lock.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
+    except OSError as exc:
+        lock.close()
+        import errno
+        if exc.errno in (errno.EACCES,errno.EAGAIN,errno.EDEADLK):
+            return None
+        raise
+    return lock
+
+
 def main():
     ap=argparse.ArgumentParser(); ap.add_argument('--home',default=str(Path.home()/'.codex')); ap.add_argument('--initial',action='store_true'); ap.add_argument('--discover',action='store_true'); ap.add_argument('--watch',action='store_true'); ap.add_argument('--interval',type=int,default=120); a=ap.parse_args(); kb=KB()
     lock=None
     if a.watch:
-        import msvcrt
-        lock=(kb.path.parent/'worker.lock').open('a+b')
-        lock.seek(0);lock.write(b'0');lock.flush();lock.seek(0)
-        try:msvcrt.locking(lock.fileno(),msvcrt.LK_NBLCK,1)
-        except OSError:return
+        lock=acquire_worker_lock(kb.path.parent/'worker.lock')
+        if lock is None:raise KBError('WORKER_RUNNING','已有同步进程持有数据库工作锁')
     while True:
         try:
             result=run(kb,Path(a.home),a.discover,a.initial)

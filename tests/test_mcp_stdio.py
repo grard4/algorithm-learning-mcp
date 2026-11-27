@@ -1,11 +1,11 @@
-import asyncio, json
+import asyncio, json, sys
 from jsonschema import Draft202012Validator
 from pathlib import Path
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
 
 ROOT=Path(__file__).resolve().parents[1]
-PYTHON=ROOT/".venv"/"Scripts"/"python.exe"
+PYTHON=sys.executable
 
 def data(result):
     assert result.isError is False
