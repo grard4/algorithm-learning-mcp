@@ -7,6 +7,7 @@ from typing import Literal
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp.exceptions import ToolError
 
 from kb import KB, KBError, ROOT, dump, digest, now, uid
 
@@ -35,8 +36,7 @@ class PublicMCP(FastMCP):
         except Exception:
             # FastMCP validation errors include input_value before our decorator
             # runs. Never serialize their repr (or caller-supplied tool names).
-            return [TextContent(type='text', text=json.dumps({'ok': False, 'error': {
-                'code': 'INVALID_INPUT', 'message': '工具名称或参数不符合接口定义'}}))]
+            raise ToolError('INVALID_INPUT: 工具名称或参数不符合接口定义') from None
 
 
 mcp=PublicMCP('algorithm-learning', instructions=COURSE_INSTRUCTIONS)

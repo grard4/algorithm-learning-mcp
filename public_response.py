@@ -3,12 +3,12 @@
 Text redaction is conservative: path-looking prose may be masked. It is not a
 general secret scanner. Pagination must use the projected text's offsets.
 """
-import hashlib
 import json
 import re
+from kb import digest
 
 _PRIVATE = {'cwd', 'source_path', 'archive_path', 'file_path', 'filename',
-            'directory', 'working_directory', 'home', 'path'}
+            'directory', 'working_directory', 'home'}
 # Preserve web links, but remove file URIs, drive paths, UNC and POSIX paths.
 # Spaces within directory components are allowed; trailing prose is not consumed.
 _PATH = re.compile(
@@ -18,7 +18,7 @@ _PATH = re.compile(
 
 
 def source_id(value):
-    return hashlib.sha256(str(value).encode('utf-8')).hexdigest()
+    return digest(str(value))
 
 
 def public_text(text):
