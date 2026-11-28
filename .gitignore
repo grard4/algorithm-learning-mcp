@@ -6,6 +6,7 @@ __pycache__/
 config/learning_preferences.md
 config/initial_threads.json
 config/discovery_since.txt
+config/discovery_exclusions.json
 config/topic_aliases.json
 data/*
 !data/.gitkeep

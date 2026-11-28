@@ -34,6 +34,20 @@ def configured_aliases():
     rows=data.get('aliases',[]) if isinstance(data,dict) else []
     return [row for row in rows if isinstance(row,dict) and isinstance(row.get('name'),str) and isinstance(row.get('canonical'),str) and isinstance(row.get('aliases',[]),list)]
 _scanned={}
+
+def discovery_exclusions():
+    """Explicit local exclusions affect discovery only, never registered courses."""
+    path=ROOT/'config'/'discovery_exclusions.json'
+    if not path.exists(): return set()
+    try:
+        data=json.loads(path.read_text(encoding='utf-8'))
+        if not isinstance(data,list) or any(not isinstance(x,str) or not re.fullmatch(
+                r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}',x) for x in data):
+            raise ValueError('invalid exclusion list')
+    except (OSError,ValueError) as exc:
+        raise KBError('INVALID_DISCOVERY_EXCLUSIONS','发现排除清单必须为聊天 UUID 字符串数组') from exc
+    return set(data)
+
 def read_bytes(path):
     path=Path(path)
     if path.stat().st_size>limits.SOURCE_BYTES: limits.too_large('源文件超过字节预算')
@@ -274,9 +288,14 @@ def run(kb,home,discover=False,initial=False):
         name=t.get('name') or t['title']
         results.append(sync_file(kb,matches[0],t['title'],name,t.get('canonical')))
     known={r['id'] for r in kb.rows('SELECT id FROM conversations')}
+    excluded=discovery_exclusions() if discover else set()
     for p in paths:
         # 未来发现只处理系统安装之后的新文件；不扩大到其他历史聊天。
         is_known=any(cid in p.name for cid in known)
+        excluded_id=next((cid for cid in sorted(excluded) if cid in p.name),None)
+        if not is_known and excluded_id:
+            results.append({'excluded':excluded_id})
+            continue
         if not is_known and (not discover or p.stat().st_ctime<cutoff): continue
         try:
             stat=p.stat(); signature=(stat.st_size,stat.st_mtime_ns)
@@ -284,7 +303,9 @@ def run(kb,home,discover=False,initial=False):
             result=sync_file(kb,p,allow_new=discover)
             results.append(result)
             _scanned[str(p)]=signature
-        except Exception as e: results.append(error_response(e))
+        except Exception as e:
+            # Opaque correlation key: diagnose a failed source without exposing its path.
+            results.append({**error_response(e),'source_id':digest(str(p))})
     report(kb); return results
 def acquire_worker_lock(path):
     """One worker per database, using the platform's native advisory lock."""
