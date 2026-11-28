@@ -8,9 +8,11 @@
 
 本阶段从第三轮提交 `d8f190686d3eef5abca052d7fad00793e5274b1a` 建立独立发布候选，在 Windows Python 3.14.7 的全新隔离虚拟环境中重跑质量门禁，检查 A04 资源边界和并发导入，并独立复核 A09、A10、A11。
 
-本机隔离验收通过：质量门禁四项通过，176 项测试通过；CLI 初始化、合成学习数据写读、备份恢复、stdio/回环 HTTP MCP、旧版数据库重复启动和数据库拒绝路径均有实测。A04 保持 `PARTIAL`，因为没有进程级或跨进程导入并发限额，也没有严格进程内存上界。
+第四阶段基线版本本机隔离验收通过：质量门禁四项通过，176 项测试通过；CLI 初始化、合成学习数据写读、备份恢复、stdio/回环 HTTP MCP、旧版数据库重复启动和数据库拒绝路径均有实测。补入分片修复后的当前候选验证结果见下文及 [同步补丁证据](docs/evidence/round4-sync-shards.json)。A04 保持 `PARTIAL`，因为没有进程级或跨进程导入并发限额，也没有严格进程内存上界。
 
 本地候选分支已建立，含第三轮代码和第四阶段发布文档。候选没有推送，故本候选 SHA 对应的远程 GitHub Actions 尚未运行；正式 GitHub Release 不建议在远程 CI 核验前进行。本机生产数据库、偏好文件和服务未操作。
+
+第四阶段验收后，按用户要求把多 rollout 分片同步修复补入同一候选分支。基线回归先复现第二个短分片触发 `SOURCE_TRUNCATED`；修复后完整质量门禁为 181 项通过，资源探针 10/10。此次增加独立的 `sync-sources-v1` 账本迁移，未改动冻结的 `core-v1` SQL/checksum。该迁移已在合成旧库上验证回填、原子拒绝及保留数据；生产库没有升级。
 
 ## 2. 基线与分支
 
@@ -18,7 +20,7 @@
 - 本地第三轮 worktree 的 HEAD：`d8f190686d3eef5abca052d7fad00793e5274b1a`，其父链起点为 `991ea4030061be8e8740e33629fae2a8114936b0`。GitHub 连接器只读核实远程 `main` 当前仍为 `991ea40`，远程没有第三轮分支。
 - 直接 `git fetch origin` 因执行环境无法连接 `github.com:443` 失败；远程状态以 GitHub 连接器读取为准。未修改远程 `main`。
 - 第三轮 worktree 在本任务开始时已有 5 个已修改文件和一个未跟踪的 `sync_identity.py`。其归属不明，均保留且未纳入候选。另建干净 detached 验证副本，并从第三轮 HEAD 创建候选分支。
-- 候选分支：`release-candidate/2026-11-28`，基于第三轮 HEAD；工作区在文档变更前干净。第四阶段只改变发布文档与合成资源证据，没有修改运行代码、Schema、依赖或工作流。
+- 候选分支：`release-candidate/2026-11-28`，基于第三轮 HEAD。第四阶段验收时只改变发布文档与合成资源证据；之后按用户要求，另补入多 rollout 分片同步代码、`sync-sources-v1` 加法迁移及回归测试。冻结的 `core-v1` SQL/checksum、依赖和工作流未改。
 - GitHub 目标仓库确认是 `grard4/algorithm-learning-mcp`，默认分支 `main`。目标候选分支先经只读确认不存在；随后尝试 `git push --set-upstream origin release-candidate/2026-11-28`，但执行环境连接 `github.com:443` 失败，远程分支没有创建。候选仍为本地分支，没有强推、合并、删除远程分支或正式 Release。
 
 ## 3. A04 资源安全专项评估
@@ -67,8 +69,8 @@ SQLite 锁等待有 30 秒上限，四任务共享数据库的样本没有锁超
 ## 6. 隔离安装与部署验收
 
 - **安装**：新建 Windows Python 3.14.7 虚拟环境，从候选源码目录安装锁定的运行、测试和质量依赖；`pip check` 成功。仓库没有 wheel/package 构建配置，本次验证直接运行源码，不声称验证了 PyPI wheel。
-- **初始化与重复启动**：隔离数据库首次创建、CLI `verify` 和重复初始化成功；Schema checksum 仅有一条 `core-v1`。
-- **升级副本**：用第三轮父基线 `991ea40` 代码创建含合成专题的数据库；当前候选打开两次后专题数仍为 1、checksum 仍唯一、数据库完整。因为两个版本使用相同冻结 Schema，此项验证的是数据保留与幂等重开，不是新的结构迁移。
+- **初始化与重复启动**：隔离数据库首次创建、CLI `verify` 和重复初始化成功；新的数据库账本包含冻结的 `core-v1` 和加法迁移 `sync-sources-v1`，第二次启动保持幂等。
+- **升级副本**：本阶段原先以 `991ea40` 建立的合成库可升级到当前候选；专项回归另从旧 `core-v1` 账本副本执行 `sync-sources-v1`，验证原有消息不变、游标归档映射正确。缺失匹配归档时以 `SYNC_MIGRATION_UNSAFE` 原子拒绝，数据库原状态保留。
 - **拒绝错误升级**：`user_version=99` 返回 `UNKNOWN_SCHEMA_VERSION`；伪造迁移 checksum 返回 `MIGRATION_CHECKSUM`，进程非零退出。仓库测试还独立验证未知版本拒绝时不改表结构、注入迁移失败原子回滚及填充旧库数据保留。
 - **CLI/MCP**：`cli.py --help`、CLI 合成注册/归档/学习更新、备份及恢复成功；恢复副本保留专题、消息、归档和更新记录，完整性/外键检查通过。质量套件中的真实 MCP stdio 和回环 HTTP 客户端协议测试通过；规范化 MCP 更新与读取也由完整回归覆盖。
 - **隔离/生产边界**：使用临时路径和合成数据，没有连接或修改生产 SQLite、生产偏好、归档或配置；生产环境升级未执行。
@@ -77,8 +79,10 @@ SQLite 锁等待有 30 秒上限，四任务共享数据库的样本没有锁超
 
 | 类型 | 实际结果 | 证据范围 |
 |---|---|---|
-| 当前候选源码：Windows Python 3.14.7 全量质量门禁 | 静态 PASS；176 passed，0 failed，0 skipped；依赖一致性 PASS；pip-audit PASS（0 项漏洞） | `.release-audit/quality/` 本地忽略目录；候选提交为 d8 基线加文档 |
-| 单独回归 | 38 passed | A09 同步边界、A10 CLI、A11 错误脱敏专项 |
+| 当前候选源码：Windows Python 3.14.7 全量质量门禁 | 静态 PASS；181 passed，0 failed，0 skipped；依赖一致性 PASS；pip-audit PASS（0 项漏洞） | `.release-audit/quality/` 本地忽略目录；包含分片同步修复 |
+| 同步完整性与迁移专项 | 23 passed；基线分片回归先以 `SOURCE_TRUNCATED` 失败，修复后通过 | `tests/regression/test_sync_integrity.py`、`tests/integration/test_migration_recovery.py` |
+| 资源探针（修复后重跑） | 10/10，预算内接受/超限拒绝符合预期；SQLite 完整且无外键错误 | `docs/evidence/round4-sync-patch-resource-probe.json` |
+| 原第三轮专项回归 | 38 passed | A09 同步边界、A10 CLI、A11 错误脱敏专项；本次之后全量质量门禁 181 项也通过 |
 | 资源子进程 | 六类样本通过预期接受/拒绝；另复测原始文件上限 | [资源证据](docs/evidence/round4-resources.json) |
 | 并发实测 | 4 个并行任务成功；4 归档/4 游标；SQLite 完整、无外键错误 | Windows 子进程样本；非任意并发保证 |
 | 隔离部署 | CLI、stdio/HTTP MCP 测试、备份恢复、旧库重开、拒绝未知版本/checksum 通过 | `.stage4-venv` 与系统临时 DB；合成数据 |
@@ -89,7 +93,7 @@ SQLite 锁等待有 30 秒上限，四任务共享数据库的样本没有锁超
 
 ## 8. 风险清单
 
-- **已验证**：A09 窗口边界与无部分写入；A10 CLI 状态码；A11 已确认的输入反射；单项资源预算；SQLite 完整性与同步幂等；隔离备份恢复和旧 `core-v1` 数据保留。
+- **已验证**：A09 窗口边界与无部分写入；A10 CLI 状态码；A11 已确认的输入反射；单项资源预算；rollout 分片导入、重放幂等、改写/截断拒绝；合成旧 `core-v1` 向 `sync-sources-v1` 原子迁移；隔离备份恢复。
 - **部分解决**：A04 只覆盖明确预算、代表性样本和 4 项并行场景；无任意并发进程资源上界。
 - **已知限制**：A07 文件系统归档发布和 SQLite 不能跨系统原子提交；强制终止/断电可能留下孤立归档或临时文件；磁盘累计配额未实现。
 - **未验证**：候选分支远程 Actions、第三方客户端实机兼容性、生产升级、跨平台隔离安装、敌对多用户负载。
@@ -106,8 +110,8 @@ SQLite 锁等待有 30 秒上限，四任务共享数据库的样本没有锁超
 
 ## 10. Git 变更记录
 
-候选基线为 `d8f190686d3eef5abca052d7fad00793e5274b1a`。第四阶段新增 `FOURTH_STAGE_RELEASE_CANDIDATE_REPORT.md` 和 `docs/evidence/round4-resources.json`，并更新 `RELEASE_READINESS.md` 与 `CHANGELOG.md`。上述内容只存在于本地候选分支，未推送、未合并；最终候选提交哈希由交付时分支 HEAD 提供。没有真实数据库、个人偏好或临时测试文件进入版本控制。
+候选基线为 `d8f190686d3eef5abca052d7fad00793e5274b1a`。候选现包括第四阶段验收文档、资源证据、多 rollout 分片同步修复、独立 `sync-sources-v1` 加法迁移、同步/迁移回归，以及本报告的补充证据。具体最终 SHA 由交付时分支 HEAD 提供。所有变更仍只在本地候选分支，未推送、未合并；生产库、个人偏好和临时测试文件未进入版本控制。
 
 ## 11. 下一步建议
 
-可以在远程 CI 完成后再进入正式发布审批。下一步需要将 `release-candidate/2026-11-28` 推送到已核实的 `grard4/algorithm-learning-mcp` 远程分支，再确认 13 个 Actions 作业均针对该分支最终 SHA 成功；如需修改候选文件，须重新运行受影响检查并以最新 SHA 验证。此次验收没有生产数据改动，因此无需为本阶段另做生产备份；任何将来生产升级仍须先备份并副本演练。其他 Agent/原生客户端实机测试对本机单用户条件结论不是阻塞项，但在宣称广泛客户端兼容前仍须补做。
+可在远程 CI 完成后再进入正式发布审批。下一步需将候选分支推送到已核实的 `grard4/algorithm-learning-mcp` 远程分支，并确认 13 个 Actions 作业均针对最终 SHA 成功。此候选现在包含数据库迁移：任何生产升级前必须单独备份并在副本演练；迁移后若回滚到不认识 `sync-sources-v1` 的旧程序，必须恢复完整升级前数据库备份，不能只回退代码。其他 Agent/原生客户端实机测试仍须在宣称广泛兼容前补做。

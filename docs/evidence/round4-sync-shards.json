@@ -1,0 +1,44 @@
+{
+  "stage": "user-directed multi-rollout shard patch",
+  "date": "2026-11-28",
+  "platform": "Windows, Python 3.14.7",
+  "baseline_reproduction": {
+    "command": "python -m pytest tests/regression/test_sync_integrity.py -q -k sequential_rollout_shards_keep_messages_distinct_and_retryable",
+    "expected_failure": true,
+    "failure_code": "SOURCE_TRUNCATED",
+    "scenario": "A shorter second rollout shard with the same conversation ID was treated as truncation of the first shard."
+  },
+  "post_patch_verification": {
+    "targeted_command": "python -m pytest tests/regression/test_sync_integrity.py tests/integration/test_migration_recovery.py -q",
+    "targeted_result": "23 passed",
+    "quality_gate_command": "python scripts/quality_gate.py --dependencies",
+    "quality_gate": {
+      "static": "PASS",
+      "regression": "PASS",
+      "regression_tests": 181,
+      "failed": 0,
+      "skipped": 0,
+      "dependency_consistency": "PASS",
+      "vulnerability_scan": "PASS"
+    },
+    "resource_probe": {
+      "result": "10/10 expected accept/reject outcomes; SQLite integrity passed; no foreign key errors",
+      "artifact": "round4-sync-patch-resource-probe.json"
+    }
+  },
+  "migration": {
+    "ledger_entry": "sync-sources-v1",
+    "core_v1_sql_and_checksum_changed": false,
+    "verified": [
+      "legacy cursor and matching archive backfill",
+      "repeat startup",
+      "preservation of existing message IDs and sequence values",
+      "atomic refusal when a matching archive is missing"
+    ]
+  },
+  "scope_boundaries": {
+    "production_database_accessed": false,
+    "candidate_pushed": false,
+    "remote_ci_verified": false
+  }
+}

@@ -14,6 +14,8 @@
 - 增量发现：在 `config/topic_aliases.json` 中配置希望自动匹配的别名，再执行 `python sync.py --discover --watch --interval 120`。这是轮询，不是实时监听。首次运行时，worker 创建持久化的 `config/discovery_since.txt` 时间戳，将扫描范围限定为该 worker 首次启动后创建的会话；后续轮询沿用该时间。默认空别名模板会把不确定专题保留为发现候选，不能猜测 canonical ID 或自动合并有歧义的专题。
 - 使用 Ctrl+C 或原启动进程管理器停止监测。服务器不会自动启动该进程。
 
+同一聊天可能由多个 `rollout-*.jsonl` 分片构成。同步器以 rollout 文件名作为分片身份，并为每个聊天分配不重叠的消息序号区间；后续较短的分片不会被误判为整段聊天日志缩短。相同分片重试保持幂等，已导入分片若被缩短或改写则拒绝推进游标并保留已有记录。旧数据库初始化时会从原同步游标及其内容寻址归档回填分片映射；若来源证据不足或映射不一致，迁移会原子失败，不触碰已有学习记录。
+
 `config/topic_aliases.example.json` 是空结构示例，`config/initial_threads.example.json` 说明导入格式。记录包含 `name`、`canonical` 和可选的 `aliases`，具体值由使用者定义。`initial_threads.json` 由 Git 忽略，因为其中的 ID、标题或路径可能暴露私人聊天历史。
 
 ## 能力边界

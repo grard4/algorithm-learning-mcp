@@ -2,9 +2,9 @@
 
 ## 第四阶段发布候选验收（2026-11-28）
 
-候选分支 `release-candidate/2026-11-28` 从第三轮提交 `d8f190686d3eef5abca052d7fad00793e5274b1a` 建立。候选当前仅含本报告、资源证据及本文件/变更记录的发布文档更新；业务源码、Schema、运行依赖和工作流未修改。第三轮 worktree 中已有的 5 项未提交改动因归属无法确认而保留在原处，未进入候选。
+候选分支 `release-candidate/2026-11-28` 从第三轮提交 `d8f190686d3eef5abca052d7fad00793e5274b1a` 建立。阶段四基线验收完成后，用户指定将多 rollout 分片同步补丁加入候选；当前分支包含 `sync.py` 分片隔离、`sync_identity.py`、新增 `sync-sources-v1` 加法迁移及回归测试。原第三轮 worktree 里的未提交文件保留未动；只有明确关联的补丁内容被移植。
 
-Windows Python 3.14.7 隔离环境按 `requirements-dev.txt` 与 `requirements-quality.txt` 安装后，质量门禁的静态检查、176 项回归、依赖一致性和漏洞扫描均通过；pip-audit 未报告漏洞。本机隔离安装、CLI、stdio MCP、回环 HTTP、合成数据初始化/读写、备份恢复以及从第二轮 `991ea40` 数据库副本重复启动均通过。错误 Schema 版本与不匹配 checksum 会分别以 `UNKNOWN_SCHEMA_VERSION`、`MIGRATION_CHECKSUM` 拒绝启动。此处的旧库验证是相同冻结 `core-v1` Schema 的跨版本重开与保留数据验证，不代表执行了新的 Schema 迁移。
+Windows Python 3.14.7 隔离环境按 `requirements-dev.txt` 与 `requirements-quality.txt` 安装后，当前候选质量门禁静态检查、181 项回归、依赖一致性和漏洞扫描均通过；pip-audit 未报告漏洞。10 项资源探针重跑通过。同步/迁移专项 23 项通过，基线专门回归在修复前复现了 `SOURCE_TRUNCATED`。隔离初始化、CLI、stdio MCP、回环 HTTP、备份恢复以及旧 core-v1 数据库迁移回填均通过；错误 Schema 版本、不匹配 checksum 和缺失匹配归档会分别拒绝启动，其中迁移失败原子回滚。冻结的 `core-v1` SQL/checksum 未变。详细命令和结果见 [分片同步证据](docs/evidence/round4-sync-shards.json) 与 [修复后资源探针](docs/evidence/round4-sync-patch-resource-probe.json)。
 
 A04 保持 `PARTIAL`。新增 Windows 子进程样本在接近 16 MiB 原始输入、约 31.2 MB 解压输出、近 20,000 个事件和近 250,000 个 JSON 节点时均按预期工作；过深 JSON 与超压缩比输入在写入前拒绝。4 个并行独立会话共用隔离 SQLite 后完整性/外键检查通过。接近解压上限的单任务峰值工作集约 95 MiB；并发测试没有形成理论或严格的聚合内存上界，服务也没有进程级并发/内存配额。具体边界见 [第四阶段验收报告](FOURTH_STAGE_RELEASE_CANDIDATE_REPORT.md) 与 [资源样本](docs/evidence/round4-resources.json)。
 
@@ -12,12 +12,12 @@ A04 保持 `PARTIAL`。新增 Windows 子进程样本在接近 16 MiB 原始输�
 
 ## 当前分层结论
 
-- 本机单用户：有条件通过；限于既有输入预算与正常单用户负载，A04 任意并发与进程级资源保证仍未验证。
+- 本机单用户：源码候选有条件通过；分片同步逻辑及合成迁移通过，但生产环境尚未升级，升级前须备份并副本演练。A04 任意并发与进程级资源保证仍未验证。
 - 公开源码候选：有条件通过；须披露 A04、跨文件系统归档提交窗口及其他未验证边界，并在推送后确认本候选 SHA 的完整远程 CI。
 - 正式 GitHub Release：暂不建议；候选 SHA 的远程 CI 尚未运行，正式版本号/Release notes 审批未完成。
 - 多用户或公网部署：不通过；无完整身份认证、多租户隔离、用户级资源配额或不可信调用者隔离。
 
-本阶段没有创建 PR、合并 `main`、创建正式 Release/Tag 或发布 PyPI 包。生产部署若后续另行安排，仍须先备份并在隔离副本验收。
+本候选已含数据库迁移。部署前必须备份并在隔离副本验收；若迁移后回滚到不识别新账本的旧程序，必须恢复升级前的完整数据库备份，不能只回退源码。本阶段没有创建 PR、合并 `main`、创建正式 Release/Tag 或发布 PyPI 包。
 
 更新：2026-11-27，第三轮基线 main=991ea4030061be8e8740e33629fae2a8114936b0，代码候选 8b805a5，独立分支 audit/round3-20261127。本轮只完成源码与隔离验收，未升级生产、未推送、未合并、未创建 Release/Tag/PyPI。第二轮 PR #3 已合并及此前部署是历史事实，不作为本轮部署证据。
 
@@ -41,6 +41,6 @@ A04 保持 `PARTIAL`。新增 Windows 子进程样本在接近 16 MiB 原始输�
 - 首次发现注册与同步分两步持久化，I/O失败可保留已注册未同步聊天；消息与游标事务不会提前推进。
 - 原子发布依赖硬链接，网络共享文件系统未验证。搜索仍须尊重incomplete；旧隐藏读取及受信任本地CLI不构成多用户权限系统。
 - 固定规则保证来源不受偏好修改，不保证外部模型遵从，不是课程文件服务端强制校验；实际模型Token计费未验证。
-- 当前core-v1冻结；未知Schema拒绝。未来迁移需独立实现与副本验证，不允许覆写checksum绕过检查。
+- `core-v1` 保持冻结；当前候选新增 `sync-sources-v1`，通过独立 checksum 识别。未知或不匹配账本仍拒绝；生产升级尚未执行。
 
 复核、计划、实现和测试分别见 [审计复核](AUDIT_ROUND2_REVIEW.md)、[修复计划](ROUND2_FIX_PLAN.md)、[修复报告](ROUND2_FIX_REPORT.md)、[测试矩阵](ROUND2_TEST_MATRIX.md)。旧审计文档只作历史证据。

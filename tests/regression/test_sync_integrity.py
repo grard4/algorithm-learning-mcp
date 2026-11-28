@@ -160,3 +160,83 @@ def test_unchanged_sync_recovers_missing_archive(imported):
     archive.unlink()
     sync.sync_file(kb,path)
     assert archive.read_bytes()==path.read_bytes()
+
+
+def test_sequential_rollout_shards_keep_messages_distinct_and_retryable(tmp_path):
+    kb=KB(tmp_path/'shards.sqlite3')
+    first=tmp_path/'rollout-2026-01-01T00-00-00-chat.jsonl'
+    second=tmp_path/'rollout-2026-01-02T00-00-00-chat_next.jsonl'
+    save(first,[
+        dict(type='session_meta',payload={'id':'sharded-chat'}),
+        dict(type='response_item',timestamp='2026-01-01T00:00:01Z',payload=dict(type='message',role='user',content=[dict(type='input_text',text='first shard')])) ,
+        dict(type='event_msg',payload={}),
+        dict(type='event_msg',payload={}),
+        dict(type='event_msg',payload={}),
+        dict(type='event_msg',payload={}),
+    ])
+    save(second,[
+        dict(type='session_meta',payload={'id':'sharded-chat'}),
+        dict(type='response_item',timestamp='2026-01-02T00:00:01Z',payload=dict(type='message',role='user',content=[dict(type='input_text',text='second shard')])) ,
+        dict(type='event_msg',payload={}),
+        dict(type='response_item',timestamp='2026-01-02T00:00:02Z',payload=dict(type='message',role='assistant',content=[dict(type='output_text',text='second shard reply')])) ,
+    ])
+
+    first_result=sync.sync_file(kb,first,name='Synthetic',canonical='synthetic')
+    first_message=kb.rows("SELECT id,seq,content FROM messages WHERE conversation_id='sharded-chat' AND content='first shard'")[0]
+    second_result=sync.sync_file(kb,second)
+
+    assert first_result['imported']==1
+    assert second_result['imported']==2
+    assert kb.rows("SELECT id,seq,content FROM messages WHERE conversation_id='sharded-chat' AND content='first shard'")==[first_message]
+    messages=kb.rows("SELECT seq,content FROM messages WHERE conversation_id='sharded-chat' AND seq>0 ORDER BY seq")
+    assert [row['content'] for row in messages]==['first shard','second shard','second shard reply']
+    assert len({row['seq'] for row in messages})==3
+    assert messages[1]['seq']>first_message['seq']
+    assert sync.sync_file(kb,second)['unchanged'] is True
+    assert len(kb.rows("SELECT id FROM messages WHERE conversation_id='sharded-chat' AND seq>0"))==3
+
+
+def test_rollout_sources_are_processed_in_filename_order(tmp_path):
+    home=tmp_path/'codex'
+    late=home/'archived_sessions'/'rollout-2026-01-02T00-00-00-chat.jsonl'
+    early=home/'sessions'/'rollout-2026-01-01T00-00-00-chat.jsonl'
+    late.parent.mkdir(parents=True);early.parent.mkdir(parents=True)
+    late.write_text('{}\n',encoding='utf-8');early.write_text('{}\n',encoding='utf-8')
+    assert sync.sources(home)==[early,late]
+
+
+def test_rewritten_or_truncated_shard_is_rejected_without_advancing_ledger(tmp_path):
+    kb=KB(tmp_path/'shard-integrity.sqlite3')
+    path=tmp_path/'rollout-2026-01-01T00-00-00-chat.jsonl'
+    save(path,[
+        dict(type='session_meta',payload={'id':'integrity-chat'}),
+        dict(type='response_item',timestamp='2026-01-01T00:00:01Z',payload=dict(type='message',role='user',content=[dict(type='input_text',text='original')])) ,
+        dict(type='event_msg',payload={}),
+    ])
+    sync.sync_file(kb,path,name='Synthetic',canonical='synthetic')
+    before_state=kb.rows('SELECT * FROM sync_state')
+    before_shards=kb.rows('SELECT * FROM sync_sources')
+    before_messages=kb.rows('SELECT * FROM messages')
+    before_archives=kb.rows('SELECT sha256 FROM archives ORDER BY sha256')
+
+    save(path,[
+        dict(type='session_meta',payload={'id':'integrity-chat'}),
+        dict(type='response_item',timestamp='2026-01-01T00:00:01Z',payload=dict(type='message',role='user',content=[dict(type='input_text',text='rewritten')])) ,
+        dict(type='event_msg',payload={}),
+    ])
+    with pytest.raises(KBError) as caught:
+        sync.sync_file(kb,path)
+    assert caught.value.code=='SOURCE_CHANGED'
+    assert kb.rows('SELECT * FROM sync_state')==before_state
+    assert kb.rows('SELECT * FROM sync_sources')==before_shards
+    assert kb.rows('SELECT * FROM messages')==before_messages
+    assert kb.rows('SELECT sha256 FROM archives ORDER BY sha256')==before_archives
+
+    save(path,[dict(type='session_meta',payload={'id':'integrity-chat'})])
+    with pytest.raises(KBError) as caught:
+        sync.sync_file(kb,path)
+    assert caught.value.code=='SOURCE_TRUNCATED'
+    assert kb.rows('SELECT * FROM sync_state')==before_state
+    assert kb.rows('SELECT * FROM sync_sources')==before_shards
+    assert kb.rows('SELECT * FROM messages')==before_messages
+    assert kb.rows('SELECT sha256 FROM archives ORDER BY sha256')==before_archives

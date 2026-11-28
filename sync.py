@@ -4,6 +4,7 @@ from pathlib import Path
 import zstandard
 from kb import KB, KBError, ROOT, digest, dump, now, uid
 from archive_io import archive_path, publish
+from sync_identity import source_key
 from errors import error_response
 import input_limits as limits
 
@@ -190,19 +191,28 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
     else:
         tid=known[0]['topic_id']
     state=kb.rows('SELECT * FROM sync_state WHERE conversation_id=?',(cid,))
+    key=source_key(path)
+    shard=kb.rows('SELECT * FROM sync_sources WHERE conversation_id=? AND source_key=?',(cid,key))
     # Even unchanged sources must not hide a missing or corrupt archive file.
-    if state and state[0]['source_hash']==sha:
+    if shard and shard[0]['source_hash']==sha:
         publish(archive,raw)
         finish_extraction(kb,tid,cid)
         return {'conversation_id':cid,'unchanged':True}
     # 内容寻址归档只创建一次，重试验证内容而非覆盖。
     fresh=[]
     def fn(c,u):
-        previous=c.execute('SELECT line_count FROM sync_state WHERE conversation_id=?',(cid,)).fetchone()
+        previous=c.execute('SELECT line_count,seq_offset FROM sync_sources WHERE conversation_id=? AND source_key=?',(cid,key)).fetchone()
         if previous and previous['line_count']>len(events):
             raise KBError('SOURCE_TRUNCATED','源日志行数减少，停止推进游标')
+        if previous:
+            offset=previous['seq_offset']
+        else:
+            cursor=c.execute('SELECT MAX(seq_offset+line_count) FROM sync_sources WHERE conversation_id=?',(cid,)).fetchone()[0]
+            max_seq=c.execute('SELECT MAX(seq) FROM messages WHERE conversation_id=? AND seq>0',(cid,)).fetchone()[0]
+            offset=max(cursor or 0,max_seq or 0)
         c.execute('INSERT OR IGNORE INTO archives VALUES(?,?,?,?,?,?)',(sha,cid,str(archive),str(path),len(raw),now()))
         for m in messages:
+            m['seq']+=offset
             m['id']=digest([cid,m['seq']]); m['conversation_id']=cid; m['source_hash']=sha
             old=c.execute('SELECT * FROM messages WHERE id=?',(m['id'],)).fetchone()
             if old:
@@ -210,8 +220,7 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
                 if any(old[key]!=m[key] for key in fields): raise KBError('SOURCE_CHANGED','已有消息元数据或正文被改写，保留原档并停止导入')
             else:
                 c.execute('INSERT INTO messages VALUES(?,?,?,?,?,?,?,?)',tuple(m[k] for k in ('id','conversation_id','seq','role','timestamp','content','source_hash','source_line'))); fresh.append(m)
-        prior_count=c.execute('SELECT count(*) FROM messages WHERE conversation_id=? AND seq>0',(cid,)).fetchone()[0]
-        if prior_count>len(messages): raise KBError('SOURCE_TRUNCATED','源文件缩短，停止推进游标')
+        c.execute('INSERT OR REPLACE INTO sync_sources VALUES(?,?,?,?,?,?,?)',(cid,key,str(path),sha,len(events),offset,now()))
         conv=dict(c.execute('SELECT * FROM conversations WHERE id=?',(cid,)).fetchone())
         if conv['source_path']!=str(path):
             conv['source_path']=str(path)
@@ -219,12 +228,15 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
         c.execute('INSERT OR REPLACE INTO sync_state VALUES(?,?,?,?,NULL)',(cid,sha,len(events),now()))
         publish(archive,raw)
         return {'conversation_id':cid,'imported':len(fresh),'archive_sha256':sha,'messages':len(messages)}
-    result=kb.mutate('sync','sync:'+cid+':'+sha,'local-sync',cid,[sha],fn)
+    result=kb.mutate('sync','sync:'+cid+':'+digest([key,sha]),'local-sync',cid,[key,sha],fn)
     # 即使上次在归档后中断，重新运行仍补齐提取；每条候选有稳定幂等键。
     finish_extraction(kb,tid,cid)
     return result
 def sources(home):
-    return [p for folder in ('sessions','archived_sessions') for p in (home/folder).rglob('rollout-*.jsonl*') if p.suffix in ('.jsonl','.zst')]
+    paths=[p for folder in ('sessions','archived_sessions') for p in (home/folder).rglob('rollout-*.jsonl*') if p.suffix in ('.jsonl','.zst')]
+    # Rollout names carry their start time; chronological order keeps the
+    # conversation cursor and shard sequence ranges deterministic on rescans.
+    return sorted(paths,key=lambda p:(p.name.casefold(),str(p).casefold()))
 def report(kb):
     out=kb.path.parent/'reports'; out.mkdir(exist_ok=True)
     fingerprint=digest([kb.rows('SELECT MAX(change_id) v FROM context_events'),kb.rows('SELECT MAX(rowid) v FROM archives'),now()[:10]])
