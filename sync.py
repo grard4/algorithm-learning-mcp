@@ -1,5 +1,5 @@
 """只读适配本机 Codex rollout；格式变化时停止该文件并记录错误。"""
-import argparse, hashlib, io, json, os, re, time
+import argparse, hashlib, io, json, os, re, time, math
 from pathlib import Path
 import zstandard
 from kb import KB, KBError, ROOT, digest, dump, now, uid
@@ -8,6 +8,7 @@ from sync_identity import source_key
 from errors import error_response
 import input_limits as limits
 from zstd_frames import frames
+from discovery import Boundary, MAX_FILES
 
 def discovery_cutoff():
     """Persist a one-time discovery boundary so watch mode does not reset per poll."""
@@ -22,7 +23,7 @@ def discovery_cutoff():
         value=float(path.read_text(encoding='utf-8').strip())
     except (OSError, ValueError) as exc:
         raise KBError('INVALID_DISCOVERY_CUTOFF', 'config/discovery_since.txt must contain a Unix timestamp') from exc
-    if value < 0:
+    if not math.isfinite(value) or value < 0:
         raise KBError('INVALID_DISCOVERY_CUTOFF', 'discovery cutoff cannot be negative')
     return value
 
@@ -247,7 +248,12 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
     finish_extraction(kb,tid,cid)
     return result
 def sources(home):
-    paths=[p for folder in ('sessions','archived_sessions') for p in (home/folder).rglob('rollout-*.jsonl*') if p.suffix in ('.jsonl','.zst')]
+    paths=[]
+    for folder in ('sessions','archived_sessions'):
+        for p in (home/folder).rglob('rollout-*.jsonl*'):
+            if p.suffix in ('.jsonl','.zst'):
+                if len(paths)>=MAX_FILES: limits.too_large('发现文件清单超过预算')
+                paths.append(p)
     # Rollout names carry their start time; chronological order keeps the
     # conversation cursor and shard sequence ranges deterministic on rescans.
     return sorted(paths,key=lambda p:(p.name.casefold(),str(p).casefold()))
@@ -277,6 +283,7 @@ def run(kb,home,discover=False,initial=False):
         results.append(sync_file(kb,matches[0],t['title'],name,t.get('canonical')))
     known={r['id'] for r in kb.rows('SELECT id FROM conversations')}
     excluded=discovery_exclusions() if discover else set()
+    boundary=Boundary(ROOT/'config', home, paths, cutoff) if discover else None
     for p in paths:
         # 未来发现只处理系统安装之后的新文件；不扩大到其他历史聊天。
         is_known=any(cid in p.name for cid in known)
@@ -284,9 +291,9 @@ def run(kb,home,discover=False,initial=False):
         if not is_known and excluded_id:
             results.append({'excluded':excluded_id})
             continue
-        if not is_known and (not discover or p.stat().st_ctime<cutoff): continue
         try:
             stat=p.stat(); signature=(stat.st_size,stat.st_mtime_ns)
+            if not is_known and (not discover or not boundary.allows(p,stat)): continue
             if _scanned.get(str(p))==signature:continue
             result=sync_file(kb,p,allow_new=discover)
             results.append(result)

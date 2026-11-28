@@ -36,6 +36,9 @@ def test_invalid_exclusion_is_rejected(tmp_path, monkeypatch):
 
 def test_failed_source_has_opaque_identity(tmp_path, monkeypatch):
     configure(tmp_path,monkeypatch,[])
+    # Establish an empty initial inventory before the new failing source arrives.
+    from discovery import Boundary
+    Boundary(tmp_path/'config',tmp_path,[],0)
     path=tmp_path/'private-rollout.jsonl';path.write_text('invalid\n')
     monkeypatch.setattr(sync,'sources',lambda home:[path])
     result=sync.run(KB(tmp_path/'kb.sqlite3'),tmp_path,discover=True)[0]
