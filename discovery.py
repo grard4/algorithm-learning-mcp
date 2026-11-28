@@ -1,7 +1,8 @@
 """Persistent first-observation boundary; never interpret ctime/mtime as birth.
 
 Without birthtime, a stable file identity absent from the initial inventory is
-eligible. This is arrival-after-inventory, not proof of physical creation time.
+eligible for manual review only, never automatic import. Arrival-after-inventory
+is not proof of physical creation time.
 Existing paths and identities remain excluded even after rename/replacement.
 """
 import json
@@ -85,6 +86,7 @@ class Boundary:
             raise KBError('INVALID_DISCOVERY_BOUNDARY', '发现快照无效；保留现场并显式登记') from exc
 
     def allows(self, path, stat):
+        """Allow inspection of a new arrival; absent birthtime still needs consent."""
         key = identity(stat)
         if not key or path.is_symlink() or digest(str(path.resolve())) in self.paths or key in self.identities:
             return False

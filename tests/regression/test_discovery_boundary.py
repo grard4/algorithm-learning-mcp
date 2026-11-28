@@ -37,13 +37,54 @@ def test_native_old_metadata_changes_new_file_and_restart(tmp_path, monkeypatch)
     sync.run(kb, home, discover=True)
     assert called == [], 'old metadata change must not admit historical chat'
     new = log(home, 'new')
+    result = sync.run(kb, home, discover=True)
+    has_birth = hasattr(new.stat(), 'st_birthtime')
+    expected = [new.name] if has_birth else []
+    assert called == expected
+    if not has_birth:
+        assert result[0]['needs_registration']
+        assert kb.rows('SELECT source_path FROM discovery_candidates') == [{'source_path': str(new)}]
     sync.run(kb, home, discover=True)
-    assert called == [new.name]
-    sync.run(kb, home, discover=True)
-    assert called == [new.name], 'unchanged scan should be cached'
+    assert called == expected, 'unchanged scan should be cached'
     monkeypatch.setattr(sync, '_scanned', {})
     sync.run(kb, home, discover=True)
-    assert called == [new.name, new.name], 'persistent boundary must survive worker restart'
+    assert called == expected * 2, 'persistent boundary must survive worker restart'
+    if not has_birth:
+        kb.register('Synthetic', '', 'new', 'Synthetic')
+        sync.run(kb, home, discover=True)
+        assert called == [new.name], 'explicit registration enables known-source import'
+
+
+def test_simulated_new_without_birthtime_requires_registration(tmp_path, monkeypatch):
+    kb, home = setup(tmp_path, monkeypatch)
+    sync.run(kb, home, discover=True)
+    p = log(home, 'new')
+
+    class NoBirth:
+        name = p.name
+
+        def __str__(self):
+            return str(p)
+
+        def resolve(self):
+            return p.resolve()
+
+        def is_symlink(self):
+            return False
+
+        def stat(self):
+            s = p.stat()
+            return SimpleNamespace(st_dev=s.st_dev, st_ino=s.st_ino,
+                st_size=s.st_size, st_mtime_ns=s.st_mtime_ns)
+
+    monkeypatch.setattr(sync, 'sources', lambda home: [NoBirth()])
+    calls = []
+    monkeypatch.setattr(sync, 'sync_file', lambda *args, **kw: calls.append(1) or {})
+    assert sync.run(kb, home, discover=True)[0]['needs_registration']
+    assert calls == []
+    kb.register('Synthetic', '', 'new', 'Synthetic')
+    sync.run(kb, home, discover=True)
+    assert calls == [1]
 
 
 def test_simulated_no_birthtime_old_rename_and_uncertain_identity(tmp_path, monkeypatch):
@@ -121,3 +162,16 @@ def test_corrupt_snapshot_fails_closed(tmp_path):
     with pytest.raises(Exception) as exc:
         Boundary(tmp_path/'config', home, [], 0)
     assert getattr(exc.value, 'code', None) == 'INVALID_DISCOVERY_BOUNDARY'
+
+
+def test_incomplete_inventory_fails_closed(tmp_path, monkeypatch):
+    kb, home = setup(tmp_path, monkeypatch)
+
+    def failed_walk(base, onerror, **kwargs):
+        onerror(PermissionError('synthetic unreadable directory'))
+        return iter(())
+
+    monkeypatch.setattr(sync.os, 'walk', failed_walk)
+    with pytest.raises(PermissionError):
+        sync.run(kb, home, discover=True)
+    assert not list((tmp_path/'config').glob('discovery-baseline-*'))

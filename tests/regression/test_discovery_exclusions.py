@@ -40,7 +40,11 @@ def test_failed_source_has_opaque_identity(tmp_path, monkeypatch):
     from discovery import Boundary
     Boundary(tmp_path/'config',tmp_path,[],0)
     path=tmp_path/'private-rollout.jsonl';path.write_text('invalid\n')
+    # This test targets error redaction, so explicitly authorize this synthetic
+    # source on platforms that cannot establish a reliable birth time.
+    kb=KB(tmp_path/'kb.sqlite3')
+    kb.register('Synthetic','','private','Synthetic')
     monkeypatch.setattr(sync,'sources',lambda home:[path])
-    result=sync.run(KB(tmp_path/'kb.sqlite3'),tmp_path,discover=True)[0]
+    result=sync.run(kb,tmp_path,discover=True)[0]
     assert result['ok'] is False and result['source_id']==sync.digest(str(path))
     assert str(path) not in json.dumps(result)

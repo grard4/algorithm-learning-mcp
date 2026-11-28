@@ -248,12 +248,20 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
     finish_extraction(kb,tid,cid)
     return result
 def sources(home):
+    import fnmatch
     paths=[]
+    def scan_error(exc):
+        raise exc  # A partial inventory must not become a trusted baseline.
     for folder in ('sessions','archived_sessions'):
-        for p in (home/folder).rglob('rollout-*.jsonl*'):
-            if p.suffix in ('.jsonl','.zst'):
-                if len(paths)>=MAX_FILES: limits.too_large('发现文件清单超过预算')
-                paths.append(p)
+        base=home/folder
+        try: base.stat()
+        except FileNotFoundError: continue
+        for directory, _, names in os.walk(base,onerror=scan_error,followlinks=False):
+            for name in names:
+                p=Path(directory)/name
+                if fnmatch.fnmatchcase(name,'rollout-*.jsonl*') and p.suffix in ('.jsonl','.zst'):
+                    if len(paths)>=MAX_FILES: limits.too_large('发现文件清单超过预算')
+                    paths.append(p)
     # Rollout names carry their start time; chronological order keeps the
     # conversation cursor and shard sequence ranges deterministic on rescans.
     return sorted(paths,key=lambda p:(p.name.casefold(),str(p).casefold()))
@@ -291,12 +299,28 @@ def run(kb,home,discover=False,initial=False):
         if not is_known and excluded_id:
             results.append({'excluded':excluded_id})
             continue
+        if not is_known and not discover: continue
         try:
-            stat=p.stat(); signature=(stat.st_size,stat.st_mtime_ns)
+            stat=p.stat(); signature=(stat.st_size,stat.st_mtime_ns,is_known)
             if not is_known and (not discover or not boundary.allows(p,stat)): continue
             if _scanned.get(str(p))==signature:continue
+            if not is_known and not hasattr(stat,'st_birthtime'):
+                # A new inode might be an old file moved from outside the initial
+                # inventory. Never read/import its contents without registration.
+                match=re.search(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}',p.name)
+                candidate=match[0] if match else 'source:'+digest(str(p))
+                with kb.connect() as c:
+                    c.execute('INSERT OR IGNORE INTO discovery_candidates VALUES(?,?,?,?)',
+                        (candidate,str(p),'缺少可靠创建时间；新到达来源需显式登记后导入',now()))
+                results.append({'source_id':digest(str(p)),'needs_registration':True})
+                _scanned[str(p)]=signature
+                continue
             result=sync_file(kb,p,allow_new=discover)
             results.append(result)
+            if result.get('conversation_id'):
+                with kb.connect() as c:
+                    c.execute('DELETE FROM discovery_candidates WHERE conversation_id=? OR source_path=?',
+                        (result['conversation_id'],str(p)))
             _scanned[str(p)]=signature
         except Exception as e:
             # Opaque correlation key: diagnose a failed source without exposing its path.
