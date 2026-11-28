@@ -60,3 +60,26 @@ def test_invalid_and_resource_boundaries(tmp_path, monkeypatch, kind):
         with pytest.raises(KBError) as exc:
             sync.read_bytes(path)
         assert exc.value.code == ('TOO_LARGE' if kind == 'output' else 'INVALID_LOG')
+
+
+@pytest.mark.parametrize('size', [0, 1, 255, 256, 131072, 300000])
+@pytest.mark.parametrize('content_size', [True, False])
+def test_actual_025_frame_encodings(tmp_path, size, content_size):
+    import os
+    data = os.urandom(size)
+    path = tmp_path/'encoded.zst'
+    path.write_bytes(zstandard.ZstdCompressor(write_content_size=content_size, write_checksum=True).compress(data))
+    assert sync.read_bytes(path) == data
+
+
+def test_every_truncation_and_corrupt_checksum(tmp_path):
+    frame = zstandard.ZstdCompressor(write_checksum=True).compress(b'proof' * 100)
+    path = tmp_path/'truncated.zst'
+    for end in range(len(frame)):
+        path.write_bytes(frame[:end])
+        with pytest.raises(KBError) as exc:
+            sync.read_bytes(path)
+        assert exc.value.code == 'INVALID_LOG'
+    path.write_bytes(frame[:-1] + bytes([frame[-1] ^ 1]))
+    with pytest.raises(KBError):
+        sync.read_bytes(path)
