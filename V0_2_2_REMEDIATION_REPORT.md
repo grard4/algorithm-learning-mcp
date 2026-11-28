@@ -4,7 +4,7 @@
 
 ## 1. 执行摘要
 
-A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态文档已更新。建立独立分支 `release-candidate/v0.2.2`。本地干净 Python 3.14.7 环境 220 passed，0 failed，0 skipped。远程矩阵尚待本候选推送后的结果，当前发布建议 **NOT_READY**；此状态将在远程逐项验收后更新。A04 保持 **PARTIAL**。
+A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态文档已更新。建立独立分支 `release-candidate/v0.2.2`。本地干净 Python 3.14.7 环境 221 passed，0 failed，0 skipped。远程矩阵尚待本候选推送后的结果，当前发布建议 **NOT_READY**；此状态将在远程逐项验收后更新。A04 保持 **PARTIAL**。
 
 本任务只形成候选；不合并 main、不创建正式 Release/Tag、不发布 PyPI，也不升级或修改本机生产数据库。
 
@@ -25,7 +25,7 @@ A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态
 
 - 在所有已注册工具共享的输出边界生成对外副本；移除 cwd/source_path 等定位字段，为来源生成与 worker 一致的不透明 source_id。
 - 递归处理结构、JSON 字符串中的 JSON、Windows/UNC/POSIX/file URI 风格的路径文本；原始数据库及归档不改写。
-- 单条知识/消息先脱敏再切片，offset/total_chars 针对脱敏后的文本，避免拆分绕过。原始证据哈希仍指向内部原文，不能拿遮蔽后的文本重新计算原文哈希。
+- 单条知识/消息（包括作为文本读取的嵌套 JSON）先结构脱敏再切片，offset/total_chars 针对脱敏后的文本，避免拆分绕过。原始证据哈希仍指向内部原文，不能拿遮蔽后的文本重新计算原文哈希。
 - 框架参数验证可能在业务装饰器之前失败，因此单独替换其异常文本；保留 MCP `isError` 语义。Schema details.path 是字段位置，不作为磁盘路径字段删除。
 - 普通和 full=true 历史查询均经过相同边界。可信本地 CLI/数据库诊断可继续定位原始文件。
 
@@ -74,7 +74,7 @@ v0.2.1 正式基线 CI 为 Actions `46150934512`：12 个 Windows/Ubuntu/macOS �
 
 仍未实现：进程内存硬限制、聚合并发配额、整体任务超时、磁盘累计配额、被强制终止后的临时文件清理保证。未知文件树遍历、数据库历史累计、公开健康检查记录总量、并发任务与缓存仍可能消耗较多资源。新增脱敏扫描与发现快照也有分配开销，不作“零增长”承诺。
 
-可复现脚本 `scripts/v022_resource_probe.py` 与原有 `scripts/round2_resource_probe.py` 均使用合成输入和独立临时数据库。完整规模、耗时、OS 峰值 RSS、返回状态、完整性、残留文件检查见 `docs/evidence/v022-resources-windows.json` 与 `docs/evidence/v022-existing-resources-windows.json`。样本包括 200,000 个空帧、200,000 微小帧、33 MiB 解压输出、约 15 MB 同步输入、5,000 文件连续 5 次扫描、5,000 条真实 stdio MCP 历史分页读取。
+可复现脚本 `scripts/v022_resource_probe.py` 与原有 `scripts/round2_resource_probe.py` 均使用合成输入和独立临时数据库。完整规模、耗时、OS 峰值 RSS、返回状态、完整性、残留文件检查见 `docs/evidence/v022-resources-windows.json` 与 `docs/evidence/v022-existing-resources-windows.json`。样本包括 200,000 个空帧、200,000 微小帧、33 MiB 解压输出、约 15 MB 同步输入、5,000 文件连续 5 次扫描、5,000 条真实 stdio MCP 历史分页读取，以及 500,000 个连续反斜杠的脱敏扫描。
 
 RSS 是整个探针子进程的峰值，含导入和构造输入；历史读取另启 MCP 服务子进程，其 RSS 没有计入，不是两进程聚合测量。正常退出后临时目录/发布暂存文件清理已检查；未测试强制杀进程清理。计时不是跨设备性能保证。旧 10 项资源探针同样通过。
 
@@ -86,13 +86,13 @@ RSS 是整个探针子进程的峰值，含导入和构造输入；历史读取�
 |---|---|
 | A12/A13/A14 先复现再修复 | 明确红/绿证据，如上 |
 | 既有安全与回归目录 | 中间版本 150 passed；新增边界纳入最终全量 |
-| 最终全量 pytest + ResourceWarning as error | 220 passed，0 failed，0 skipped |
+| 最终全量 pytest + ResourceWarning as error | 221 passed，0 failed，0 skipped |
 | Ruff E9,F63,F7,F82 / compileall | 通过 |
 | pip check / pip-audit | 通过；本次审计未报告已知漏洞 |
 | SQLite integrity_check / foreign_key_check | 各测试隔离 DB fixture 和资源/升级探针均通过 |
-| 原有资源探针 / 新资源探针 | 10 / 6 个场景通过 |
+| 原有资源探针 / 新资源探针 | 10 / 7 个场景通过 |
 | 实际 v0.2.1 升级、CLI、备份恢复 | 通过，见 v022-upgrade-windows.json |
-| 真实 MCP stdio + 回环 HTTP | 通过；17 公开读取、分页、错误路径专项通过 |
+| 真实 MCP stdio + 回环 HTTP | 通过；17 公开读取、分页、嵌套 JSON、错误路径和分隔符噪声专项通过 |
 | GitHub Actions 最终候选 | 待远程结果 |
 
 命令（在候选仓库、独立环境执行）：
@@ -113,7 +113,7 @@ python scripts/v022_upgrade_smoke.py --output v022-upgrade-smoke.json
 
 升级冒烟从已核实的实际 v0.2.1 tag 导出代码，创建有合成聊天/消息/归档的临时库，再用候选打开；逐表比较升级前后数据、验证归档哈希及 Schema，不复制生产数据。支持新建空库、备份、恢复与失败退出码。
 
-失败均已分析：初次全量 1 failed/204 passed 是脱敏包装改变 framework isError 语义，修复后恢复断言；早期裸 UNC 正则误遮蔽规则里的双反斜杠，收紧匹配并保留规则一致性测试；资源脚本首次引用了错误列名 last_seq，改为实际 line_count 后重跑。未删除测试、降低断言或跳过失败项。
+失败均已分析：初次全量 1 failed/204 passed 是脱敏包装改变 framework isError 语义，修复后恢复断言；早期裸 UNC 正则误遮蔽规则里的双反斜杠，收紧匹配并保留规则一致性测试；资源脚本首次引用了错误列名 last_seq，改为实际 line_count 后重跑。追加复核复现了嵌套 JSON 分页遗留字段，已移到分页前处理；同时发现初版路径正则对连续反斜杠存在二次回溯，8,000 字符约 0.47 秒。收紧路径起始匹配后，500,000 字符约 0.02 秒，并加入独立子进程超时回归与资源探针。未删除测试、降低断言或跳过失败项。
 
 ## 9. 跨平台与远程 CI
 

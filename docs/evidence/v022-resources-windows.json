@@ -7,105 +7,119 @@
       "case": "empty_frames",
       "input_bytes": 1800000,
       "units": 200000,
-      "elapsed_seconds": 0.07094100000540493,
-      "peak_rss_bytes": 38924288,
+      "elapsed_seconds": 0.0656684999994468,
+      "peak_rss_bytes": 39149568,
       "status": "TOO_LARGE",
       "repeated_scans": null,
       "integrity": "ok",
       "foreign_key_errors": 0,
       "pending_files": 0,
-      "measured_at": "2026-11-28T14:31:38.157438+00:00",
+      "measured_at": "2026-11-28T14:36:57.695981+00:00",
       "temporary_directory_removed": true
     },
     {
       "case": "small_frames",
       "input_bytes": 2000000,
       "units": 200000,
-      "elapsed_seconds": 0.0807559000022593,
-      "peak_rss_bytes": 39288832,
+      "elapsed_seconds": 0.07597539999551373,
+      "peak_rss_bytes": 39407616,
       "status": "TOO_LARGE",
       "repeated_scans": null,
       "integrity": "ok",
       "foreign_key_errors": 0,
       "pending_files": 0,
-      "measured_at": "2026-11-28T14:31:38.460048+00:00",
+      "measured_at": "2026-11-28T14:36:58.015830+00:00",
       "temporary_directory_removed": true
     },
     {
       "case": "large_output",
       "input_bytes": 1091953,
       "units": 34603008,
-      "elapsed_seconds": 0.08785090000310447,
-      "peak_rss_bytes": 106786816,
+      "elapsed_seconds": 0.09615219999977853,
+      "peak_rss_bytes": 106762240,
       "status": "TOO_LARGE",
       "repeated_scans": null,
       "integrity": "ok",
       "foreign_key_errors": 0,
       "pending_files": 0,
-      "measured_at": "2026-11-28T14:31:38.791258+00:00",
+      "measured_at": "2026-11-28T14:36:58.358648+00:00",
       "temporary_directory_removed": true
     },
     {
       "case": "large_sync",
       "input_bytes": 15070557,
       "units": 1500,
-      "elapsed_seconds": 0.5275099999998929,
-      "peak_rss_bytes": 67162112,
+      "elapsed_seconds": 0.5696554999958607,
+      "peak_rss_bytes": 67260416,
       "status": "accepted",
       "repeated_scans": null,
       "integrity": "ok",
       "foreign_key_errors": 0,
       "pending_files": 0,
-      "measured_at": "2026-11-28T14:31:39.545299+00:00",
+      "measured_at": "2026-11-28T14:36:59.170127+00:00",
       "temporary_directory_removed": true
     },
     {
       "case": "discovery",
-      "input_bytes": 680164,
+      "input_bytes": 680163,
       "units": 5000,
-      "elapsed_seconds": 3.8653918000054546,
-      "peak_rss_bytes": 53272576,
+      "elapsed_seconds": 4.2272526000015205,
+      "peak_rss_bytes": 53936128,
       "status": "accepted",
       "repeated_scans": [
         {
-          "seconds": 1.2037936999986414,
-          "peak_rss_bytes": 53272576
+          "seconds": 1.3259352000022773,
+          "peak_rss_bytes": 53936128
         },
         {
-          "seconds": 0.6703864000010071,
-          "peak_rss_bytes": 53272576
+          "seconds": 0.7120469000001322,
+          "peak_rss_bytes": 53936128
         },
         {
-          "seconds": 0.6315389000010327,
-          "peak_rss_bytes": 53272576
+          "seconds": 0.688585800002329,
+          "peak_rss_bytes": 53936128
         },
         {
-          "seconds": 0.6880832000024384,
-          "peak_rss_bytes": 53272576
+          "seconds": 0.7537143000008655,
+          "peak_rss_bytes": 53936128
         },
         {
-          "seconds": 0.6688663000022643,
-          "peak_rss_bytes": 53272576
+          "seconds": 0.7440557000008994,
+          "peak_rss_bytes": 53936128
         }
       ],
       "integrity": "ok",
       "foreign_key_errors": 0,
       "pending_files": 0,
-      "measured_at": "2026-11-28T14:31:44.367209+00:00",
+      "measured_at": "2026-11-28T14:37:04.458077+00:00",
       "temporary_directory_removed": true
     },
     {
       "case": "history",
       "input_bytes": 3105000,
       "units": 5000,
-      "elapsed_seconds": 1.7107545000035316,
-      "peak_rss_bytes": 75362304,
+      "elapsed_seconds": 1.843183199998748,
+      "peak_rss_bytes": 75288576,
       "status": "accepted",
       "repeated_scans": null,
       "integrity": "ok",
       "foreign_key_errors": 0,
       "pending_files": 0,
-      "measured_at": "2026-11-28T14:31:46.721161+00:00",
+      "measured_at": "2026-11-28T14:37:07.018231+00:00",
+      "temporary_directory_removed": true
+    },
+    {
+      "case": "redaction_noise",
+      "input_bytes": 500000,
+      "units": 500000,
+      "elapsed_seconds": 0.020165899994026404,
+      "peak_rss_bytes": 36335616,
+      "status": "accepted",
+      "repeated_scans": null,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "pending_files": 0,
+      "measured_at": "2026-11-28T14:37:07.393704+00:00",
       "temporary_directory_removed": true
     }
   ]

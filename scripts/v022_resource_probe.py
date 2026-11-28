@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 from round2_resource_probe import peak_rss
 
-CASES = ('empty_frames', 'small_frames', 'large_output', 'large_sync', 'discovery', 'history')
+CASES = ('empty_frames', 'small_frames', 'large_output', 'large_sync', 'discovery', 'history', 'redaction_noise')
 
 
 def probe(case):
@@ -28,7 +28,13 @@ def probe(case):
         os.environ.update(ALGORITHM_KB=str(root/'test.sqlite3'), ALGORITHM_PREFERENCES=str(root/'missing'))
         kb = KB()
         size, units, status, reads = 0, 0, 'accepted', None
-        if case in ('empty_frames', 'small_frames', 'large_output'):
+        if case == 'redaction_noise':
+            from public_response import public_response
+            value = chr(92) * 500000
+            size = units = len(value)
+            start = time.perf_counter()
+            assert public_response({'text': value}) == {'text': value}
+        elif case in ('empty_frames', 'small_frames', 'large_output'):
             path = root/'source.zst'
             if case == 'large_output':
                 raw = os.urandom(1024 * 1024) * 33

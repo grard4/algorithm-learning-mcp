@@ -13,7 +13,8 @@ _PRIVATE = {'cwd', 'source_path', 'archive_path', 'file_path', 'filename',
 # Spaces within directory components are allowed; trailing prose is not consumed.
 _PATH = re.compile(
     r'https?://[^\s<>"`]+|'
-    r'(?:file://|[A-Za-z]:[\\/]|\\\\|(?<![\w:/])/)(?:[^\r\n<>"`|]*[\\/])?[^\s<>"`|,;\\/]+'
+    r'(?:file://[\\/]*|[A-Za-z]:[\\/]+|\\\\(?=[^\s\\/])|(?<![\w:/\\])/+)'
+    r'(?=[^\s\\/])(?:[^\r\n<>"`|]*[\\/])?[^\s<>"`|,;\\/]+'
 )
 
 

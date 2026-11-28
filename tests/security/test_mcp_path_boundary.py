@@ -2,6 +2,7 @@
 import asyncio
 import json
 import sys
+import subprocess
 from pathlib import Path
 
 from mcp import ClientSession
@@ -117,3 +118,14 @@ def test_paginated_text_redacted_before_slicing(linked):
             offset = page['next_offset']
         assert 'private-person' not in ''.join(pieces)
         assert 'prefix' in ''.join(pieces) and 'suffix' in ''.join(pieces)
+
+
+def test_separator_noise_has_no_quadratic_backtracking():
+    # A bounded subprocess deadline catches the original quadratic pattern.
+    # Original measured 8,000 backslashes at ~0.47s; 200,000 exceeded this bound.
+    result = subprocess.run([sys.executable, '-c',
+        "from public_response import public_text; "
+        "s=chr(92)*200000; assert public_text(s)==s; "
+        "s=(chr(92)+'/')*100000; assert public_text(s)==s"],
+        cwd=ROOT, capture_output=True, timeout=10)
+    assert result.returncode == 0
