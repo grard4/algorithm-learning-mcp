@@ -1,0 +1,131 @@
+{
+  "date": "2026-11-28",
+  "baseline_commit": "d8f190686d3eef5abca052d7fad00793e5274b1a",
+  "platform": "Windows x64",
+  "python": "3.14.7",
+  "scope": "Synthetic isolated inputs. RSS is each child process peak working set, including interpreter/import/database overhead. The sum of per-process peaks is not a simultaneous aggregate or a theoretical bound.",
+  "budgets": {
+    "source_bytes": 16777216,
+    "decompressed_bytes": 33554432,
+    "window_bytes": 8388608,
+    "events": 20000,
+    "json_depth": 32,
+    "json_nodes": 250000,
+    "message_bytes": 262144,
+    "sqlite_busy_timeout_ms": 30000
+  },
+  "cases": [
+    {
+      "name": "source_near_limit",
+      "input_bytes": 16509361,
+      "events": 67,
+      "status": "accepted",
+      "elapsed_seconds": 0.777,
+      "peak_working_set_bytes": 70262784,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "archives": 1,
+      "cursors": 1,
+      "pending_temp_files_after_exit": 0
+    },
+    {
+      "name": "decompressed_near_limit",
+      "compressed_input_bytes": 167004,
+      "decompressed_bytes_approx": 31200000,
+      "messages": 120,
+      "status": "accepted",
+      "elapsed_seconds": 1.739,
+      "peak_working_set_bytes": 99573760,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "archives": 1,
+      "cursors": 1,
+      "pending_temp_files_after_exit": 0
+    },
+    {
+      "name": "events_near_limit",
+      "input_bytes": 2839771,
+      "events": 19999,
+      "status": "accepted",
+      "note": "Raised JSON_NODES only for this isolated probe so the EVENTS boundary could be measured independently.",
+      "peak_working_set_bytes": 74604544,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "archives": 1,
+      "cursors": 1,
+      "pending_temp_files_after_exit": 0
+    },
+    {
+      "name": "json_nodes_near_limit",
+      "input_bytes": 500045,
+      "numeric_values": 249990,
+      "status": "accepted",
+      "peak_working_set_bytes": 38666240,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "archives": 1,
+      "cursors": 1,
+      "pending_temp_files_after_exit": 0
+    },
+    {
+      "name": "json_depth_over_limit",
+      "input_bytes": 134,
+      "status": "TOO_LARGE",
+      "peak_working_set_bytes": 34091008,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "archives": 0,
+      "cursors": 0,
+      "pending_temp_files_after_exit": 0
+    },
+    {
+      "name": "compression_ratio_over_limit",
+      "compressed_input_bytes": 82,
+      "decompressed_payload_bytes": 2097152,
+      "status": "TOO_LARGE",
+      "peak_working_set_bytes": 37507072,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "archives": 0,
+      "cursors": 0,
+      "pending_temp_files_after_exit": 0
+    },
+    {
+      "name": "raw_file_over_limit",
+      "input_bytes": 16777217,
+      "status": "TOO_LARGE",
+      "evidence": "Existing round-three resource probe; file size rejected before full read.",
+      "database_unchanged": true,
+      "archives_created": 0,
+      "integrity": "ok",
+      "foreign_key_errors": 0
+    }
+  ],
+  "concurrency": {
+    "parallel_imports": 4,
+    "process_model": "Four independent child processes, four distinct synthetic conversation IDs, one shared isolated SQLite database and separate content-addressed archive directories.",
+    "compressed_input_bytes_each": 167731,
+    "decompressed_bytes_each_approx": 31200000,
+    "individual_peak_working_set_bytes": [
+      99999744,
+      99692544,
+      99962880,
+      99864576
+    ],
+    "sum_individual_peak_bytes": 399519744,
+    "sum_is_not_simultaneous_peak": true,
+    "statuses": ["accepted", "accepted", "accepted", "accepted"],
+    "archives_after_exit": 4,
+    "cursors_after_exit": 4,
+    "integrity": "ok",
+    "foreign_key_errors": 0,
+    "pending_temp_files_after_exit": 0
+  },
+  "limitations": [
+    "Representative samples are not a strict process-memory bound.",
+    "No process-wide or cross-process concurrent-import limit was found.",
+    "Four child processes were exercised; arbitrary concurrency, hostile multi-user load, CPU quota and OS-level memory pressure remain unverified.",
+    "The sample did not simulate forced termination while a temporary archive file was being written; an abrupt process kill may leave an orphan temporary file.",
+    "A04 therefore remains PARTIAL."
+  ]
+}
