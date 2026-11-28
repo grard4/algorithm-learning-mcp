@@ -13,6 +13,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
@@ -22,6 +24,8 @@ jobs:
       - run: python -m ruff check --select E9,F63,F7,F82 .
       - run: python -m pytest -ra --cov=. --cov-report=term-missing --cov-report=xml --junitxml=test-results.xml
       - run: python scripts/round2_resource_probe.py --output resource-probe.json
+      - run: python scripts/v022_resource_probe.py --output v022-resource-probe.json
+      - run: python scripts/v022_upgrade_smoke.py --output v022-upgrade-smoke.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -30,6 +34,8 @@ jobs:
             test-results.xml
             coverage.xml
             resource-probe.json
+            v022-resource-probe.json
+            v022-upgrade-smoke.json
   dependencies:
     runs-on: ubuntu-latest
     timeout-minutes: 10
