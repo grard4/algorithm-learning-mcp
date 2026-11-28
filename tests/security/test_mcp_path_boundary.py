@@ -71,6 +71,7 @@ def test_all_public_reads_redact_paths_over_stdio(linked, tmp_path):
                     c.execute('UPDATE messages SET content=?', ('prefix ' + POSIX + ' suffix',))
                     row = json.loads(c.execute("SELECT data FROM knowledge_items WHERE id='k'").fetchone()[0])
                     row['content'] = 'prefix ' + WIN + ' suffix'
+                    row['metadata'] = {'source_path': WIN, 'nested': json.dumps({'cwd': POSIX, 'safe': 'kept'})}
                     c.execute("UPDATE knowledge_items SET data=? WHERE id='k'", (json.dumps(row),))
                 for name, args, field in [
                     ('get_conversation_history', {'conversation_id': 'chat', 'message_id': 'msg'}, 'content'),
@@ -83,6 +84,15 @@ def test_all_public_reads_redact_paths_over_stdio(linked, tmp_path):
                         text += page[field]
                         offset = page['next_offset']
                     assert 'private-person' not in text and 'prefix' in text and 'suffix' in text
+                offset, text = 0, ''
+                while offset is not None:
+                    response = await session.call_tool('read_knowledge',
+                        {'knowledge_id': 'k', 'field': 'metadata', 'offset': offset, 'chars': 3})
+                    page = json.loads(response.content[0].text)['data']
+                    text += page['text']
+                    offset = page['next_offset']
+                assert 'source_path' not in text and 'cwd' not in text and 'private-person' not in text
+                assert 'kept' in text
     asyncio.run(run())
     assert kb.rows('SELECT cwd,source_path FROM conversations')[0] == {'cwd': WIN, 'source_path': POSIX}
     assert kb.rows('SELECT source_path FROM discovery_candidates')[0]['source_path'] == WIN
