@@ -296,6 +296,8 @@ class Context:
 
         if not isinstance(text, str): text = dump(text)
 
+        from public_response import public_text
+        text = public_text(text)
         chars = max(1, min(chars, 12000)); end = offset + chars
 
         return dict(result, field=field, text=text[offset:end], offset=offset, total_chars=len(text),
@@ -324,7 +326,8 @@ class Context:
 
         if not rows: return {'message': None, 'next_after_seq': after_seq}
 
-        row = rows[0]; text = row.pop('content'); chars = max(1, min(chars, 12000)); end = offset + chars
+        from public_response import public_text
+        row = rows[0]; text = public_text(row.pop('content')); chars = max(1, min(chars, 12000)); end = offset + chars
 
         row.update(content=text[offset:end], offset=offset, total_chars=len(text), next_offset=end if end < len(text) else None)
 

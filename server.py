@@ -24,10 +24,22 @@ from optimized_reads import ReadCache
 from archive_io import archive_path, publish
 from errors import error_response
 from input_limits import NormalizedMessages, normalized_raw
+from public_response import public_response
 
 
 
-mcp=FastMCP('algorithm-learning', instructions=COURSE_INSTRUCTIONS)
+class PublicMCP(FastMCP):
+    async def call_tool(self, name, arguments):
+        try:
+            return await super().call_tool(name, arguments)
+        except Exception:
+            # FastMCP validation errors include input_value before our decorator
+            # runs. Never serialize their repr (or caller-supplied tool names).
+            return [TextContent(type='text', text=json.dumps({'ok': False, 'error': {
+                'code': 'INVALID_INPUT', 'message': '工具名称或参数不符合接口定义'}}))]
+
+
+mcp=PublicMCP('algorithm-learning', instructions=COURSE_INSTRUCTIONS)
 try:
     kb=KB()
 except Exception as exc:
@@ -56,9 +68,9 @@ def tool(fn):
 
     def call(*a,**kw):
 
-        try: return {'ok':True,'data':fn(*a,**kw)}
+        try: return public_response({'ok':True,'data':fn(*a,**kw)})
 
-        except Exception as exc: return error_response(exc)
+        except Exception as exc: return public_response(error_response(exc))
 
     TOOLS[fn.__name__]=call
 
