@@ -10,16 +10,17 @@
   },
   "post_patch_verification": {
     "targeted_command": "python -m pytest tests/regression/test_sync_integrity.py tests/integration/test_migration_recovery.py -q",
-    "targeted_result": "23 passed",
+    "targeted_result": "24 passed",
     "quality_gate_command": "python scripts/quality_gate.py --dependencies",
     "quality_gate": {
       "static": "PASS",
       "regression": "PASS",
-      "regression_tests": 181,
+      "regression_tests": 182,
       "failed": 0,
       "skipped": 0,
       "dependency_consistency": "PASS",
-      "vulnerability_scan": "PASS"
+      "vulnerability_scan": "PASS",
+      "hidden_event_rewrite": "rejected as SOURCE_CHANGED; prior archive bytes must remain an exact prefix"
     },
     "resource_probe": {
       "result": "10/10 expected accept/reject outcomes; SQLite integrity passed; no foreign key errors",

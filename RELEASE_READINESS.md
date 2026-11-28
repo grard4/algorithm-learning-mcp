@@ -4,7 +4,7 @@
 
 候选分支 `release-candidate/2026-11-28` 从第三轮提交 `d8f190686d3eef5abca052d7fad00793e5274b1a` 建立。阶段四基线验收完成后，用户指定将多 rollout 分片同步补丁加入候选；当前分支包含 `sync.py` 分片隔离、`sync_identity.py`、新增 `sync-sources-v1` 加法迁移及回归测试。原第三轮 worktree 里的未提交文件保留未动；只有明确关联的补丁内容被移植。
 
-Windows Python 3.14.7 隔离环境按 `requirements-dev.txt` 与 `requirements-quality.txt` 安装后，当前候选质量门禁静态检查、181 项回归、依赖一致性和漏洞扫描均通过；pip-audit 未报告漏洞。10 项资源探针重跑通过。同步/迁移专项 23 项通过，基线专门回归在修复前复现了 `SOURCE_TRUNCATED`。隔离初始化、CLI、stdio MCP、回环 HTTP、备份恢复以及旧 core-v1 数据库迁移回填均通过；错误 Schema 版本、不匹配 checksum 和缺失匹配归档会分别拒绝启动，其中迁移失败原子回滚。冻结的 `core-v1` SQL/checksum 未变。详细命令和结果见 [分片同步证据](docs/evidence/round4-sync-shards.json) 与 [修复后资源探针](docs/evidence/round4-sync-patch-resource-probe.json)。
+Windows Python 3.14.7 隔离环境按 `requirements-dev.txt` 与 `requirements-quality.txt` 安装后，当前候选质量门禁静态检查、182 项回归、依赖一致性和漏洞扫描均通过；pip-audit 未报告漏洞。10 项资源探针重跑通过。同步/迁移专项 24 项通过，基线专门回归在修复前复现了 `SOURCE_TRUNCATED`；追加复核还验证任何既有归档字节（包括非消息事件）被改写都会以 `SOURCE_CHANGED` 拒绝，只允许旧内容保持完整前缀的追加更新。隔离初始化、CLI、stdio MCP、回环 HTTP、备份恢复以及旧 core-v1 数据库迁移回填均通过；错误 Schema 版本、不匹配 checksum 和缺失匹配归档会分别拒绝启动，其中迁移失败原子回滚。冻结的 `core-v1` SQL/checksum 未变。详细命令和结果见 [分片同步证据](docs/evidence/round4-sync-shards.json) 与 [修复后资源探针](docs/evidence/round4-sync-patch-resource-probe.json)。
 
 A04 保持 `PARTIAL`。新增 Windows 子进程样本在接近 16 MiB 原始输入、约 31.2 MB 解压输出、近 20,000 个事件和近 250,000 个 JSON 节点时均按预期工作；过深 JSON 与超压缩比输入在写入前拒绝。4 个并行独立会话共用隔离 SQLite 后完整性/外键检查通过。接近解压上限的单任务峰值工作集约 95 MiB；并发测试没有形成理论或严格的聚合内存上界，服务也没有进程级并发/内存配额。具体边界见 [第四阶段验收报告](FOURTH_STAGE_RELEASE_CANDIDATE_REPORT.md) 与 [资源样本](docs/evidence/round4-resources.json)。
 

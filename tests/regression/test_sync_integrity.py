@@ -240,3 +240,29 @@ def test_rewritten_or_truncated_shard_is_rejected_without_advancing_ledger(tmp_p
     assert kb.rows('SELECT * FROM sync_sources')==before_shards
     assert kb.rows('SELECT * FROM messages')==before_messages
     assert kb.rows('SELECT sha256 FROM archives ORDER BY sha256')==before_archives
+
+
+def test_non_message_event_rewrite_in_existing_shard_is_rejected(tmp_path):
+    kb=KB(tmp_path/'hidden-event-integrity.sqlite3')
+    path=tmp_path/'rollout-2026-01-01T00-00-00-chat.jsonl'
+    save(path,[
+        dict(type='session_meta',payload={'id':'hidden-event-chat'}),
+        dict(type='response_item',timestamp='2026-01-01T00:00:01Z',payload=dict(type='message',role='user',content=[dict(type='input_text',text='same visible message')])) ,
+        dict(type='event_msg',payload={'state':'before'}),
+    ])
+    sync.sync_file(kb,path,name='Synthetic',canonical='synthetic')
+    before_state=kb.rows('SELECT * FROM sync_state')
+    before_shards=kb.rows('SELECT * FROM sync_sources')
+    before_archives=kb.rows('SELECT sha256 FROM archives ORDER BY sha256')
+    save(path,[
+        dict(type='session_meta',payload={'id':'hidden-event-chat'}),
+        dict(type='response_item',timestamp='2026-01-01T00:00:01Z',payload=dict(type='message',role='user',content=[dict(type='input_text',text='same visible message')])) ,
+        dict(type='event_msg',payload={'state':'after!'}),
+    ])
+
+    with pytest.raises(KBError) as caught:
+        sync.sync_file(kb,path)
+    assert caught.value.code=='SOURCE_CHANGED'
+    assert kb.rows('SELECT * FROM sync_state')==before_state
+    assert kb.rows('SELECT * FROM sync_sources')==before_shards
+    assert kb.rows('SELECT sha256 FROM archives ORDER BY sha256')==before_archives

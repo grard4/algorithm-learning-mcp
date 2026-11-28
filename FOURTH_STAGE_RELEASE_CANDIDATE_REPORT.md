@@ -12,7 +12,7 @@
 
 本地候选分支已建立，含第三轮代码和第四阶段发布文档。候选没有推送，故本候选 SHA 对应的远程 GitHub Actions 尚未运行；正式 GitHub Release 不建议在远程 CI 核验前进行。本机生产数据库、偏好文件和服务未操作。
 
-第四阶段验收后，按用户要求把多 rollout 分片同步修复补入同一候选分支。基线回归先复现第二个短分片触发 `SOURCE_TRUNCATED`；修复后完整质量门禁为 181 项通过，资源探针 10/10。此次增加独立的 `sync-sources-v1` 账本迁移，未改动冻结的 `core-v1` SQL/checksum。该迁移已在合成旧库上验证回填、原子拒绝及保留数据；生产库没有升级。
+第四阶段验收后，按用户要求把多 rollout 分片同步修复补入同一候选分支。基线回归先复现第二个短分片触发 `SOURCE_TRUNCATED`；追加复核又发现非消息事件被改写时可绕过可见消息对比，现改为验证旧归档原始字节必须是更新内容的完整前缀，并新增回归覆盖。修复后完整质量门禁为 182 项通过，专项 24 项通过，资源探针 10/10。此次增加独立的 `sync-sources-v1` 账本迁移，未改动冻结的 `core-v1` SQL/checksum。该迁移已在合成旧库上验证回填、原子拒绝及保留数据；生产库没有升级。
 
 ## 2. 基线与分支
 
@@ -79,10 +79,10 @@ SQLite 锁等待有 30 秒上限，四任务共享数据库的样本没有锁超
 
 | 类型 | 实际结果 | 证据范围 |
 |---|---|---|
-| 当前候选源码：Windows Python 3.14.7 全量质量门禁 | 静态 PASS；181 passed，0 failed，0 skipped；依赖一致性 PASS；pip-audit PASS（0 项漏洞） | `.release-audit/quality/` 本地忽略目录；包含分片同步修复 |
-| 同步完整性与迁移专项 | 23 passed；基线分片回归先以 `SOURCE_TRUNCATED` 失败，修复后通过 | `tests/regression/test_sync_integrity.py`、`tests/integration/test_migration_recovery.py` |
+| 当前候选源码：Windows Python 3.14.7 全量质量门禁 | 静态 PASS；182 passed，0 failed，0 skipped；依赖一致性 PASS；pip-audit PASS（0 项漏洞） | `.release-audit/quality/` 本地忽略目录；包含分片同步修复 |
+| 同步完整性与迁移专项 | 24 passed；基线短分片回归先以 `SOURCE_TRUNCATED` 失败，隐含事件改写回归先以未抛异常失败，修复后通过 | `tests/regression/test_sync_integrity.py`、`tests/integration/test_migration_recovery.py` |
 | 资源探针（修复后重跑） | 10/10，预算内接受/超限拒绝符合预期；SQLite 完整且无外键错误 | `docs/evidence/round4-sync-patch-resource-probe.json` |
-| 原第三轮专项回归 | 38 passed | A09 同步边界、A10 CLI、A11 错误脱敏专项；本次之后全量质量门禁 181 项也通过 |
+| 原第三轮专项回归 | 38 passed | A09 同步边界、A10 CLI、A11 错误脱敏专项；本次之后全量质量门禁 182 项也通过 |
 | 资源子进程 | 六类样本通过预期接受/拒绝；另复测原始文件上限 | [资源证据](docs/evidence/round4-resources.json) |
 | 并发实测 | 4 个并行任务成功；4 归档/4 游标；SQLite 完整、无外键错误 | Windows 子进程样本；非任意并发保证 |
 | 隔离部署 | CLI、stdio/HTTP MCP 测试、备份恢复、旧库重开、拒绝未知版本/checksum 通过 | `.stage4-venv` 与系统临时 DB；合成数据 |

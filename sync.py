@@ -193,6 +193,18 @@ def sync_file(kb,path,title=None,name=None,canonical=None,allow_new=False):
     state=kb.rows('SELECT * FROM sync_state WHERE conversation_id=?',(cid,))
     key=source_key(path)
     shard=kb.rows('SELECT * FROM sync_sources WHERE conversation_id=? AND source_key=?',(cid,key))
+    if shard and shard[0]['source_hash']!=sha:
+        previous_raw_path=archive_path(kb,cid,shard[0]['source_hash'],'.jsonl')
+        try:
+            previous_raw=previous_raw_path.read_bytes()
+        except OSError as exc:
+            raise KBError('ARCHIVE_CORRUPT','已登记分片的原始归档缺失，无法安全校验更新') from exc
+        if digest(previous_raw)!=shard[0]['source_hash']:
+            raise KBError('ARCHIVE_CORRUPT','已登记分片的原始归档校验失败')
+        if len(raw)<len(previous_raw):
+            raise KBError('SOURCE_TRUNCATED','已导入分片内容缩短，停止推进游标')
+        if not raw.startswith(previous_raw):
+            raise KBError('SOURCE_CHANGED','已导入分片的既有内容被改写，停止推进游标')
     # Even unchanged sources must not hide a missing or corrupt archive file.
     if shard and shard[0]['source_hash']==sha:
         publish(archive,raw)
