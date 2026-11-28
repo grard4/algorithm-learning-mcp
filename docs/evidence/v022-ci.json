@@ -1,0 +1,1612 @@
+{
+  "run_id": 46155676605,
+  "head_sha": "d45773d29a70a2c4fc7c13dbdce9c516b471202a",
+  "conclusion": "success",
+  "job_count": 13,
+  "skipped_jobs": 0,
+  "all_steps_success": true,
+  "html_url": "https://github.com/grard4/algorithm-learning-mcp/actions/runs/46155676605",
+  "artifacts": [
+    {
+      "artifact": "results-windows-latest-3.12",
+      "platform": "win32",
+      "python": "3.12.10",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.07050270000002001,
+          "peak_rss_bytes": 35864576,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:41:04.908343+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.08579599999995935,
+          "peak_rss_bytes": 36335616,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:41:06.350126+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092305,
+          "units": 34603008,
+          "elapsed_seconds": 0.06678619999996727,
+          "peak_rss_bytes": 103849984,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:41:06.676766+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.9070907999999918,
+          "peak_rss_bytes": 64425984,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:41:07.838015+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680162,
+          "units": 5000,
+          "elapsed_seconds": 4.789806199999987,
+          "peak_rss_bytes": 49360896,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 1.5625826000000416,
+              "peak_rss_bytes": 49360896
+            },
+            {
+              "seconds": 0.8170174000000543,
+              "peak_rss_bytes": 49360896
+            },
+            {
+              "seconds": 0.7926458000000025,
+              "peak_rss_bytes": 49360896
+            },
+            {
+              "seconds": 0.8025923000000148,
+              "peak_rss_bytes": 49360896
+            },
+            {
+              "seconds": 0.8128296000000432,
+              "peak_rss_bytes": 49360896
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:41:14.772499+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.486062400000037,
+          "peak_rss_bytes": 66134016,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:41:17.662017+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.01959199999998873,
+          "peak_rss_bytes": 33550336,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:41:17.997622+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-ubuntu-latest-3.12",
+      "platform": "linux",
+      "python": "3.12.16",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.05994803700002649,
+          "peak_rss_bytes": 40718336,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:17.704122+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.06829960400000346,
+          "peak_rss_bytes": 41230336,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:17.879734+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092316,
+          "units": 34603008,
+          "elapsed_seconds": 0.018673401999990347,
+          "peak_rss_bytes": 80601088,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:18.030376+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.28650350999998864,
+          "peak_rss_bytes": 68308992,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:18.429029+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680163,
+          "units": 5000,
+          "elapsed_seconds": 0.9455261240000254,
+          "peak_rss_bytes": 46071808,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.2792438150000862,
+              "peak_rss_bytes": 46071808
+            },
+            {
+              "seconds": 0.16512102699994102,
+              "peak_rss_bytes": 46071808
+            },
+            {
+              "seconds": 0.16510749300005045,
+              "peak_rss_bytes": 46071808
+            },
+            {
+              "seconds": 0.17059449099997437,
+              "peak_rss_bytes": 46071808
+            },
+            {
+              "seconds": 0.16493385399996896,
+              "peak_rss_bytes": 46071808
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:19.575529+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.0318380690000595,
+          "peak_rss_bytes": 66777088,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:20.786595+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.01988825800003724,
+          "peak_rss_bytes": 37605376,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:20.967917+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-windows-latest-3.14",
+      "platform": "win32",
+      "python": "3.14.10",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.05212160000002086,
+          "peak_rss_bytes": 38596608,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:55.207050+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.06327420000002348,
+          "peak_rss_bytes": 38924288,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:55.507082+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092294,
+          "units": 34603008,
+          "elapsed_seconds": 0.051636599999994814,
+          "peak_rss_bytes": 106524672,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:55.783557+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.6518067999999744,
+          "peak_rss_bytes": 66842624,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:56.656281+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680163,
+          "units": 5000,
+          "elapsed_seconds": 2.8428844000000026,
+          "peak_rss_bytes": 52707328,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 1.0202004000000215,
+              "peak_rss_bytes": 52707328
+            },
+            {
+              "seconds": 0.48312299999997776,
+              "peak_rss_bytes": 52707328
+            },
+            {
+              "seconds": 0.44267849999999953,
+              "peak_rss_bytes": 52707328
+            },
+            {
+              "seconds": 0.4470678999999791,
+              "peak_rss_bytes": 52707328
+            },
+            {
+              "seconds": 0.446970800000031,
+              "peak_rss_bytes": 52707328
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:00.535382+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.167897499999981,
+          "peak_rss_bytes": 73699328,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:02.728237+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.013500300000032439,
+          "peak_rss_bytes": 36122624,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:03.030510+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-macos-latest-3.11",
+      "platform": "darwin",
+      "python": "3.11.9",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.06506275000000983,
+          "peak_rss_bytes": 40026112,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:40.826825+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.06914883299998564,
+          "peak_rss_bytes": 42565632,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:41.084436+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092305,
+          "units": 34603008,
+          "elapsed_seconds": 0.018038749999988113,
+          "peak_rss_bytes": 111312896,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:41.346828+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.5369244590000051,
+          "peak_rss_bytes": 90521600,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:42.124183+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680164,
+          "units": 5000,
+          "elapsed_seconds": 2.5057942920000187,
+          "peak_rss_bytes": 48234496,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.7516049169999803,
+              "peak_rss_bytes": 47382528
+            },
+            {
+              "seconds": 0.4576007919999938,
+              "peak_rss_bytes": 47693824
+            },
+            {
+              "seconds": 0.4263641670000027,
+              "peak_rss_bytes": 48234496
+            },
+            {
+              "seconds": 0.44918141600001604,
+              "peak_rss_bytes": 48234496
+            },
+            {
+              "seconds": 0.4184892080000111,
+              "peak_rss_bytes": 48234496
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:45.215113+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.6575491670000133,
+          "peak_rss_bytes": 71991296,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:47.557389+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.02958045799999809,
+          "peak_rss_bytes": 36372480,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:47.862688+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-windows-latest-3.11",
+      "platform": "win32",
+      "python": "3.11.9",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.0712370999999905,
+          "peak_rss_bytes": 34488320,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:11.583436+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.08559660000000235,
+          "peak_rss_bytes": 34951168,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:11.900100+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092998,
+          "units": 34603008,
+          "elapsed_seconds": 0.11840039999998453,
+          "peak_rss_bytes": 102617088,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:12.270918+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.6403490000000147,
+          "peak_rss_bytes": 63647744,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:13.153494+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680163,
+          "units": 5000,
+          "elapsed_seconds": 4.336420799999985,
+          "peak_rss_bytes": 49897472,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 1.3736121000000026,
+              "peak_rss_bytes": 49897472
+            },
+            {
+              "seconds": 0.7379669000000035,
+              "peak_rss_bytes": 49897472
+            },
+            {
+              "seconds": 0.7357488000000103,
+              "peak_rss_bytes": 49897472
+            },
+            {
+              "seconds": 0.7434562999999912,
+              "peak_rss_bytes": 49897472
+            },
+            {
+              "seconds": 0.7434044000000029,
+              "peak_rss_bytes": 49897472
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:19.150808+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.5362010999999995,
+          "peak_rss_bytes": 66117632,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:21.796877+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.02553700000001413,
+          "peak_rss_bytes": 32333824,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:22.125569+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "dependency-audit",
+      "dependencies": 62,
+      "vulnerabilities": 0
+    },
+    {
+      "artifact": "results-ubuntu-latest-3.13",
+      "platform": "linux",
+      "python": "3.13.18",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.05473684200000406,
+          "peak_rss_bytes": 40574976,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:38:59.795194+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.05922660400000268,
+          "peak_rss_bytes": 40833024,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:38:59.971120+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1091942,
+          "units": 34603008,
+          "elapsed_seconds": 0.01840435500000126,
+          "peak_rss_bytes": 78979072,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:00.122432+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.4235919969999955,
+          "peak_rss_bytes": 67977216,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:00.664101+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680164,
+          "units": 5000,
+          "elapsed_seconds": 0.9731796960000025,
+          "peak_rss_bytes": 45846528,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.2874399049999994,
+              "peak_rss_bytes": 45846528
+            },
+            {
+              "seconds": 0.16934177699999964,
+              "peak_rss_bytes": 45846528
+            },
+            {
+              "seconds": 0.1726305090000011,
+              "peak_rss_bytes": 45846528
+            },
+            {
+              "seconds": 0.1709254259999966,
+              "peak_rss_bytes": 45846528
+            },
+            {
+              "seconds": 0.17235663400001044,
+              "peak_rss_bytes": 45846528
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:01.892362+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 0.9296575049999944,
+          "peak_rss_bytes": 66953216,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:03.038555+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.014216997999994874,
+          "peak_rss_bytes": 37298176,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:03.215737+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-windows-latest-3.13",
+      "platform": "win32",
+      "python": "3.13.17",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.1153901999999789,
+          "peak_rss_bytes": 36511744,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:34.809207+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.11361640000001216,
+          "peak_rss_bytes": 36945920,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:35.207170+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092657,
+          "units": 34603008,
+          "elapsed_seconds": 0.08087740000001986,
+          "peak_rss_bytes": 104579072,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:35.583852+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 1.0689707000000226,
+          "peak_rss_bytes": 64811008,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:36.947642+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680164,
+          "units": 5000,
+          "elapsed_seconds": 7.484098900000049,
+          "peak_rss_bytes": 49848320,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 2.424669300000005,
+              "peak_rss_bytes": 49848320
+            },
+            {
+              "seconds": 1.2521109000000479,
+              "peak_rss_bytes": 49848320
+            },
+            {
+              "seconds": 1.2661463000000026,
+              "peak_rss_bytes": 49848320
+            },
+            {
+              "seconds": 1.2582050999999979,
+              "peak_rss_bytes": 49848320
+            },
+            {
+              "seconds": 1.280553800000007,
+              "peak_rss_bytes": 49848320
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:46.552982+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.9085782000000222,
+          "peak_rss_bytes": 68595712,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:50.068033+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.03520819999999958,
+          "peak_rss_bytes": 34078720,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:50.443256+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-macos-latest-3.14",
+      "platform": "darwin",
+      "python": "3.14.10",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.0947997080000107,
+          "peak_rss_bytes": 44269568,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:51.153644+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.14547129099997846,
+          "peak_rss_bytes": 44613632,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:51.595731+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092998,
+          "units": 34603008,
+          "elapsed_seconds": 0.054877500000003465,
+          "peak_rss_bytes": 116555776,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:51.904121+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.7171315840000148,
+          "peak_rss_bytes": 89767936,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:53.018541+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680161,
+          "units": 5000,
+          "elapsed_seconds": 2.511612124999999,
+          "peak_rss_bytes": 52985856,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.8149876249999863,
+              "peak_rss_bytes": 52985856
+            },
+            {
+              "seconds": 0.41280891700000666,
+              "peak_rss_bytes": 52985856
+            },
+            {
+              "seconds": 0.35729862499999854,
+              "peak_rss_bytes": 52985856
+            },
+            {
+              "seconds": 0.4302223749999996,
+              "peak_rss_bytes": 52985856
+            },
+            {
+              "seconds": 0.494135,
+              "peak_rss_bytes": 52985856
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:56.413596+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 2.3379451669999867,
+          "peak_rss_bytes": 77496320,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:59.471343+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.04066208300000085,
+          "peak_rss_bytes": 40796160,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:40:00.144628+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-ubuntu-latest-3.11",
+      "platform": "linux",
+      "python": "3.11.18",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.06287021800000048,
+          "peak_rss_bytes": 40034304,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:15.768167+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.07057780199998831,
+          "peak_rss_bytes": 40468480,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:15.955615+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092646,
+          "units": 34603008,
+          "elapsed_seconds": 0.023482108999999696,
+          "peak_rss_bytes": 79712256,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:16.125558+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.43031428199999766,
+          "peak_rss_bytes": 67371008,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:16.748123+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680164,
+          "units": 5000,
+          "elapsed_seconds": 1.2352251350000074,
+          "peak_rss_bytes": 45092864,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.37891666299999827,
+              "peak_rss_bytes": 45092864
+            },
+            {
+              "seconds": 0.21553227900000138,
+              "peak_rss_bytes": 45092864
+            },
+            {
+              "seconds": 0.21213122099999282,
+              "peak_rss_bytes": 45092864
+            },
+            {
+              "seconds": 0.21637448399999926,
+              "peak_rss_bytes": 45092864
+            },
+            {
+              "seconds": 0.2117644900000073,
+              "peak_rss_bytes": 45092864
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:18.259646+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.0646990689999996,
+          "peak_rss_bytes": 66682880,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:19.767823+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.019688612999999577,
+          "peak_rss_bytes": 36679680,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:19.950277+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-macos-latest-3.13",
+      "platform": "darwin",
+      "python": "3.13.17",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.07221254200004523,
+          "peak_rss_bytes": 42090496,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:39.714951+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.06500966700002664,
+          "peak_rss_bytes": 42467328,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:39.933674+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092294,
+          "units": 34603008,
+          "elapsed_seconds": 0.014292457999999897,
+          "peak_rss_bytes": 115064832,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:40.127700+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 1.2038669579999919,
+          "peak_rss_bytes": 88195072,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:41.582832+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680163,
+          "units": 5000,
+          "elapsed_seconds": 2.1682224580000025,
+          "peak_rss_bytes": 52690944,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.7700317499999869,
+              "peak_rss_bytes": 50020352
+            },
+            {
+              "seconds": 0.2840990000000261,
+              "peak_rss_bytes": 50020352
+            },
+            {
+              "seconds": 0.38429545799999687,
+              "peak_rss_bytes": 52674560
+            },
+            {
+              "seconds": 0.3620776660000047,
+              "peak_rss_bytes": 52674560
+            },
+            {
+              "seconds": 0.365697750000038,
+              "peak_rss_bytes": 52690944
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:44.921132+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.6116238749999638,
+          "peak_rss_bytes": 71761920,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:47.225590+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.03470754099998885,
+          "peak_rss_bytes": 38518784,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:47.658848+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-macos-latest-3.12",
+      "platform": "darwin",
+      "python": "3.12.10",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.05312025000000631,
+          "peak_rss_bytes": 42123264,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:35.127145+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.07201091700000006,
+          "peak_rss_bytes": 42434560,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:35.335410+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092305,
+          "units": 34603008,
+          "elapsed_seconds": 0.009090541999995594,
+          "peak_rss_bytes": 112492544,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:35.491576+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.3380132919999994,
+          "peak_rss_bytes": 76529664,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:35.961958+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680162,
+          "units": 5000,
+          "elapsed_seconds": 1.6873748339999963,
+          "peak_rss_bytes": 51200000,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.5096915830000057,
+              "peak_rss_bytes": 49020928
+            },
+            {
+              "seconds": 0.28869445899999846,
+              "peak_rss_bytes": 49659904
+            },
+            {
+              "seconds": 0.28480733299997496,
+              "peak_rss_bytes": 50184192
+            },
+            {
+              "seconds": 0.3034390839999901,
+              "peak_rss_bytes": 51167232
+            },
+            {
+              "seconds": 0.29911595799998736,
+              "peak_rss_bytes": 51183616
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:38.045892+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 1.470506040999993,
+          "peak_rss_bytes": 69632000,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:39.969669+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.030060915999996496,
+          "peak_rss_bytes": 37109760,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:40.232941+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    },
+    {
+      "artifact": "results-ubuntu-latest-3.14",
+      "platform": "linux",
+      "python": "3.14.10",
+      "tests": 221,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "critical_cases_executed": true,
+      "resource_cases": 17,
+      "upgrade_from_actual_v021": true,
+      "resources": [
+        {
+          "case": "empty_frames",
+          "input_bytes": 1800000,
+          "units": 200000,
+          "elapsed_seconds": 0.05681913500001201,
+          "peak_rss_bytes": 42598400,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:38:58.189560+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "small_frames",
+          "input_bytes": 2000000,
+          "units": 200000,
+          "elapsed_seconds": 0.056080288000003975,
+          "peak_rss_bytes": 42840064,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:38:58.356734+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_output",
+          "input_bytes": 1092998,
+          "units": 34603008,
+          "elapsed_seconds": 0.017730567000000974,
+          "peak_rss_bytes": 80769024,
+          "status": "TOO_LARGE",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:38:58.541730+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "large_sync",
+          "input_bytes": 15070557,
+          "units": 1500,
+          "elapsed_seconds": 0.3557884199999819,
+          "peak_rss_bytes": 69726208,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:38:59.009394+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "discovery",
+          "input_bytes": 680164,
+          "units": 5000,
+          "elapsed_seconds": 0.8921415800000148,
+          "peak_rss_bytes": 47943680,
+          "status": "accepted",
+          "repeated_scans": [
+            {
+              "seconds": 0.2667241499999875,
+              "peak_rss_bytes": 47943680
+            },
+            {
+              "seconds": 0.15418752500002597,
+              "peak_rss_bytes": 47943680
+            },
+            {
+              "seconds": 0.1544427110000015,
+              "peak_rss_bytes": 47943680
+            },
+            {
+              "seconds": 0.15215623500000675,
+              "peak_rss_bytes": 47943680
+            },
+            {
+              "seconds": 0.16412646599999903,
+              "peak_rss_bytes": 47943680
+            }
+          ],
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:00.168972+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "history",
+          "input_bytes": 3105000,
+          "units": 5000,
+          "elapsed_seconds": 0.9353390079999997,
+          "peak_rss_bytes": 72900608,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:01.329929+00:00",
+          "temporary_directory_removed": true
+        },
+        {
+          "case": "redaction_noise",
+          "input_bytes": 500000,
+          "units": 500000,
+          "elapsed_seconds": 0.01266273800001727,
+          "peak_rss_bytes": 38838272,
+          "status": "accepted",
+          "repeated_scans": null,
+          "integrity": "ok",
+          "foreign_key_errors": 0,
+          "pending_files": 0,
+          "measured_at": "2026-11-28T14:39:01.514396+00:00",
+          "temporary_directory_removed": true
+        }
+      ]
+    }
+  ]
+}

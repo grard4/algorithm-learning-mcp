@@ -2,6 +2,8 @@
 
 The current stable release is **v0.2.1** (2026-11-28, `df6c340`), published and merged into main. Its 12 Windows/Linux/macOS × Python 3.11–3.14 test jobs and dependency audit passed (Actions 46150934512). This branch is the **v0.2.2 release candidate**, addressing A12/A13/A14; see the [candidate report](V0_2_2_REMEDIATION_REPORT.md) for validation status. Supported scope is trusted local single-user operation only. A04 remains PARTIAL; public multi-tenant deployment is unsupported. See the [round-three report](THIRD_ROUND_REMEDIATION_REPORT.md) for historical conclusions.
 
+Candidate implementation `d45773d` passed all 13 jobs in Actions `46155676605`: each of 12 native runner environments passed 221 tests with no failures/skips, plus resource and upgrade probes. A04 still lacks process memory limits, aggregate concurrency quotas, whole-task deadlines, cumulative disk quotas and guaranteed cleanup after forced termination. This candidate masks local paths in MCP responses; new sources without reliable birthtime require explicit registration. The user production installation and real-course acceptance have not been upgraded/tested for v0.2.2.
+
 [简体中文（默认）](README.md) | English
 
 > **Noncommercial source-available:** Noncommercial learning, research, modification, and sharing are permitted. Unauthorized commercial exploitation and unlawful resale are prohibited. The project uses [PolyForm Noncommercial License 1.0.0](LICENSE), with attribution to `grard4`. The license controls, including its express organizational-use provisions; this summary does not add a learning-only restriction or limit statutory rights. This is not an OSI open-source license.

@@ -4,7 +4,7 @@
 
 ## 1. 执行摘要
 
-A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态文档已更新。建立独立分支 `release-candidate/v0.2.2`。本地干净 Python 3.14.7 环境 221 passed，0 failed，0 skipped。远程矩阵尚待本候选推送后的结果，当前发布建议 **NOT_READY**；此状态将在远程逐项验收后更新。A04 保持 **PARTIAL**。
+A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态文档已更新。建立独立分支 `release-candidate/v0.2.2`。本地干净 Python 3.14.7 环境 221 passed，0 failed，0 skipped。远程 Actions `46155676605` 的 13 个作业与全部步骤成功，12 组实机 runner 各 221 项测试、0 failed/error/skipped；已逐项检查上传产物。发布建议 **CONDITIONALLY_READY**，只限下述受信任本机单用户边界。A04 保持 **PARTIAL**。
 
 本任务只形成候选；不合并 main、不创建正式 Release/Tag、不发布 PyPI，也不升级或修改本机生产数据库。
 
@@ -13,13 +13,13 @@ A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态
 - 实时核实最新正式 Release：v0.2.1（非草稿、非预发布），2026-11-28 发布。
 - 正式 commit：`df6c3401d5829cbf99b2734120b9440397acc633`；远程 main、正式 tag 的解引用 commit 与之相同。核实时没有更新的 Release 或 v0.2.2 分支。
 - 原本地 main 工作区干净、落后远程 49 commits；从正式 tag 新建候选分支，未移动本地 main 引用。原 stage4 工作区及其他历史 worktree 保持原分支。
-- 修复按问题分开提交。实现与验收脚本提交截至 `35289e3`；后续文档提交不更改正式 tag。最终候选 HEAD 用 `git rev-parse release-candidate/v0.2.2` 核实，远程 CI 必须匹配其 commit。
+- 修复按问题分开提交。已完整远程验证的最新实现 commit 为 `d45773d29a70a2c4fc7c13dbdce9c516b471202a`（含分页 JSON 和正则资源边界补充修复）。本报告及 CI 证据随后以独立文档提交补齐，最终分支 HEAD 用 `git rev-parse release-candidate/v0.2.2` 查询；文档提交不改变实现或正式 tag，提交后再次核验该 HEAD 的完整 CI。
 - 开始前检查当前目录、Git 根、分支/HEAD、暂存/未暂存/未跟踪文件、远程分支和 tags；未发现用户未提交改动。当前协作树仅本 agent。检测到的 Python 服务来自独立安装目录，未操作其进程或数据；进程清单不能证明任意外部编辑器永不写入，提交前仍复核 diff。
 - 没有 reset --hard、clean、强推、覆盖分支或删除非本任务文件。新环境与所有测试数据在忽略目录/临时目录中，未进入候选发布内容。
 
 ## 3. A14：公开 MCP 响应边界
 
-**状态：本地 VERIFIED，远程待验。** 根因是成功路径直接序列化数据库记录，而旧错误脱敏不能覆盖历史 JSON、正文和框架参数验证。真实 stdio 最小测试在修复前 2 failed：偏好正文带出路径，以及分页拼接还原路径。
+**状态：VERIFIED（本地及三平台真实 MCP/回归）。** 根因是成功路径直接序列化数据库记录，而旧错误脱敏不能覆盖历史 JSON、正文和框架参数验证。真实 stdio 最小测试在修复前 2 failed：偏好正文带出路径，以及分页拼接还原路径。
 
 修改 `public_response.py`、`server.py`、`context.py`：
 
@@ -35,7 +35,7 @@ A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态
 
 ## 4. A12：首次解压阶段帧数量限制
 
-**状态：本地 VERIFIED，远程待验。** 旧代码先 stream_reader 完整解压，再用 decompressobj 第二次解压统计帧数。修复前计数测试 2 failed：第一次解码器直接收到了全部 10,000 帧。
+**状态：VERIFIED（本地及三平台真实 MCP/回归）。** 旧代码先 stream_reader 完整解压，再用 decompressobj 第二次解压统计帧数。修复前计数测试 2 failed：第一次解码器直接收到了全部 10,000 帧。
 
 修改 `zstd_frames.py`、`sync.py`：依据 Zstandard 帧结构先检查一帧的数量、头、块长度和完整结束位置，再把单个帧交给固定版本 zstandard==0.25.0 的有界 stream_reader。达到帧预算时，不再检查或解压下一帧。包括 skippable 帧在内均计数。块内容/字典/校验和由真实解码器校验；移除 decompressobj 二次解压。
 
@@ -47,7 +47,7 @@ A12、A13、A14 已修复并通过本地专项及全量回归；A15 当前状态
 
 ## 5. A13：跨平台发现边界
 
-**状态：本地 VERIFIED，跨平台真实结果待 CI。** 根因是把 POSIX metadata-change time 当作创建时间。修复前模拟 POSIX ctime 更新测试确实错误触发旧文件导入；Windows 原生测试不被冒充为 POSIX 复现。
+**状态：VERIFIED（Windows、Linux、macOS 真实 runner，加明确标注的模拟边界测试）。** 根因是把 POSIX metadata-change time 当作创建时间。修复前模拟 POSIX ctime 更新测试确实错误触发旧文件导入；Windows 原生测试不被冒充为 POSIX 复现。
 
 修改 `discovery.py`、`sync.py` 及 `.gitignore`：
 
@@ -93,7 +93,7 @@ RSS 是整个探针子进程的峰值，含导入和构造输入；历史读取�
 | 原有资源探针 / 新资源探针 | 10 / 7 个场景通过 |
 | 实际 v0.2.1 升级、CLI、备份恢复 | 通过，见 v022-upgrade-windows.json |
 | 真实 MCP stdio + 回环 HTTP | 通过；17 公开读取、分页、嵌套 JSON、错误路径和分隔符噪声专项通过 |
-| GitHub Actions 最终候选 | 待远程结果 |
+| GitHub Actions 实现候选 d45773d | 13/13 job、全部 step 成功；12 组各 221 tests，0 failed/error/skipped |
 
 命令（在候选仓库、独立环境执行）：
 
@@ -117,13 +117,21 @@ python scripts/v022_upgrade_smoke.py --output v022-upgrade-smoke.json
 
 ## 9. 跨平台与远程 CI
 
-当前本地 Windows 真实运行；模拟 POSIX/birthtime 用例明确标为 simulated。Linux/macOS 暂待远程实机 runner，不能以本地 monkeypatch 代替。
+实际实现提交 `d45773d29a70a2c4fc7c13dbdce9c516b471202a`，运行 **46155676605**。13 个 job 全部成功，0 skipped job，所有 step 成功。已下载全部 13 份 artifact，解析 JUnit 并检查关键 testcase 确实存在且无跳过；并非只看总体绿色状态。摘要与逐平台资源原始数字见 [CI 证据](docs/evidence/v022-ci.json)。
 
-CI 配置保持 3 系统 × 4 Python 的 pytest/静态检查与独立 dependency audit；新增每个平台的资源和实际 v0.2.1 升级脚本，上传 junit、coverage、两类资源及升级 JSON。完整历史 checkout 用于核实实际正式 tag。最终检查需逐 job、step、JUnit testcase 和 skipped 计数，而非只看总体绿灯。
+| 系统 | 实际 Python 版本 | 实际验证 |
+|---|---|---|
+| Windows | 3.11.9 / 3.12.10 / 3.13.17 / 3.14.10 | 每组 221 passed，0 failed/error/skipped；原生文件 metadata/新建/重启测试、实际 stdio/HTTP、17 资源场景、v0.2.1 升级冒烟 |
+| Linux (Ubuntu) | 3.11.18 / 3.12.16 / 3.13.18 / 3.14.10 | 同上，真实 runner；无 birthtime 时走待确认与显式登记路径 |
+| macOS | 3.11.9 / 3.12.10 / 3.13.17 / 3.14.10 | 同上，真实 runner；birthtime 校验与首次快照 |
+
+本地 Windows 3.14.7 的结果单独保留。monkeypatch 模拟用例并未冒充真实跨平台测试。矩阵总计 2,652 次 pytest 用例执行；dependency job 审计 62 个环境依赖，0 已知漏洞。原生系统/版本来自上传 JSON，与 workflow matrix 一一核对。尚未验证其他厂商真实客户端、生产课程生成和极端存储故障，不因 CI 全绿扩大这些结论。
+
+CI 每组执行 pytest（含 A12 调用计数、A13 原生和模拟测试、A14 实际 MCP 与分页/资源用例）、静态检查、原有 10 场景资源探针、新 7 场景探针，以及从实际 v0.2.1 tag 导出的升级脚本，均有上传产物。检查未发现关键测试被 CI 排除。后续纯文档提交的 HEAD 检查仍需成功；其运行记录可在候选分支 Actions 下按精确 SHA 查询。
 
 ## 10. 遗留风险、发布建议与操作边界
 
-发布建议暂为 **NOT_READY**（远程矩阵未完成）；全部通过后也仅能在受信任本机单用户范围评估 **CONDITIONALLY_READY**。
+发布建议为 **CONDITIONALLY_READY**。A12/A13/A14/A15 与候选回归门槛已通过；条件是只支持受信任本机单用户，接受以下公开限制，安装前按文档备份并进行个人环境验收。此结论不是合并/正式发布授权。
 
 - A04 五类资源保护仍未实现；非公网多租户服务，无认证/隔离/每用户配额。
 - 文件系统与 SQLite 无跨系统原子提交；崩溃可留孤立内容寻址文件，重试可复用。登记与同步仍为两个持久步骤。
@@ -132,4 +140,4 @@ CI 配置保持 3 系统 × 4 Python 的 pytest/静态检查与独立 dependency
 - Claude/Cursor/VS Code/Gemini 等真实客户端未验证，协议测试不能替代；实际总 token 显著下降未证明。
 - 路径文本可能保守遮蔽，出生时间缺失时需人工登记，这是明确兼容性取舍。
 
-操作边界：未修改 main 引用、未合并、未创建正式 Release/Tag、未发布 PyPI、未修改生产数据库或真实聊天/归档。所有修复、文档和公开合成证据将提交至独立候选分支；忽略目录的本地测试日志/虚拟环境不作为发布内容。最终未提交状态须在完成后由 git status 核实。
+操作边界：未修改 main 引用、未合并、未创建正式 Release/Tag、未发布 PyPI、未修改生产数据库或真实聊天/归档。所有修复、文档和公开合成证据提交至独立候选分支；忽略目录的本地测试日志/虚拟环境不作为发布内容。提交前审查 diff 与密钥/私人路径模式，未包含真实配置、数据库或个人资料；仅保留明确的合成测试路径与通用安装示例。最终交付时再次核验 git status、远程 main 和正式 tag。

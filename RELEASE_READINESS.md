@@ -4,7 +4,7 @@
 
 正式 Release 为 **v0.2.1**，对应 `df6c3401d5829cbf99b2734120b9440397acc633`，已合并 main、创建 Tag 并公开发布。Actions **46150934512** 的 12 个系统/Python 测试作业及依赖漏洞检查全部成功，无 skipped 作业。本机安装与真实课程验收为 v0.2.1 的既有证据，不能代替 v0.2.2 安装验收。
 
-当前工作分支为 `release-candidate/v0.2.2`：A14 对外响应脱敏、A12 首次解压阶段帧数限制、A13 跨平台发现边界；完整验证及最终 CI 结果以 [V0_2_2_REMEDIATION_REPORT.md](V0_2_2_REMEDIATION_REPORT.md) 为准。v0.2.2 尚不是正式 Release，本次任务不授权合并 main、正式发布或 PyPI 上传。
+当前工作分支为 `release-candidate/v0.2.2`：A14 对外响应脱敏、A12 首次解压阶段帧数限制、A13 跨平台发现边界；实现提交 `d45773d` 的 Actions `46155676605` 已完成：13/13 job、全部 step 通过，三系统 × 四 Python 各 221 项测试且无失败/跳过，全部资源/升级产物已核验；结论为 CONDITIONALLY_READY。完整验证及 CI 结果以 [V0_2_2_REMEDIATION_REPORT.md](V0_2_2_REMEDIATION_REPORT.md) 为准。v0.2.2 尚不是正式 Release，本次任务不授权合并 main、正式发布或 PyPI 上传。
 
 发布范围只限受信任本机单用户。A04 保持 **PARTIAL**：进程级内存限制、聚合并发配额、整体任务超时、累计磁盘配额、强制终止后的临时文件回收均未实现。HTTP 只允许回环绑定，无内置认证与多租户隔离。跨文件系统/SQLite 提交窗口及其他真实客户端仍有未验证边界。
 
