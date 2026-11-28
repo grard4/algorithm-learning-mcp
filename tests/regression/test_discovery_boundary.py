@@ -32,7 +32,14 @@ def test_native_old_metadata_changes_new_file_and_restart(tmp_path, monkeypatch)
     sync.run(kb, home, discover=True)
     assert called == []
     time.sleep(0.02)
-    old.chmod(old.stat().st_mode | 0o200)
+    original_mode = old.stat().st_mode
+    try:
+        old.chmod(original_mode & ~0o200)
+        assert not old.stat().st_mode & 0o200, 'permission bit must really change'
+        sync.run(kb, home, discover=True)
+        assert called == [], 'permission change must not admit historical chat'
+    finally:
+        old.chmod(original_mode)
     os.utime(old, None)
     sync.run(kb, home, discover=True)
     assert called == [], 'old metadata change must not admit historical chat'
