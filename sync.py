@@ -7,6 +7,7 @@ from archive_io import archive_path, publish
 from sync_identity import source_key
 from errors import error_response
 import input_limits as limits
+from zstd_frames import frames
 
 def discovery_cutoff():
     """Persist a one-time discovery boundary so watch mode does not reset per poll."""
@@ -64,29 +65,16 @@ def read_bytes(path):
         budget=min(limits.DECOMPRESSED_BYTES,max(limits.RATIO_ALLOWANCE,len(raw)*limits.COMPRESSION_RATIO))
         output=bytearray()
         try:
-            # stream_reader bounds each output allocation, but accepts truncated EOF.
-            # After bounding the full output, a second pass verifies frame completion.
+            # Check framing/count before decoding each frame. stream_reader bounds
+            # output allocation; the slicer rejects incomplete frames at EOF.
             factory=zstandard.ZstdDecompressor(max_window_size=limits.WINDOW_BYTES)
-            with factory.stream_reader(io.BytesIO(raw),read_across_frames=True) as reader:
-                while True:
-                    part=reader.read(min(limits.CHUNK_BYTES,budget-len(output)+1))
-                    if not part: break
-                    output.extend(part)
-                    if len(output)>budget: limits.too_large('解压结果超过大小或压缩比预算')
-            decoder=factory.decompressobj();frames=0
-            for offset in range(0,len(raw),limits.CHUNK_BYTES):
-                remaining=raw[offset:offset+limits.CHUNK_BYTES]
-                while remaining:
-                    if decoder.eof: decoder=factory.decompressobj()
-                    verified=decoder.decompress(remaining)
-                    del verified
-                    if decoder.eof:
-                        frames+=1
-                        if frames>limits.EVENTS: limits.too_large('压缩帧超过数量预算')
-                        remaining=decoder.unused_data
-                    else:
-                        remaining=b''
-            if not decoder.eof: raise KBError('INVALID_LOG','压缩日志帧不完整')
+            for frame in frames(raw):
+                with factory.stream_reader(io.BytesIO(frame),read_across_frames=False) as reader:
+                    while True:
+                        part=reader.read(min(limits.CHUNK_BYTES,budget-len(output)+1))
+                        if not part: break
+                        output.extend(part)
+                        if len(output)>budget: limits.too_large('解压结果超过大小或压缩比预算')
         except zstandard.ZstdError as exc:
             raise KBError('INVALID_LOG','压缩日志损坏或窗口超过预算') from exc
         return bytes(output)
