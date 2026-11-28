@@ -1,6 +1,6 @@
 # 算法学习 MCP 服务器
 
-2026-11-27 第三轮：CLI 失败退出码与动态业务错误脱敏已修复；8 MiB Zstandard 窗口按固定版本实测保留字节传参。Windows 双 Python 各 176 项通过，A04 仍为 PARTIAL；本轮未部署、未合并、未执行远程 CI。详见 [第三轮报告](THIRD_ROUND_REMEDIATION_REPORT.md)。
+当前正式版本为 **v0.2.1**（2026-11-28，`df6c340`），已发布并合入 main；该提交的 Windows、Linux、macOS × Python 3.11–3.14 共 12 个测试作业及依赖审计均通过（Actions 46150934512）。本分支为 **v0.2.2 发布候选**，修复 A12/A13/A14；候选验收状态见 [报告](V0_2_2_REMEDIATION_REPORT.md)。适用范围仅为受信任的本机单用户，A04 仍为 PARTIAL，不支持公网多租户服务。历史结论见 [第三轮报告](THIRD_ROUND_REMEDIATION_REPORT.md)。
 
 简体中文（默认） | [English](README.en.md)
 

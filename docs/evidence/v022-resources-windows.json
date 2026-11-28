@@ -1,0 +1,112 @@
+{
+  "platform": "win32",
+  "python": "3.14.7",
+  "memory_scope": "Whole probe child peak RSS including imports and input setup. History MCP server child RSS is NOT included; no aggregate memory guarantee.",
+  "cases": [
+    {
+      "case": "empty_frames",
+      "input_bytes": 1800000,
+      "units": 200000,
+      "elapsed_seconds": 0.07094100000540493,
+      "peak_rss_bytes": 38924288,
+      "status": "TOO_LARGE",
+      "repeated_scans": null,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "pending_files": 0,
+      "measured_at": "2026-11-28T14:31:38.157438+00:00",
+      "temporary_directory_removed": true
+    },
+    {
+      "case": "small_frames",
+      "input_bytes": 2000000,
+      "units": 200000,
+      "elapsed_seconds": 0.0807559000022593,
+      "peak_rss_bytes": 39288832,
+      "status": "TOO_LARGE",
+      "repeated_scans": null,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "pending_files": 0,
+      "measured_at": "2026-11-28T14:31:38.460048+00:00",
+      "temporary_directory_removed": true
+    },
+    {
+      "case": "large_output",
+      "input_bytes": 1091953,
+      "units": 34603008,
+      "elapsed_seconds": 0.08785090000310447,
+      "peak_rss_bytes": 106786816,
+      "status": "TOO_LARGE",
+      "repeated_scans": null,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "pending_files": 0,
+      "measured_at": "2026-11-28T14:31:38.791258+00:00",
+      "temporary_directory_removed": true
+    },
+    {
+      "case": "large_sync",
+      "input_bytes": 15070557,
+      "units": 1500,
+      "elapsed_seconds": 0.5275099999998929,
+      "peak_rss_bytes": 67162112,
+      "status": "accepted",
+      "repeated_scans": null,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "pending_files": 0,
+      "measured_at": "2026-11-28T14:31:39.545299+00:00",
+      "temporary_directory_removed": true
+    },
+    {
+      "case": "discovery",
+      "input_bytes": 680164,
+      "units": 5000,
+      "elapsed_seconds": 3.8653918000054546,
+      "peak_rss_bytes": 53272576,
+      "status": "accepted",
+      "repeated_scans": [
+        {
+          "seconds": 1.2037936999986414,
+          "peak_rss_bytes": 53272576
+        },
+        {
+          "seconds": 0.6703864000010071,
+          "peak_rss_bytes": 53272576
+        },
+        {
+          "seconds": 0.6315389000010327,
+          "peak_rss_bytes": 53272576
+        },
+        {
+          "seconds": 0.6880832000024384,
+          "peak_rss_bytes": 53272576
+        },
+        {
+          "seconds": 0.6688663000022643,
+          "peak_rss_bytes": 53272576
+        }
+      ],
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "pending_files": 0,
+      "measured_at": "2026-11-28T14:31:44.367209+00:00",
+      "temporary_directory_removed": true
+    },
+    {
+      "case": "history",
+      "input_bytes": 3105000,
+      "units": 5000,
+      "elapsed_seconds": 1.7107545000035316,
+      "peak_rss_bytes": 75362304,
+      "status": "accepted",
+      "repeated_scans": null,
+      "integrity": "ok",
+      "foreign_key_errors": 0,
+      "pending_files": 0,
+      "measured_at": "2026-11-28T14:31:46.721161+00:00",
+      "temporary_directory_removed": true
+    }
+  ]
+}

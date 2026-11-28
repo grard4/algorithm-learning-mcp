@@ -1,5 +1,14 @@
 # 变更记录
 
+## v0.2.2 candidate — 2026-11-28
+
+- A14: public MCP projections redact internal paths (including nested audit JSON and paginated text); framework validation errors no longer echo arguments. Original internal evidence is retained.
+- A12: count and delimit each Zstandard frame before bounded decoding; remove the second decompression pass. Preserve byte/output/window/ratio limits and valid multi-frame input.
+- A13: replace ctime-based discovery with a persistent inventory and birthtime checks. Sources without reliable birthtime require explicit registration. Keep registered-course priority and exclusions; reject incomplete inventories.
+- A15: distinguish the published v0.2.1 release from this unmerged candidate; retain historical audit results. Add cross-platform resource and actual v0.2.1 upgrade smoke checks.
+- A04 remains PARTIAL. Scope: trusted local single-user only; no public multi-tenant support. Candidate results: V0_2_2_REMEDIATION_REPORT.md.
+
+
 ## Unreleased — 续课输入与发现范围（2026-11-28）
 
 - 初始化指引要求按名称发现工具、按需展开单个定义，普通续课优先专题摘要；新增短交接记录流程，明确不能自动压缩客户端历史。

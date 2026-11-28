@@ -1,0 +1,36 @@
+{
+  "baseline": "df6c3401d5829cbf99b2734120b9440397acc633",
+  "platform": "win32",
+  "python": "3.14.7",
+  "synthetic_data_preserved": true,
+  "fresh_initialization": true,
+  "archive_hashes_valid": true,
+  "integrity": "ok",
+  "foreign_key_errors": 0,
+  "checks": [
+    {
+      "command": "call",
+      "exit_code": 0
+    },
+    {
+      "command": "verify",
+      "exit_code": 0
+    },
+    {
+      "command": "backup",
+      "exit_code": 0
+    },
+    {
+      "command": "restore",
+      "exit_code": 0
+    },
+    {
+      "command": "call",
+      "exit_code": 1
+    },
+    {
+      "command": "call",
+      "exit_code": 0
+    }
+  ]
+}

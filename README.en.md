@@ -1,6 +1,6 @@
 # Algorithm Learning MCP
 
-Round three (2026-11-27): fixed CLI failure exit status and reflected business-error data. The pinned Zstandard backend enforces the existing 8 MiB byte limit. Both local Windows Python environments passed 176 tests. A04 remains PARTIAL; this round is not deployed or merged, and remote CI has not run. See [the report](THIRD_ROUND_REMEDIATION_REPORT.md).
+The current stable release is **v0.2.1** (2026-11-28, `df6c340`), published and merged into main. Its 12 Windows/Linux/macOS × Python 3.11–3.14 test jobs and dependency audit passed (Actions 46150934512). This branch is the **v0.2.2 release candidate**, addressing A12/A13/A14; see the [candidate report](V0_2_2_REMEDIATION_REPORT.md) for validation status. Supported scope is trusted local single-user operation only. A04 remains PARTIAL; public multi-tenant deployment is unsupported. See the [round-three report](THIRD_ROUND_REMEDIATION_REPORT.md) for historical conclusions.
 
 [简体中文（默认）](README.md) | English
 
