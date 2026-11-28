@@ -19,7 +19,7 @@
 - 直接 `git fetch origin` 因执行环境无法连接 `github.com:443` 失败；远程状态以 GitHub 连接器读取为准。未修改远程 `main`。
 - 第三轮 worktree 在本任务开始时已有 5 个已修改文件和一个未跟踪的 `sync_identity.py`。其归属不明，均保留且未纳入候选。另建干净 detached 验证副本，并从第三轮 HEAD 创建候选分支。
 - 候选分支：`release-candidate/2026-11-28`，基于第三轮 HEAD；工作区在文档变更前干净。第四阶段只改变发布文档与合成资源证据，没有修改运行代码、Schema、依赖或工作流。
-- GitHub 目标仓库确认是 `grard4/algorithm-learning-mcp`，默认分支 `main`。候选仍为本地分支，没有强推、合并、删除远程分支或正式 Release。
+- GitHub 目标仓库确认是 `grard4/algorithm-learning-mcp`，默认分支 `main`。目标候选分支先经只读确认不存在；随后尝试 `git push --set-upstream origin release-candidate/2026-11-28`，但执行环境连接 `github.com:443` 失败，远程分支没有创建。候选仍为本地分支，没有强推、合并、删除远程分支或正式 Release。
 
 ## 3. A04 资源安全专项评估
 
@@ -62,7 +62,7 @@ SQLite 锁等待有 30 秒上限，四任务共享数据库的样本没有锁超
 
 - 预期工作流：仓库 `.github/workflows/quality.yml`，3 个平台 × Python 3.11、3.12、3.13、3.14，以及独立 Ubuntu 依赖扫描，共 13 个作业。
 - 本候选分支未推送，所以没有候选 SHA、Workflow URL 或 Run ID；13 项远程作业均为 **NOT VERIFIED**。不使用历史 `main` 或 PR 的 CI 代替。
-- 直接 GitHub HTTPS fetch 在执行环境失败。远程 `main=991ea4030061be8e8740e33629fae2a8114936b0` 以及候选分支不存在由已连接 GitHub 工具只读核实。
+- 直接 GitHub HTTPS fetch 和候选 push 均因执行环境无法连接 `github.com:443` 失败。远程 `main=991ea4030061be8e8740e33629fae2a8114936b0` 以及候选分支不存在由已连接 GitHub 工具只读核实。
 
 ## 6. 隔离安装与部署验收
 
